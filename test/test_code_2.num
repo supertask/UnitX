@@ -1,0 +1,7 @@
+print 100{2->8}
+print 1{億円->万円}
+
+memory_size = 1024{MB}
+entry = 10{エントリ}
+#for i in range(0,entry*memory_size,memory_size):
+#	print i

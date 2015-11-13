@@ -3,5 +3,9 @@ print 1{億円->万円}
 
 memory_size = 1024{MB}
 entry = 10{エントリ}
-#for i in range(0,entry*memory_size,memory_size):
-#	print i
+
+for i in range(5):
+	始め = time("10月i日10時20分"){日本->スイス}
+	終わり = time("10月i日18時20分"){日本->スイス}
+	print "$(始め) - $(終わり)"
+

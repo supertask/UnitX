@@ -5,15 +5,14 @@
 #
 #
 
-import parser
 import sys
-if len(sys.argv) < 2: sys.exit(1)
+import parser
 
-a_filepath = sys.argv[1]
-#with open(a_filepath, 'r') as rf:
-#a_code = rf.read()
-a_parser = parser.MainParser(a_filepath)
-a_parser.parse()
+def main():
+	if len(sys.argv) < 2: sys.exit(1)
+	a_filepath = sys.argv[1]
+	a_parser = parser.MainParser(a_filepath)
+	a_parser.parse()
 
-#if __name__ == '__main__':
-	
+if __name__ == '__main__':
+	main()

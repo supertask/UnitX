@@ -5,3 +5,5 @@ all:
 	./$(TARGET) $(SRC)
 tests:
 	python test_parsing.py
+vim:
+	vim parser.py test_parsing.py

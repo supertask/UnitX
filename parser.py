@@ -18,18 +18,18 @@ class MainParser:
 	<newlines>		::= '\n' | '\n' <newlines>
 	<assign>		::= <variable> '=' <expr>
 	<print>			::= <PRINT> <expr>	
-	<expr>	::= <term> [('+'|'-') <term> ]*
+	<expr>			::= <term> [('+'|'-') <term> ]*
 	<term>			::= <factor> [ ('*'|'/') <factor> ]*
 	<factor> 		::= <variable> | <constant>* <unit> | '(' <expr> ')'
 	<variable> 		::= <id>
-	<constant> 		::= <integer> | <real> 
+	<constant> 		::= <INTEGER> | <REAL> 
 	<unit>			::= '{' <unit_operator> '}'
 	<unit_opeator>	::= <id> '/' <id> | <id> '->' <id> | '->' <id> | <id>
 	<id> 			::= [a-zA-Z_][a-zA-Z0-9_]*
-	<integer> 		::= [0-9]+
-	<real> 			::= [0-9]* "." [0-9]+
-	<none>			::= ''
-	<eof>			::= EOF
+	<INTEGER> 		::= [0-9]+
+	<REAL> 			::= [0-9]* "." [0-9]+
+	<NONE>			::= ''
+	<EOF>			::= EOF
 	"""
 
 	def __init__(self, filepath):
@@ -55,26 +55,28 @@ class MainParser:
 	def __del__(self):
 		self.num_file.close()
 
+	def get_wchar(self):
+		return self.get_wchar_of(self.index)
+
+	def get_wchar_of(self, current_index):
+		return self.lines[current_index]
+
 	def next_char(self):
 		""" どこのメソッドも使わない
 		"""
 		return self.code_iter.next().encode('utf-8') #str
 
-	def add_index(self, i=1):
-		if self.is_next_EOF():
-			sys.exit(1)
-		else:
-			self.index+=1
-
 	def add_one_index(self):
-		self.add_index()
+		""" 1増加させたindexがEOFかを返す
+		"""
+		assert not self.is_EOF()
+		self.index+=1
 
 	def is_next_EOF(self):
-		self.is_EOF(d_index=1)
+		return self.index + 1 >= len(self.lines)
 
-	def is_EOF(self, corrent_index=-1, d_index=0):
-		if corrent_index == -1: corrent_index = self.index
-		return corrent_index + d_index >= len(self.lines)
+	def is_EOF(self):
+		return self.index >= len(self.lines)
 
 	def program(self):
 		self.statements()
@@ -91,10 +93,10 @@ class MainParser:
 			self.statements()
 
 	def statement(self):
-		print self.lines[self.index].encode('utf-8')
+		#print self.get_wchar().encode('utf-8')
 		self.add_one_index()
-		#if self.is_print_(): self.print_()
-		#else: self.assign()
+		if self.is_print_(): self.print_()
+		else: self.assign()
 	
 	def is_newlines(self):
 		next_index = self.guess_newlines(self.index)
@@ -118,7 +120,7 @@ class MainParser:
 
 	def assign(self):
 		self.variable()
-		assert self.lines[self.index] == '='
+		assert self.get_wchar() == '='
 		self.add_one_index()
 		self.expr()
 
@@ -129,64 +131,98 @@ class MainParser:
 		self.index += len(Lex.PRINT)
 		self.expr()
 
-	def is_char_for_variable(self, a_char):
+	def is_wchar(self, a_char):
 		if ord(a_char) >= 128: return True
 		if a_char.isalpha(): return True
 		return a_char == '_'
 
-	def variable(self):
-		var_name = ""
-		if self.is_char_for_variable(self.lines[self.index]):
-			var_name += self.lines[self.index]
-			self.add_one_index()
-		while True:
-			print var_name.encode('utf-8')
-			if not self.is_char_for_variable(self.lines[self.index]):
-				break
-			if self.lines[self.index].isdigit():
-				break
-			var_name += self.lines[self.index]
-			self.add_one_index()
-		return var_name
-
 	def expr(self):
-		value = term();
-		while (self.lines[self.index] == Lex.ADD or self.lines[self.index] == Lex.SUBTRACT):
-			two_arithme_ope = self.lines[self.index]
+		""" 四則演算をする.
+			@return int or float 定数
+
+			Test: Bug (11/19/2015)
+		"""
+		value = self.term();
+		while (self.get_wchar() == Lex.ADD or self.get_wchar() == Lex.SUBTRACT):
+			two_arithme_ope = self.get_wchar()
 			self.add_one_index()
-			if two_arithme_ope == Lex.ADD: value += term();
-			else: value -= term();
+			if two_arithme_ope == Lex.ADD: value += self.term();
+			else: value -= self.term();
+		print "expr", value
 		return value
 
 	def term(self):
-		value = factor();
-		while (self.lines[self.index] == Lex.MULTIPLY or self.lines[self.index] == Lex.DIVIDE):
-			two_arithme_ope = self.lines[self.index]
+		""" 四則演算をする.
+			@return int or float 定数
+
+			Test: Bug (11/19/2015)
+		"""
+		value = self.factor();
+		while (self.get_wchar() == Lex.MULTIPLY or self.get_wchar() == Lex.DIVIDE):
+			two_arithme_ope = self.get_wchar()
 			self.add_one_index()
-			if two_arithme_ope == Lex.MULTIPLY: value *= factor();
-			else: value /= factor();
+			if two_arithme_ope == Lex.MULTIPLY: value *= self.factor();
+			else: value /= self.factor();
+		print "term", value
 		return value
 
 	def factor(self):
-		if isdigit(self.lines[self.index]):
-			self.constant()
-		elif self.lines[self.index] == Lex.LPAR:
+		""" 四則演算をする.
+			@return int or float 定数
+
+			Test: Bug (11/19/2015)
+		"""
+		a_constant = 0
+		if self.get_wchar().isdigit():
+			a_constant = self.constant()
+		elif self.get_wchar() == Lex.LPAR:
 			self.add_one_index()
-			value = expr()
-			assert self.lines[self.index] == Lex.RPAR
+			a_constant = expr()
+			assert self.get_wchar() == Lex.RPAR
 			self.add_one_index()
 		else:
-			var_name = variable()
+			a_constant = variable()
+			value = 0 #変数の数値
+		print "factor", a_constant
+		return a_constant
+
+
+	def variable(self):
+		""" 変数をコードから取り出し返す。尚、変数はASCII以外も使用可能
+			@return string 変数名
+
+			Test: Good (11/19/2015)
+		"""
+		var_name = ""
+		if self.is_wchar(self.get_wchar()):
+			var_name += self.get_wchar()
+			self.add_one_index()
+		else:
+			print "syntax error."
+			raise #after <-後から改善（エラーの内容をどうするか）
+
+		while self.is_wchar(self.get_wchar()) or self.get_wchar().isdigit():
+			var_name += self.get_wchar()
+			self.add_one_index()
+			if self.is_EOF(): break
+
+		return var_name
+
 
 	def constant(self):
+		""" 文字列表記の定数をコードから取り出し、その文字列表記の定数のを数値へ変換し、返す
+			@return int or float 定数
+
+			Test: Good (11/19/2015)
+		"""
 		number_str = ''
-		if self.lines[self.index] == '.':
+		if self.get_wchar() == '.':
 			self.add_one_index()
 			number_str='.'
-		assert self.float_ptr.match(self.lines[self.index])
+		assert self.float_ptr.match(self.get_wchar())
 		while True:
 			if self.is_EOF(): break
-			number_str += self.lines[self.index]
+			number_str += self.get_wchar()
 			if not self.float_ptr.match(number_str):
 				number_str = number_str[:-1]
 				break

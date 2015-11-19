@@ -22,35 +22,46 @@ class ParsingTest():
 			assert res == test_res_line
 			assert type(res) == type(test_res_line)
 
-	def test_is_char_for_variable(self):
+	def test_is_wchar(self):
 		test_lines = 		["", "SSFEFE", "aaa22", "22ge"]
 		for test_line in test_lines:
 			for a_char in test_line:
-				print a_char, self.parser.is_char_for_variable(a_char)
+				print a_char, self.parser.is_wchar(a_char)
 			print
 
-	
 	def test_variable(self):
-		test_lines = [u'あああ',u'aa']
+		test_lines = [u'変数XXX',u'aa',u'xxxx32', u'ほげ32'] #,u'ほ+', u'++']
 		test_res_lines = test_lines
 		for test_line, test_res_line in zip(test_lines, test_res_lines):
 			self.parser.index=0
 			self.parser.lines = test_line
 			res = self.parser.variable()
-			#print res.encode('utf-8')
-			#assert res == test_res_line
+			print res.encode('utf-8'), test_line.encode('utf-8')
+			assert res == test_res_line
 			
+	def test_expr(self):
+		test_lines = ['20*1.22+52','32*(52 + 2)','(51+(6163+5252)-52)/3', '52/52'] #,u'ほ+', u'++']
+		test_res_lines = map(eval, test_lines)
+		#print test_res_lines
+		for test_line, test_res_line in zip(test_lines, test_res_lines):
+			self.parser.index=0
+			self.parser.lines = test_line
+			res = self.parser.expr()
+			print res, test_res_line
+			assert res == test_res_line
+				
 
 	def setUp(self):
 		print "Check.."
 
 	def tearDown(self):
-		print "OK"
+		print "The test was successful!"
 		
 if __name__ == "__main__":
 	app = ParsingTest()
 	app.setUp()
 	#app.test_constant()
-	app.test_variable()
+	#app.test_variable()
+	app.test_expr()
 	app.tearDown()
     #unittest.main()

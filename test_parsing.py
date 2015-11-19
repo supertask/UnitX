@@ -40,7 +40,7 @@ class ParsingTest():
 			assert res == test_res_line
 			
 	def test_expr(self):
-		test_lines = ['20*1.22+52','32*(52 + 2)','(51+(6163+5252)-52)/3', '52/52'] #,u'ほ+', u'++']
+		test_lines = ['20*1.22+52','32*(52+2)','(51+(6163+5252)-52)/3', '52/52'] #,u'ほ+', u'++']
 		test_res_lines = map(eval, test_lines)
 		#print test_res_lines
 		for test_line, test_res_line in zip(test_lines, test_res_lines):

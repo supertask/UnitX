@@ -1,11 +1,82 @@
-飛行機代 = 10{万円}
-語学学校の費用, レジデンスの費用 = 6{万円/月}, 9{万円/月}
-行く日数 = 12{ヶ月}
-トータル = 飛行機代 + (語学学校の費用 + レジデンスの費用) * 行く日数
-print トータル{->億円}
+【出力】
+飛行機代 - 20 万円
+----
+学校代 - 6 万円/月
+レジデンス代 - 9 万円/月
+計 - 25万円
+--
+学校代 - 72 万円/年
+レジデンス代 - 108 万円/年
+計 - 180万円
+--
+学校代 -> 288 万円/4年
+レジデンス代 - 432 万円/4年
+計 - 740万円
+--
 
-air_money = 100000
-school_money = 60000
-regidence_money = 90000
-all_day = 12
-total = air_money + () * all_day
+[Python]
+飛行機代 = 10 * 2
+print "飛行機代 - %s万円/%s" % (飛行機代, s)
+print '-' * 4
+
+for i,s in zip([1, 12, 48], ['月','年','4年']):
+	学校代 = 6 * i
+	レジデンス代 = 9 * i
+	計 = 飛行機代 + (学校代 + レジデンス代)
+
+	print "学校代 - %s万円/%s" % (学校代, s)
+	print "レジデンス代 - %s万円/%s" % (レジデンス代, s)
+	print "計 - %s万円/%s" % (計, s)
+	print '-' * 2
+
+
+[UnitX]
+@飛行機代 = 10{万円} * 2{往復*}
+----
+rep(i,[月,年,4年]) {
+	@学校代 = 6{万円/月->i}
+	@レジデンス代 = 9{万円/月->i}
+	@計 = 飛行機代 + (学校代 + レジデンス代){万円}
+	--
+}
+
+
+
+[Python - File]
+money_by_hour = 12
+worked_hour = 9
+transportation_expenses = 10
+worked_day = 12 * 30
+worked_money = money_by_hour * worked_hour * worked_day
+trans_money = transportation_expenses * worked_day
+print "worked_money -> %s dollar" % worked_money
+print "trans_money -> %s dollar" % trans_money
+print "total_money -> %s dollar" % (worked_money + trans_money)
+
+[UnitX - File]
+money_by_hour = 12 {dollar/hour}
+worked_hour = 9 {hour}
+transportation_expenses = 10 {dollar/day}
+worked_day = 12 {month->day}
+@worked_money = money_by_hour * worked_hour * worked_day
+@trans_money = transportation_expenses * worked_day
+@total_money = total_money + trans_money
+
+---
+worked_money -> 38880 dollar
+trans_money -> 3600 dollar
+total_money -> 42480 dollar
+
+
+[Python - Inline]
+>>> total_money = 12 * 9 * 360 + 10 * 360
+>>> total_money
+43070
+
+[UnitX - Inline]
+>>> total_money = 12{dollar/hour} * 9{hour} * 360{day} + 10{money/day} * 360{day}
+>>> total_money
+43,070{dollar}
+
+
+

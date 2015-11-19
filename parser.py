@@ -56,6 +56,7 @@ class MainParser:
 		self.num_file.close()
 
 	def get_wchar(self):
+		if self.is_EOF(): return None
 		return self.get_wchar_of(self.index)
 
 	def get_wchar_of(self, current_index):
@@ -148,7 +149,7 @@ class MainParser:
 			self.add_one_index()
 			if two_arithme_ope == Lex.ADD: value += self.term();
 			else: value -= self.term();
-		print "expr", value
+		#print "expr", value
 		return value
 
 	def term(self):
@@ -163,7 +164,7 @@ class MainParser:
 			self.add_one_index()
 			if two_arithme_ope == Lex.MULTIPLY: value *= self.factor();
 			else: value /= self.factor();
-		print "term", value
+		#print "term", value
 		return value
 
 	def factor(self):
@@ -177,13 +178,13 @@ class MainParser:
 			a_constant = self.constant()
 		elif self.get_wchar() == Lex.LPAR:
 			self.add_one_index()
-			a_constant = expr()
+			a_constant = self.expr()
 			assert self.get_wchar() == Lex.RPAR
 			self.add_one_index()
 		else:
-			a_constant = variable()
+			a_constant = self.variable()
 			value = 0 #変数の数値
-		print "factor", a_constant
+		#print "factor", a_constant
 		return a_constant
 
 
@@ -200,11 +201,9 @@ class MainParser:
 		else:
 			print "syntax error."
 			raise #after <-後から改善（エラーの内容をどうするか）
-
 		while self.is_wchar(self.get_wchar()) or self.get_wchar().isdigit():
 			var_name += self.get_wchar()
 			self.add_one_index()
-			if self.is_EOF(): break
 
 		return var_name
 

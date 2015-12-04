@@ -1,5 +1,5 @@
 class Lex:
-	PRINT 		= 'print'
+	PRINT 		= '@'
 	SEMICOLON 	= ';'
 	COMMA 		= ','
 	EQUAL 		= '='

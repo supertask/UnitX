@@ -10,14 +10,16 @@ from lex import Lex
 import sys
 
 class MainParser:
+	
 	"""
 	【BNF for Numlang】
 	<program>		::= <statements>
 	<statements>	::= <EOF> | <newlines> <statements> | <statement> <newlines> <statements>
-	<statement>		::= <assign> | <print>
+	<statement>		::=  <debug> | <print> | <assign>
 	<newlines>		::= '\n' | '\n' <newlines>
 	<assign>		::= <variable> '=' <expr>
-	<print>			::= <PRINT> <expr>	
+	<print>			::= <PRINT> <expr>
+	<debug>			::= <DEBUG> <assign> | <DEBUG> <expr>
 	<expr>			::= <term> [('+'|'-') <term> ]*
 	<term>			::= <factor> [ ('*'|'/') <factor> ]*
 	<factor> 		::= <variable> | <constant>* <unit> | '(' <expr> ')'
@@ -28,29 +30,25 @@ class MainParser:
 	<id> 			::= [a-zA-Z_][a-zA-Z0-9_]*
 	<INTEGER> 		::= [0-9]+
 	<REAL> 			::= [0-9]* "." [0-9]+
-	<NONE>			::= ''
 	<EOF>			::= EOF
 	"""
 
 	def __init__(self, filepath):
 		import re
 		self.float_ptr = re.compile('^[+-]?(\d*\.\d+|\d+\.?\d*)([eE][+-]?\d+|)\Z')
-		#import codecs
-		#self.num_file = codecs.open(filepath,'r', 'utf-8')
 		self.num_file = open(filepath,'r')
 		self.lines = self.num_file.read()
 		self.lines = self.lines.decode('utf-8')
 		self.index = 0
 		self.lines = """\
-あ
-い
-
-う
-
-え
-お
+aa=2
+ba=5
 """
 		self.lines = self.lines.decode('utf-8')
+		#self.root = None 
+		#self.parser_rule = (statements, statement, newlines, assign, print_, debug, expr, term, factor, variable, constant, unit, unit_operator, EOF) = range(14)
+		self.dict_of_global_var = {}
+		self.dict_of_local_var = {}
 	
 	def __del__(self):
 		self.num_file.close()
@@ -73,16 +71,33 @@ class MainParser:
 		assert not self.is_EOF()
 		self.index+=1
 
-	def is_next_EOF(self):
-		return self.index + 1 >= len(self.lines)
+	def is_next_EOF(self, d_index=1):
+		return self.index + d_index >= len(self.lines)
 
 	def is_EOF(self):
 		return self.index >= len(self.lines)
 
+	def is_newlines(self):
+		next_index = self.guess_newlines(self.index)
+		assert next_index >= self.index # next_indexがマイナスならエラー
+		return next_index > self.index
+
+	def newlines(self):
+		self.index = self.guess_newlines(self.index)
+		
+	def guess_newlines(self, next_index):
+		if self.is_next_EOF(d_index=next_index): return next_index
+		elif self.lines[next_index] == '\n':
+			next_index+=1
+			return self.guess_newlines(next_index)
+		else:
+			return next_index
+	
 	def program(self):
 		self.statements()
 		
 	def statements(self):
+		#self.root = Node(, None)
 		if self.is_EOF():
 			pass
 		elif self.is_newlines():
@@ -94,43 +109,36 @@ class MainParser:
 			self.statements()
 
 	def statement(self):
+		""" 1行の文字列解釈する
+		"""
 		#print self.get_wchar().encode('utf-8')
-		self.add_one_index()
 		if self.is_print_(): self.print_()
-		else: self.assign()
+		else: self.assign() # Bug(11/26/2015), assignでなく、空文字がここに来る
+		#self.add_one_index()
 	
-	def is_newlines(self):
-		next_index = self.guess_newlines(self.index)
-		assert next_index >= self.index # next_indexがマイナスならエラー
-		return next_index > self.index
-
-	def newlines(self):
-		self.index = self.guess_newlines(self.index)
-		
-	def guess_newlines(self, next_index):
-		if self.is_EOF(corrent_index=next_index): return next_index
-		elif self.lines[next_index] == '\n':
-			next_index+=1
-			return self.guess_newlines(next_index)
-		else:
-			return next_index
-	
-
-	""" ここから未チェック
-	"""
 
 	def assign(self):
-		self.variable()
-		assert self.get_wchar() == '='
+		""" 変数を代入する.
+			Test: Good (11/20/2015)
+		"""
+		var_name = ''
+		var_name = self.variable()
+		assert self.get_wchar() == Lex.EQUAL
 		self.add_one_index()
-		self.expr()
+		a_constant = self.expr()
+		self.dict_of_global_var[var_name] = a_constant
+
+	def is_assign(self):
+		self.assign()
 
 	def is_print_(self):
 		return self.lines[self.index:len(Lex.PRINT)] == Lex.PRINT
 
 	def print_(self):
+		""" 出力する引数をprintする
+		"""
 		self.index += len(Lex.PRINT)
-		self.expr()
+		print self.expr()
 
 	def is_wchar(self, a_char):
 		if ord(a_char) >= 128: return True
@@ -141,7 +149,7 @@ class MainParser:
 		""" 四則演算をする.
 			@return int or float 定数
 
-			Test: Bug (11/19/2015)
+			Test: Good (11/20/2015)
 		"""
 		value = self.term();
 		while (self.get_wchar() == Lex.ADD or self.get_wchar() == Lex.SUBTRACT):
@@ -149,14 +157,13 @@ class MainParser:
 			self.add_one_index()
 			if two_arithme_ope == Lex.ADD: value += self.term();
 			else: value -= self.term();
-		#print "expr", value
 		return value
 
 	def term(self):
 		""" 四則演算をする.
 			@return int or float 定数
 
-			Test: Bug (11/19/2015)
+			Test: Good (11/20/2015)
 		"""
 		value = self.factor();
 		while (self.get_wchar() == Lex.MULTIPLY or self.get_wchar() == Lex.DIVIDE):
@@ -164,14 +171,13 @@ class MainParser:
 			self.add_one_index()
 			if two_arithme_ope == Lex.MULTIPLY: value *= self.factor();
 			else: value /= self.factor();
-		#print "term", value
 		return value
 
 	def factor(self):
 		""" 四則演算をする.
 			@return int or float 定数
 
-			Test: Bug (11/19/2015)
+			Test: Bug (11/20/2015)
 		"""
 		a_constant = 0
 		if self.get_wchar().isdigit():
@@ -183,8 +189,7 @@ class MainParser:
 			self.add_one_index()
 		else:
 			a_constant = self.variable()
-			value = 0 #変数の数値
-		#print "factor", a_constant
+			value = self.dict_of_global_var[a_constant]
 		return a_constant
 
 
@@ -194,19 +199,19 @@ class MainParser:
 
 			Test: Good (11/19/2015)
 		"""
-		var_name = ""
+		var_name = ''
 		if self.is_wchar(self.get_wchar()):
 			var_name += self.get_wchar()
 			self.add_one_index()
 		else:
-			print "syntax error."
-			raise #after <-後から改善（エラーの内容をどうするか）
+			print 'syntax error.'
+			sys.exit(1)
+			#raise #after <-後から改善（エラーの内容をどうするか）
 		while self.is_wchar(self.get_wchar()) or self.get_wchar().isdigit():
 			var_name += self.get_wchar()
 			self.add_one_index()
 
 		return var_name
-
 
 	def constant(self):
 		""" 文字列表記の定数をコードから取り出し、その文字列表記の定数のを数値へ変換し、返す

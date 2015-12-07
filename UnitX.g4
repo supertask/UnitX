@@ -1,13 +1,30 @@
 /*
- Copyright (c) 2015 Tasuku TAKAHASHI 
- All rights reserved.
-*/
+ * The MIT License (MIT)
+ * Copyright (c) 2015 Tasuku TAKAHASHI 
+ * All rights reserved.
 
-/** A UnitX grammar.
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
+
+/*
+ * UnitX grammar.
  *
- *  $ antlr4 UnitX.g4
- *  $ javac *.java
- *  $ grun UnitX compilationUnit *.java
  */
 grammar UnitX;
 
@@ -23,22 +40,34 @@ typeDeclaration
 	;
 
 functionDeclaration
-	: 'def' //Identifier formalParameters methodBody
+	: 'def' Identifier formalParameters block
 	;
 
-
-statement
-    : block
-    | 'loop' '(' forControl ')' statement
-	| 'if' parExpr statement ('else' statement)?
-	| '@'? expr
-	| 'print' expr
-    | 'break'
-    | 'continue'
-	| newlinePrinter
+formalParameters
+    : '(' formalParameterList? ')'
     ;
 
-newlinePrinter
+formalParameterList
+    : formalParameter (',' formalParameter)* 
+    ;
+
+formalParameter
+    :  Identifier ('=' expression)?
+    ;
+
+statement
+	: block
+	| 'loop' '(' forControl ')' statement
+	| 'if' parExpression statement ('else' statement)?
+	| '@'? expression
+	| 'print' expression
+	| 'return' expression
+	| 'break'
+	| 'continue'
+	| borderPrinter
+	;
+
+borderPrinter
 	: '---' '-'*
 	;
 
@@ -50,8 +79,12 @@ blockStatement
     : statement
     ;
 
-parExpr
-	: '(' expr ')'
+expressionList
+    :   expression (',' expression)*
+    ;
+
+parExpression
+	: '(' expression ')'
 	;
 
 forControl
@@ -64,14 +97,16 @@ endFor
 	;
 
 collection
-	: '[' (',' expr)* ']'
+	: '[' expression? (',' expression)* ']'
 	;
 
-expr
+expression
 	: primary
-	| expr ('*'|'/') expr
-	| expr ('+'|'-') expr
-    | expr ('='|'+='|'-='|'*='|'/='|'%=') expr
+	| expression ('*'|'/') expression
+	| expression ('+'|'-') expression
+	| ('++'|'--') expression
+	| expression '(' expressionList ')'
+    | expression ('='|'+='|'-='|'*='|'/='|'%=') expression
 	;
 
 unit
@@ -92,7 +127,7 @@ unitOperator
 primary
 	: Identifier
 	| literal unit?
-    | '(' expr ')'
+    | '(' expression ')'
 	;
 
 literal
@@ -109,6 +144,7 @@ literal
 
 // §3.9 Keywords
 
+DEF           	: 'def';
 LOOP           	: 'loop';
 PRINT         	: 'print';
 LPAREN          : '(';
@@ -123,6 +159,7 @@ DOT             : '.';
 
 // §3.12 Operators
 
+TREE_BORDER		: '---';
 ASSIGN          : '=';
 GT              : '>';
 LT              : '<';

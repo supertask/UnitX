@@ -7,7 +7,7 @@ SRC		= \
 
 GRAMMAR=UnitX
 DEST_SRC_DIR=./dest_dir/src
-ANTLR_APP=lib/antlr-4.5.1-complete
+ANTLR_APP=parser_generator/antlr-4.5.1-complete
 ANTLR_SRC_DIR=./antlr_src
 SRC_DIR=./src
 

@@ -1,7 +1,7 @@
 TARGET 	= unitx
 CURDIR	= UnitX
 SRCDIR	= src
-TEST 	= test/test_code_0.num
+TEST 	= test/test_0.num
 SRC		= \
 	$(SRCDIR)/unitx
 

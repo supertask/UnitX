@@ -498,5 +498,5 @@ COMMENT
     ;
 
 LINE_COMMENT
-    :   '//' ~[\r\n]* -> skip
+    :   '#' ~[\r\n]* -> skip
     ;

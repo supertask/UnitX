@@ -59,12 +59,12 @@ statement
 	: block
 	| 'loop' '(' forControl ')' statement
 	| 'if' parExpression statement ('else' statement)?
-	| '@'? expression
 	| 'print' expression
 	| 'return' expression
 	| 'break'
 	| 'continue'
 	| borderPrinter
+	| '@'? expression
 	;
 
 borderPrinter
@@ -104,9 +104,10 @@ expression
 	: primary
 	| expression ('*'|'/') expression
 	| expression ('+'|'-') expression
-	| ('++'|'--') expression
+	| expression ('++' | '--')
 	| expression '(' expressionList ')'
     | expression ('='|'+='|'-='|'*='|'/='|'%=') expression
+	| ('++'|'--') expression
 	;
 
 unit
@@ -125,18 +126,18 @@ unitOperator
 	;
 
 primary
-	: Identifier
+	: Identifier unit?
 	| literal unit?
-    | '(' expression ')'
+    | '(' expression ')' unit?
 	;
 
 literal
-    :   IntegerLiteral
-    |   FloatingPointLiteral
-    |   CharacterLiteral
-    |   StringLiteral
-    |   BooleanLiteral
-    |   'null'
+    : IntegerLiteral
+    | FloatingPointLiteral
+    | StringLiteral
+    | BooleanLiteral
+    | ImageLiteral
+    | 'null'
     ;
 
 
@@ -147,6 +148,10 @@ literal
 DEF           	: 'def';
 LOOP           	: 'loop';
 PRINT         	: 'print';
+IF          	: 'if';
+RETURN          : 'return';
+BREAK           : 'break';
+CONTINUE      	: 'continue';
 LPAREN          : '(';
 RPAREN          : ')';
 LBRACE          : '{';
@@ -198,6 +203,10 @@ AT				: '@';
 //NEWLINE			: '\n';
 
 // §3.10.1 Integer Literals
+
+ImageLiteral
+    : ( FloatingPointLiteral |  ) [jJ]
+    ;
 
 IntegerLiteral
     :   DecimalIntegerLiteral
@@ -395,22 +404,11 @@ BooleanLiteral
     |   'false'
     ;
 
-// §3.10.4 Character Literals
-
-CharacterLiteral
-    :   '\'' SingleCharacter '\''
-    |   '\'' EscapeSequence '\''
-    ;
-
-fragment
-SingleCharacter
-    :   ~['\\]
-    ;
-
 // §3.10.5 String Literals
 
 StringLiteral
     :   '"' StringCharacters? '"'
+    |   '\'' StringCharacters? '\''
     ;
 
 fragment

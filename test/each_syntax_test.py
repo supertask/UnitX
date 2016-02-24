@@ -2,8 +2,8 @@
 # -*- coding: utf-8 -*-
 
 import unittest
-import parser
 
+"""
 class ParsingTest():
 	def __init__(self):
 		import sys
@@ -69,14 +69,17 @@ class ParsingTest():
 
 	def tearDown(self):
 		print "The test was successful!"
-		
-if __name__ == "__main__":
-	app = ParsingTest()
-	app.setUp()
-	#app.test_constant()
-	#app.test_variable()
-	#app.test_assign()
-	app.test_expr()
-	#app.test_statements()
-	app.tearDown()
-    #unittest.main()
+"""
+
+
+class EachSyntaxTest(unittest.TestCase):
+	def test_print(self):
+		from unitx.example import test_run
+		left = test_run("""print 'a'""")
+		print left
+
+def test():
+	test_suite = unittest.TestSuite()
+	test_suite.addTests(unittest.makeSuite(EachSyntaxTest))
+	return test_suite
+

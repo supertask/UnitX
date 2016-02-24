@@ -1,18 +1,18 @@
 /*
  * The MIT License (MIT)
- * Copyright (c) 2015 Tasuku TAKAHASHI 
+ * Copyright (c) 2015-2016 Tasuku TAKAHASHI 
  * All rights reserved.
-
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
-
+ *
  * The above copyright notice and this permission notice shall be included in
  * all copies or substantial portions of the Software.
-
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -23,15 +23,25 @@
  */
 
 /*
- * UnitX grammar.
- *
+ * 【UnitX's grammar】
+ * This grammar can be a parser of UnitX by using ANTLR4.
+ * And, ANTLR4 is a parser generator by Java.
+ * So, you need the Java lang. And also, you can use it like below.
+ * 
+ *     java -jar antlr-4.5.1-complete.jar UnitX.g4 
+ * 
+ * Anyway, see "http://www.antlr.org/" for the details! if you wanna change this grammar.
  */
 grammar UnitX;
 
-// starting point for parsing a java file
-// 後からimport文などのName Spaceができるように
+/*
+ * Parser from Here.
+ *
+ * A starting point of Parser RULE is 'program'.
+ * memo: If someone or future I could add RULES of import statement or name space, add the RULES to a 'program' RULE.
+ */
 program
-	: typeDeclaration* EOF
+	: typeDeclaration* EOF 
 	;
 
 typeDeclaration
@@ -141,10 +151,11 @@ literal
     ;
 
 
-// LEXER
+/*
+ * LEXER from here.
+ */
 
-// §3.9 Keywords
-
+// Keywords
 DEF           	: 'def';
 LOOP           	: 'loop';
 PRINT         	: 'print';
@@ -162,8 +173,7 @@ SEMI            : ';';
 COMMA           : ',';
 DOT             : '.';
 
-// §3.12 Operators
-
+// Operators
 TREE_BORDER		: '---';
 ASSIGN          : '=';
 GT              : '>';
@@ -202,7 +212,8 @@ MOD_ASSIGN      : '%=';
 AT				: '@';
 //NEWLINE			: '\n';
 
-// §3.10.1 Integer Literals
+
+// Integer Literals
 
 ImageLiteral
     : ( FloatingPointLiteral |  ) [jJ]
@@ -336,7 +347,7 @@ BinaryDigitOrUnderscore
     |   '_'
     ;
 
-// §3.10.2 Floating-Point Literals
+// Floating-Point Literals
 
 FloatingPointLiteral
     :   DecimalFloatingPointLiteral
@@ -397,14 +408,14 @@ BinaryExponentIndicator
     :   [pP]
     ;
 
-// §3.10.3 Boolean Literals
+// Boolean Literals
 
 BooleanLiteral
     :   'true'
     |   'false'
     ;
 
-// §3.10.5 String Literals
+// String Literals
 
 StringLiteral
     :   '"' StringCharacters? '"'
@@ -422,7 +433,7 @@ StringCharacter
     |   EscapeSequence
     ;
 
-// §3.10.6 Escape Sequences for Character and String Literals
+// Escape Sequences for Character and String Literals
 
 fragment
 EscapeSequence
@@ -448,13 +459,13 @@ ZeroToThree
     :   [0-3]
     ;
 
-// §3.10.7 The Null Literal
+// The Null Literal
 
 NullLiteral
     :   'null'
     ;
 
-// §3.8 Identifiers (must appear after all keywords in the grammar)
+// Identifiers (must appear after all keywords in the grammar)
 
 Identifier
 	:   UnitXLetter UnitXLetterOrDigit*
@@ -478,9 +489,8 @@ UnitXLetterOrDigit
         [\uD800-\uDBFF] [\uDC00-\uDFFF]
     ;
 
-//
+
 // Whitespace and comments
-//
 
 NEWLINE
 	:  ['\n']+ -> skip

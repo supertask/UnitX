@@ -1,5 +1,6 @@
 # Original for this module
 build/
+dist/
 UnitX.egg-info/
 
 # Byte-compiled / optimized / DLL files

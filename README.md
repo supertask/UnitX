@@ -25,12 +25,12 @@ Run Demo program like below.
 
 TEST
 -----
-Run XUnit, if you wanna try it.
+Run xUnit, if you wanna try it.
 	make unittest
 
 AUTHOR
 -----
-Tasuku TAKAHASHI L<https://github.com/0ED>
+[linkref]: https://github.com/0ED "Tasuku TAKAHASHI"
 
 LICENSE
 -----
@@ -38,5 +38,5 @@ MIT
 
 RELEASE SCHEDULE
 -----
-1.1.0 alpha:	2017-09-01
-1.1.0 beta:		2018-04-01
+1.1.0 alpha:	2017-09-01  
+1.1.0 beta:		2018-04-01  

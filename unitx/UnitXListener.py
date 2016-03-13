@@ -1,15 +1,8 @@
-# -*- coding: utf-8 -*-
 # Generated from UnitX.g4 by ANTLR 4.5.1
 from antlr4 import *
-from UnitXListener import UnitXListener
-from UnitXParser import UnitXParser
-from UnitXLexer import UnitXLexer
 
 # This class defines a complete listener for a parse tree produced by UnitXParser.
-class UnitXWalker(UnitXListener):
-
-    def __init__(self):
-		self.expr_buff = []
+class UnitXListener(ParseTreeListener):
 
     # Enter a parse tree produced by UnitXParser#program.
     def enterProgram(self, ctx):
@@ -18,6 +11,7 @@ class UnitXWalker(UnitXListener):
     # Exit a parse tree produced by UnitXParser#program.
     def exitProgram(self, ctx):
         pass
+
 
     # Enter a parse tree produced by UnitXParser#typeDeclaration.
     def enterTypeDeclaration(self, ctx):
@@ -30,7 +24,6 @@ class UnitXWalker(UnitXListener):
 
     # Enter a parse tree produced by UnitXParser#functionDeclaration.
     def enterFunctionDeclaration(self, ctx):
-        # 関数以下の木を保存しておく
         pass
 
     # Exit a parse tree produced by UnitXParser#functionDeclaration.
@@ -67,32 +60,12 @@ class UnitXWalker(UnitXListener):
 
     # Enter a parse tree produced by UnitXParser#statement.
     def enterStatement(self, ctx):
-        if ctx.block():
-            pass
-            # print ctx.start.line # line number
-        elif ctx.start.type == UnitXLexer.LOOP:
-            pass
-        elif ctx.start.type == UnitXLexer.IF:
-            pass
-        elif ctx.start.type == UnitXLexer.PRINT:
-            pass
-        elif ctx.start.type == UnitXLexer.AT:
-            pass
-        elif ctx.start.type == UnitXLexer.RETURN:
-            pass
-        elif ctx.start.type == UnitXLexer.BREAK:
-            pass
-        elif ctx.start.type == UnitXLexer.CONTINUE:
-            pass
-        elif ctx.borderPrinter():
-            print ctx.start.text
-        elif ctx.expression():
-            pass
-
+        pass
 
     # Exit a parse tree produced by UnitXParser#statement.
     def exitStatement(self, ctx):
         pass
+
 
     # Enter a parse tree produced by UnitXParser#borderPrinter.
     def enterBorderPrinter(self, ctx):
@@ -139,57 +112,27 @@ class UnitXWalker(UnitXListener):
         pass
 
 
-    # Enter a parse tree produced by UnitXParser#forControl.
-    def enterForControl(self, ctx):
+    # Enter a parse tree produced by UnitXParser#repControl.
+    def enterRepControl(self, ctx):
         pass
 
-    # Exit a parse tree produced by UnitXParser#forControl.
-    def exitForControl(self, ctx):
-        pass
-
-
-    # Enter a parse tree produced by UnitXParser#endFor.
-    def enterEndFor(self, ctx):
-        pass
-
-    # Exit a parse tree produced by UnitXParser#endFor.
-    def exitEndFor(self, ctx):
+    # Exit a parse tree produced by UnitXParser#repControl.
+    def exitRepControl(self, ctx):
         pass
 
 
-    # Enter a parse tree produced by UnitXParser#collection.
-    def enterCollection(self, ctx):
+    # Enter a parse tree produced by UnitXParser#endRep.
+    def enterEndRep(self, ctx):
         pass
 
-    # Exit a parse tree produced by UnitXParser#collection.
-    def exitCollection(self, ctx):
+    # Exit a parse tree produced by UnitXParser#endRep.
+    def exitEndRep(self, ctx):
         pass
 
 
     # Enter a parse tree produced by UnitXParser#expression.
     def enterExpression(self, ctx):
-        if ctx.primary():
-            pass
-        elif ctx.expression(i=0):
-            print ctx.getChild(i=1)
-            if ctx.getChild(i=1) == UnitXLexer.MUL:
-				expr_buff.append(expr_buff.pop() * expr_buff.pop())
-            elif ctx.getChild(i=1) == UnitXLexer.DIV:
-				expr_buff.append(expr_buff.pop() / expr_buff.pop())
-            elif ctx.getChild(i=1) == UnitXLexer.ADD:
-				expr_buff.append(expr_buff.pop() + expr_buff.pop())
-            elif ctx.getChild(i=1) == UnitXLexer.SUB: 
-				expr_buff.append(expr_buff.pop() - expr_buff.pop())
-                
-
-        #elif ctx.start.type == UnitXLexer.LOOP:
-        """
-        if ctx.getStart().getType() == UnitXParser.RULE_primary:
-            pass
-        elif ctx.getStart().getType() == UnitXParser.RULE_expression:
-            pass
-        #elif ctx.getStart() ==  INC
-        """
+        pass
 
     # Exit a parse tree produced by UnitXParser#expression.
     def exitExpression(self, ctx):
@@ -238,6 +181,51 @@ class UnitXWalker(UnitXListener):
 
     # Exit a parse tree produced by UnitXParser#literal.
     def exitLiteral(self, ctx):
+        pass
+
+
+    # Enter a parse tree produced by UnitXParser#string.
+    def enterString(self, ctx):
+        pass
+
+    # Exit a parse tree produced by UnitXParser#string.
+    def exitString(self, ctx):
+        pass
+
+
+    # Enter a parse tree produced by UnitXParser#number.
+    def enterNumber(self, ctx):
+        pass
+
+    # Exit a parse tree produced by UnitXParser#number.
+    def exitNumber(self, ctx):
+        pass
+
+
+    # Enter a parse tree produced by UnitXParser#integer.
+    def enterInteger(self, ctx):
+        pass
+
+    # Exit a parse tree produced by UnitXParser#integer.
+    def exitInteger(self, ctx):
+        pass
+
+
+    # Enter a parse tree produced by UnitXParser#boolean.
+    def enterBoolean(self, ctx):
+        pass
+
+    # Exit a parse tree produced by UnitXParser#boolean.
+    def exitBoolean(self, ctx):
+        pass
+
+
+    # Enter a parse tree produced by UnitXParser#none.
+    def enterNone(self, ctx):
+        pass
+
+    # Exit a parse tree produced by UnitXParser#none.
+    def exitNone(self, ctx):
         pass
 
 

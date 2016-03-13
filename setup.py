@@ -23,8 +23,9 @@ setup(
 	author_email='lightfox.task@gmail.com',
 	license='MIT',
 	scripts=[TARGET, TARGET+'.cmd'],
-	test_suite = "each_syntax_test.test",
+	test_suite = "totality_test.test",
 	install_requires=[
-		'antlr4-python2-runtime'
+		'antlr4-python2-runtime',
+		'prettyprint'
 	]
 )

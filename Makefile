@@ -2,11 +2,12 @@ PYTHON		= python
 TARGET		= $(PYTHON) unitx/example.py
 CURDIR		= UnitX
 DEST_SRC_DIR	= ./unitx
-GARBAGE_DIRS	= ./build ./dist ./UnitX.egg-info
+GENERATED_DIRS	= ./build ./dist ./UnitX.egg-info
 ANTLR_APP		= ./parser_generator/antlr-4.5.1-complete
 SRC_DIR			= ./src
 GRAMMAR			= UnitX
 AFLAG			= -Dlanguage=Python2
+INST_PACKS		= "antlr4-python2-runtime\nprettyprint"
 
 DEMO0	= demo/demo_0.num
 DEMO1	= demo/demo_1.num
@@ -33,7 +34,7 @@ prepare:
 
 # That generate lexer and parser from a grammar of ANTLR.
 generate:
-	java -jar $(ANTLR_APP).jar $(AFLAG) -o $(DEST_SRC_DIR)/ $(GRAMMAR).g4 
+	java -jar $(ANTLR_APP).jar $(AFLAG) -o $(DEST_SRC_DIR)/ $(GRAMMAR).g4 -visitor
 	@date
 
 # In python, to uninstall a module is impossible. So, we have to make "uninstall".
@@ -42,11 +43,20 @@ uninstall:
 	cat log.txt | xargs rm -vf
 	rm -f log.txt
 	rm -f "/Library/Python/2.7/site-packages/UnitX-1.0.0-py2.7.egg"
-	@echo "\nSUCCESS: The overall uninstallation is successful!"
+	@echo "\nSUCCESS: The almost uninstallation is successful!\n"
+	@echo "------"
+	@echo "If you would like to remove all, you should remove following modules by using pip command:"
+	@echo $(INST_PACKS)
+	@echo "It's like a 'pip uninstall {module name}'.\n"
 	@date
 
 unittest:
 	$(PYTHON) setup.py test
+	@date
+
+demo: all
+	$(TARGET) $(DEMO0)
+	@date
 
 demo0:
 	$(TARGET) $(DEMO0)
@@ -58,10 +68,11 @@ demo1:
 
 inline:
 	$(TARGET)
+	@date
 
 clean:
 	rm -rf $(DEST_SRC_DIR)/
-	rm -rf $(GARBAGE_DIRS)
+	rm -rf $(GENERATED_DIRS)
 	@date
 	
 # For backup of this module.

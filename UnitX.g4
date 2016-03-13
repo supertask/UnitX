@@ -38,7 +38,7 @@ grammar UnitX;
  * Parser from Here.
  *
  * A starting point of Parser RULE is 'program'.
- * memo: If someone or future I could add RULES of import statement or name space, add the RULES to a 'program' RULE.
+ * memo: If someone or future's I could add RULES of import statement or name space, add the RULES to a 'program' RULE.
  */
 program
 	: typeDeclaration* EOF 
@@ -67,14 +67,14 @@ formalParameter
 
 statement
 	: block
-	| 'loop' '(' forControl ')' statement
+	| 'rep' '(' repControl ')' statement
 	| 'if' parExpression statement ('else' statement)?
 	| 'print' expression
 	| 'return' expression
 	| 'break'
 	| 'continue'
+	| ('>' '>')? expression
 	| borderPrinter
-	| '@'? expression
 	;
 
 borderPrinter
@@ -90,35 +90,50 @@ blockStatement
     ;
 
 expressionList
-    :   expression (',' expression)*
+    : expression (',' expression)*
     ;
 
 parExpression
 	: '(' expression ')'
 	;
 
-forControl
-	: Identifier ',' endFor
+repControl
+	: Identifier ',' endRep
 	;
 
-endFor
-	: IntegerLiteral
-	| collection
-	;
-
-collection
-	: '[' expression? (',' expression)* ']'
+endRep
+	: expression
 	;
 
 expression
 	: primary
-	| expression ('*'|'/') expression
+	| expression ('*'|'/'|'%') expression
 	| expression ('+'|'-') expression
-	| expression ('++' | '--')
+	| expression ('<='|'>='|'>'|'<') expression
+	| expression ('=='|'!=') expression
+    | expression
+		( '='
+		| '+='
+		| '-='
+		| '*='
+		| '/='
+		| '&='
+		| '|='
+		| '^='
+		| '%='
+		) expression
+	| expression
+		( '&'
+		| '^'
+		| '|'
+		| '&&'
+		| '||'
+		) expression
 	| expression '(' expressionList ')'
-    | expression ('='|'+='|'-='|'*='|'/='|'%=') expression
 	| ('++'|'--') expression
 	;
+
+// | expression ('++' | '--')
 
 unit
 	: '{' unitSingleOrPairOperator '}'
@@ -138,18 +153,47 @@ unitOperator
 primary
 	: Identifier unit?
 	| literal unit?
-    | '(' expression ')' unit?
+	| '(' expression ')' unit?
+	| '[' expression? (',' expression)* ']'
 	;
 
 literal
-    : IntegerLiteral
-    | FloatingPointLiteral
-    | StringLiteral
-    | BooleanLiteral
-    | ImageLiteral
-    | 'null'
+	: number
+    | string
+    | boolean
+    | none
     ;
 
+
+string
+	: STRING_LITERAL
+	| BYTES_LITERAL
+	;
+
+number
+	: integer
+	| FLOAT_NUMBER
+	| IMAG_NUMBER
+	;
+
+/// integer        ::=  decimalinteger | octinteger | hexinteger | bininteger
+integer
+	 : DECIMAL_INTEGER
+	 | OCT_INTEGER
+	 | HEX_INTEGER
+	 | BIN_INTEGER
+	 ;
+
+// Boolean Literals
+boolean
+    :   'true'
+    |   'false'
+    ;
+
+// The Null Literal
+none
+	:   'None'
+	;
 
 /*
  * LEXER from here.
@@ -157,7 +201,7 @@ literal
 
 // Keywords
 DEF           	: 'def';
-LOOP           	: 'loop';
+REP           	: 'rep';
 PRINT         	: 'print';
 IF          	: 'if';
 RETURN          : 'return';
@@ -174,7 +218,7 @@ COMMA           : ',';
 DOT             : '.';
 
 // Operators
-TREE_BORDER		: '---';
+THREE_BORDER	: '---';
 ASSIGN          : '=';
 GT              : '>';
 LT              : '<';
@@ -213,260 +257,186 @@ AT				: '@';
 //NEWLINE			: '\n';
 
 
-// Integer Literals
 
-ImageLiteral
-    : ( FloatingPointLiteral |  ) [jJ]
-    ;
+/// stringliteral   ::=  [stringprefix](shortstring | longstring)
+/// stringprefix    ::=  "r" | "R"
+STRING_LITERAL
+	: ( SHORT_STRING | LONG_STRING )
+	;
+// without [uU]? [rR]? now
 
-IntegerLiteral
-    :   DecimalIntegerLiteral
-    |   HexIntegerLiteral
-    |   OctalIntegerLiteral
-    |   BinaryIntegerLiteral
-    ;
+/// bytesliteral   ::=  bytesprefix(shortbytes | longbytes)
+/// bytesprefix    ::=  "b" | "B" | "br" | "Br" | "bR" | "BR"
+BYTES_LITERAL
+	: ( SHORT_BYTES | LONG_BYTES )
+	;
+// without [bB] [rR]? now
 
-fragment
-DecimalIntegerLiteral
-    :   DecimalNumeral IntegerTypeSuffix?
-    ;
+/// decimalinteger ::=  nonzerodigit digit* | "0"+
+DECIMAL_INTEGER
+	: NON_ZERO_DIGIT DIGIT*
+	| '0'+
+	;
 
-fragment
-HexIntegerLiteral
-    :   HexNumeral IntegerTypeSuffix?
-    ;
+/// octinteger     ::=  "0" ("o" | "O") octdigit+
+OCT_INTEGER
+	: '0' [oO] OCT_DIGIT+
+	;
 
-fragment
-OctalIntegerLiteral
-    :   OctalNumeral IntegerTypeSuffix?
-    ;
+/// hexinteger     ::=  "0" ("x" | "X") hexdigit+
+HEX_INTEGER
+	: '0' [xX] HEX_DIGIT+
+	;
 
-fragment
-BinaryIntegerLiteral
-    :   BinaryNumeral IntegerTypeSuffix?
-    ;
+/// bininteger     ::=  "0" ("b" | "B") bindigit+
+BIN_INTEGER
+	: '0' [bB] BIN_DIGIT+
+	;
 
-fragment
-IntegerTypeSuffix
-    :   [lL]
-    ;
+/// floatnumber   ::=  pointfloat | exponentfloat
+FLOAT_NUMBER
+	: POINT_FLOAT
+	| EXPONENT_FLOAT
+	;
 
-fragment
-DecimalNumeral
-    :   '0'
-    |   NonZeroDigit (Digits? | Underscores Digits)
-    ;
+/// imagnumber ::=  (floatnumber | intpart) ("j" | "J")
+IMAG_NUMBER
+	: ( FLOAT_NUMBER | INT_PART ) [jJ]
+	;
 
-fragment
-Digits
-    :   Digit (DigitOrUnderscore* Digit)?
-    ;
 
-fragment
-Digit
-    :   '0'
-    |   NonZeroDigit
-    ;
+/*
+ * fragment
+ */
 
 fragment
-NonZeroDigit
-    :   [1-9]
-    ;
+SHORT_STRING
+	: '\'' ( STRING_ESCAPE_SEQ | ~[\\\r\n'] )* '\''
+	| '"' ( STRING_ESCAPE_SEQ | ~[\\\r\n"] )* '"'
+	;
+fragment
+LONG_STRING
+	: '\'\'\'' LONG_STRING_ITEM*? '\'\'\''
+	| '"""' LONG_STRING_ITEM*? '"""'
+	;
 
 fragment
-DigitOrUnderscore
-    :   Digit
-    |   '_'
-    ;
+LONG_STRING_ITEM
+	: LONG_STRING_CHAR
+	| STRING_ESCAPE_SEQ
+	;
 
 fragment
-Underscores
-    :   '_'+
-    ;
+LONG_STRING_CHAR
+	: ~'\\'
+	;
 
 fragment
-HexNumeral
-    :   '0' [xX] HexDigits
-    ;
+STRING_ESCAPE_SEQ
+	: '\\' .
+	;
 
 fragment
-HexDigits
-    :   HexDigit (HexDigitOrUnderscore* HexDigit)?
-    ;
+NON_ZERO_DIGIT
+	: [1-9]
+	;
 
 fragment
-HexDigit
-    :   [0-9a-fA-F]
-    ;
+DIGIT
+	: [0-9]
+	;
 
 fragment
-HexDigitOrUnderscore
-    :   HexDigit
-    |   '_'
-    ;
+OCT_DIGIT
+	: [0-7]
+	;
 
 fragment
-OctalNumeral
-    :   '0' Underscores? OctalDigits
-    ;
+HEX_DIGIT
+	: [0-9a-fA-F]
+	;
 
 fragment
-OctalDigits
-    :   OctalDigit (OctalDigitOrUnderscore* OctalDigit)?
-    ;
+BIN_DIGIT
+	: [01]
+	;
 
 fragment
-OctalDigit
-    :   [0-7]
-    ;
+POINT_FLOAT
+	: INT_PART? FRACTION
+	| INT_PART '.'
+	;
 
 fragment
-OctalDigitOrUnderscore
-    :   OctalDigit
-    |   '_'
-    ;
+EXPONENT_FLOAT
+	: ( INT_PART | POINT_FLOAT ) EXPONENT
+	;
 
 fragment
-BinaryNumeral
-    :   '0' [bB] BinaryDigits
-    ;
+INT_PART
+	: DIGIT+
+	;
 
 fragment
-BinaryDigits
-    :   BinaryDigit (BinaryDigitOrUnderscore* BinaryDigit)?
-    ;
+FRACTION
+	: '.' DIGIT+
+	;
 
 fragment
-BinaryDigit
-    :   [01]
-    ;
+EXPONENT
+	: [eE] [+-]? DIGIT+
+	;
 
 fragment
-BinaryDigitOrUnderscore
-    :   BinaryDigit
-    |   '_'
-    ;
-
-// Floating-Point Literals
-
-FloatingPointLiteral
-    :   DecimalFloatingPointLiteral
-    |   HexadecimalFloatingPointLiteral
-    ;
+SHORT_BYTES
+	: '\'' ( SHORT_BYTES_CHAR_NO_SINGLE_QUOTE | BYTES_ESCAPE_SEQ )* '\''
+	| '"' ( SHORT_BYTES_CHAR_NO_DOUBLE_QUOTE | BYTES_ESCAPE_SEQ )* '"'
+	;
 
 fragment
-DecimalFloatingPointLiteral
-    :   Digits '.' Digits? ExponentPart? FloatTypeSuffix?
-    |   '.' Digits ExponentPart? FloatTypeSuffix?
-    |   Digits ExponentPart FloatTypeSuffix?
-    |   Digits FloatTypeSuffix
-    ;
+LONG_BYTES
+	: '\'\'\'' LONG_BYTES_ITEM*? '\'\'\''
+	| '"""' LONG_BYTES_ITEM*? '"""'
+	;
 
 fragment
-ExponentPart
-    :   ExponentIndicator SignedInteger
-    ;
+LONG_BYTES_ITEM
+	: LONG_BYTES_CHAR
+	| BYTES_ESCAPE_SEQ
+	;
 
+/// shortbyteschar ::=  <any ASCII character except "\" or newline or the quote>
 fragment
-ExponentIndicator
-    :   [eE]
-    ;
-
+SHORT_BYTES_CHAR_NO_SINGLE_QUOTE
+	: [\u0000-\u0009]
+	| [\u000B-\u000C]
+	| [\u000E-\u0026]
+	| [\u0028-\u005B]
+	| [\u005D-\u007F]
+	; 
 fragment
-SignedInteger
-    :   Sign? Digits
-    ;
-
+SHORT_BYTES_CHAR_NO_DOUBLE_QUOTE
+	: [\u0000-\u0009]
+	| [\u000B-\u000C]
+	| [\u000E-\u0021]
+	| [\u0023-\u005B]
+	| [\u005D-\u007F]
+	; 
+/// longbyteschar  ::=  <any ASCII character except "\">
 fragment
-Sign
-    :   [+-]
-    ;
-
+LONG_BYTES_CHAR
+	: [\u0000-\u005B]
+	| [\u005D-\u007F]
+	;
+/// bytesescapeseq ::=  "\" <any ASCII character>
 fragment
-FloatTypeSuffix
-    :   [fFdD]
-    ;
+BYTES_ESCAPE_SEQ
+	: '\\' [\u0000-\u007F]
+	;
 
-fragment
-HexadecimalFloatingPointLiteral
-    :   HexSignificand BinaryExponent FloatTypeSuffix?
-    ;
 
-fragment
-HexSignificand
-    :   HexNumeral '.'?
-    |   '0' [xX] HexDigits? '.' HexDigits
-    ;
-
-fragment
-BinaryExponent
-    :   BinaryExponentIndicator SignedInteger
-    ;
-
-fragment
-BinaryExponentIndicator
-    :   [pP]
-    ;
-
-// Boolean Literals
-
-BooleanLiteral
-    :   'true'
-    |   'false'
-    ;
-
-// String Literals
-
-StringLiteral
-    :   '"' StringCharacters? '"'
-    |   '\'' StringCharacters? '\''
-    ;
-
-fragment
-StringCharacters
-    :   StringCharacter+
-    ;
-
-fragment
-StringCharacter
-    :   ~["\\]
-    |   EscapeSequence
-    ;
-
-// Escape Sequences for Character and String Literals
-
-fragment
-EscapeSequence
-    :   '\\' [btnfr"'\\]
-    |   OctalEscape
-    |   UnicodeEscape
-    ;
-
-fragment
-OctalEscape
-    :   '\\' OctalDigit
-    |   '\\' OctalDigit OctalDigit
-    |   '\\' ZeroToThree OctalDigit OctalDigit
-    ;
-
-fragment
-UnicodeEscape
-    :   '\\' 'u' HexDigit HexDigit HexDigit HexDigit
-    ;
-
-fragment
-ZeroToThree
-    :   [0-3]
-    ;
-
-// The Null Literal
-
-NullLiteral
-    :   'null'
-    ;
 
 // Identifiers (must appear after all keywords in the grammar)
-
 Identifier
 	:   UnitXLetter UnitXLetterOrDigit*
     ;

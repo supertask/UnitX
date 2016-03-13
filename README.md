@@ -1,5 +1,42 @@
-# UnitX
-UnitX is script language for Unit.
+UnitX 
+===
+*Read this in other languages: [English](README.md), [日本語](README.ja.md)*
 
-Sorry.
-Under construction right now !!
+Copyright &copy; 2015-2016 Tasuku TAKAHASHI
+All rights reserved.
+
+VERSION
+-----
+1.0.0
+
+INTRODUCTION
+-----
+
+INSTALL
+-----
+	make
+	sudo make install
+
+HOW TO USE
+-----
+Run Demo program like below.
+
+	make demo0
+
+TEST
+-----
+Run XUnit, if you wanna try it.
+	make unittest
+
+AUTHOR
+-----
+Tasuku TAKAHASHI L<https://github.com/0ED>
+
+LICENSE
+-----
+MIT
+
+RELEASE SCHEDULE
+-----
+1.1.0 alpha:	2017-09-01
+1.1.0 beta:		2018-04-01

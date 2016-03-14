@@ -9,8 +9,8 @@ GRAMMAR			= UnitX
 AFLAG			= -Dlanguage=Python2
 INST_PACKS		= "antlr4-python2-runtime\nprettyprint"
 
-DEMO0	= demo/demo_0.num
-DEMO1	= demo/demo_1.num
+DEMO0	= demo/demo_0.unit
+DEMO1	= demo/demo_1.unit
 
 SRC=\
 	src/main.py \

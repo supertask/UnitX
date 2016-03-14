@@ -22,13 +22,18 @@ class UnitXObject:
 	def set_scopes(self, scopes):
 		""" スコープインスタンスを束縛する．
 		"""
-		self.scopes = scopes
+		self._scopes = scopes
+	
+	def get_scopes(self):
+		""" スコープインスタンスを返す．
+		"""
+		return self._scopes
 
 	def get_value(self):
 		""" UnitXObjectに束縛する数値，文字列，または変数の値を応答する．
 		"""
 		if self.is_identifier:
-			current_scope = self.scopes[-1]
+			current_scope = self.get_scopes()[-1]
 			found_scope = current_scope.find_scope_of(self.get_varname())
 			if found_scope:
 				return found_scope[self.varname]

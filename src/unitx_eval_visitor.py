@@ -10,10 +10,12 @@ from antlr4 import *
 from UnitXVisitor import UnitXVisitor
 from UnitXParser import UnitXParser
 from UnitXLexer import UnitXLexer
+
 from unitx_object import UnitXObject
 from unitx_object_calc import UnitXObjectCalc
 from scope import Scope
 from util import Util
+from constants import Constants
 
 class UnitXEvalVisitor(UnitXVisitor):
 	
@@ -24,6 +26,7 @@ class UnitXEvalVisitor(UnitXVisitor):
 		self.scopes = []
 		self.scopes.append(Scope(parent=None))
 		self.calc = UnitXObjectCalc(self.scopes)
+		self.is_break = False
 
 	# Visit a parse tree produced by UnitXParser#program.
 	def visitProgram(self, ctx):
@@ -52,6 +55,18 @@ class UnitXEvalVisitor(UnitXVisitor):
 	# Visit a parse tree produced by UnitXParser#formalParameter.
 	def visitFormalParameter(self, ctx):
 		return self.visitChildren(ctx)
+		
+	def __new_scope(self):
+		"""現在のスコープ内のメモリを確保する．
+		"""
+		self.scopes.append(Scope(self.scopes[-1]))
+		return
+
+	def __del_scope(self):
+		""" 現在のスコープ内のメモリを解放する．
+		"""
+		self.scopes.pop()
+		return
 
 
 	def visitStatement(self, ctx):
@@ -62,29 +77,33 @@ class UnitXEvalVisitor(UnitXVisitor):
 			if parent_type == UnitXLexer.REP or parent_type == UnitXLexer.IF:
 				self.visitBlock(ctx.block())
 			else:
-				self.scopes.append(Scope(self.scopes[-1]))
+				self.__new_scope()
 				self.visitBlock(ctx.block())
-				Util.dump(self.scopes)
-				self.scopes.pop()
+				self.__del_scope()
 			return
 
 		elif ctx.start.type == UnitXLexer.REP:
-			a_var, endRep = self.visitRepControl(ctx.repControl())
-			end = endRep.get_value()
-			self.scopes.append(Scope(self.scopes[-1]))
-			for i in range(end):
+			#
+			# rep(i,5) or rep(i,[1,2,3])
+			#
+			var_obj, end_control = self.visitRepControl(ctx.repControl())
+			end_value = end_control.get_value()
+			if isinstance(end_value, int): repeat_list = [UnitXObject(x) for x in range(end_value)]
+			else: repeat_list = end_value
+
+			self.__new_scope()
+			for i in repeat_list:
+				self.calc.assign(var_obj, i)
 				self.visitStatement(ctx.statement(i=0))
-			Util.dump(self.scopes)
-			self.scopes.pop()
+			self.__del_scope()
+
 			return
 		
-		# break文の実装が最優先事項
-
-		"""
 		elif ctx.start.type == UnitXLexer.IF:
 			pass
 		elif ctx.start.type == UnitXLexer.PRINT:
 			print self.visitExpression(ctx.expression())
+			return
 
 		elif ctx.start.type == UnitXLexer.RETURN:
 			pass
@@ -93,7 +112,6 @@ class UnitXEvalVisitor(UnitXVisitor):
 
 		elif ctx.start.type == UnitXLexer.CONTINUE:
 			pass
-		"""
 		#elif ctx.start.type == UnitXLexer.E:
 		#	print self.visitExpression(ctx.expression())
 		#elif ctx.borderPrinter(): self.visitBorderPrinter(ctx.borderPrinter())
@@ -137,7 +155,8 @@ class UnitXEvalVisitor(UnitXVisitor):
 		""" Visit a parse tree produced by UnitXParser#repControl.
 			ex: [i,5], [i,[1,2,3]]
 		"""
-		return [ctx.Identifier().getText(), self.visitEndRep(ctx.endRep())]
+		varname = ctx.Identifier().getText()
+		return [UnitXObject(varname, is_identifier=True), self.visitEndRep(ctx.endRep())]
 
 
 	def visitEndRep(self, ctx):
@@ -151,8 +170,8 @@ class UnitXEvalVisitor(UnitXVisitor):
 
 
 	def visitExpression(self, ctx):
-		""" 
-			UnitXObjectを返す．	
+		""" UnitXObject同士を計算した結果を返す．
+			return: UnitXObject
 		"""
 		if ctx.expression(i=0):
 			# x,y: UnitXObject
@@ -212,9 +231,7 @@ class UnitXEvalVisitor(UnitXVisitor):
 			return self.visitExpression(ctx.expression(i=0))
 
 		elif ctx.start.type == UnitXLexer.LBRACK:
-			unitx_objs = []
-			for an_expr in ctx.expression():
-				unitx_objs.append(self.visitExpression(an_expr))
+			unitx_objs = [self.visitExpression(an_expr) for an_expr in ctx.expression()]
 			return UnitXObject(unitx_objs)
 
 		else: raise Exception("Syntax error. UnitXEvalVisitor#visitPrimary") # Never happen.

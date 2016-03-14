@@ -1,9 +1,11 @@
 UnitX 
 ===
-*Read this in other languages: [English](README.md), [日本語](README.ja.md)*
+UnitX is a script language for Unit.  
 
 Copyright &copy; 2015-2016 Tasuku TAKAHASHI
 All rights reserved.
+
+*Read this in other languages: [English](README.md), [日本語](README.ja.md)*
 
 VERSION
 -----
@@ -26,17 +28,26 @@ Run Demo program like below.
 TEST
 -----
 Run xUnit, if you wanna try it.
+
 	make unittest
+
 
 AUTHOR
 -----
-[linkref]: https://github.com/0ED "Tasuku TAKAHASHI"
+[Tasuku TAKAHASHI](https://github.com/0ED)
 
 LICENSE
 -----
 MIT
 
+RELEASED
+-----
+None
+
 RELEASE SCHEDULE
 -----
-1.1.0 alpha:	2017-09-01  
-1.1.0 beta:		2018-04-01  
+|   Version   | scheduled day |
+|:------------|--------------:|
+| 1.0.0 alpha |   2016-03-31  |
+| 1.0.0 beta  |   2016-05-01  |
+| 1.1.0 alpha |   2018-04-01  |

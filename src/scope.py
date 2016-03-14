@@ -17,5 +17,10 @@ class Scope(dict):
 		if varname in self: return self
 		else:
 			if not self.parent: return None #終了条件
-			return self.parent.find_scope_of(varname) #再帰的に辿る
+			return self.parent.find_scope_of(varname) #再帰的に探す
 
+def main():
+	return 0
+
+if __name__ == '__main__':
+	sys.exit(main())

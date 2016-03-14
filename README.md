@@ -34,7 +34,7 @@ Run xUnit, if you wanna try it.
 
 AUTHOR
 -----
-[Tasuku TAKAHASHI](https://github.com/0ED)
+Tasuku TAKAHASHI([supertask.jp](http://supertask.jp))
 
 LICENSE
 -----

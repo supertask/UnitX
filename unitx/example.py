@@ -26,7 +26,7 @@ def parse_file(in_stream):
 	a_visitor = UnitXEvalVisitor()
 	a_visitor.visit(a_tree)
 
-	return 'End.'
+	return
 	#lisp_tree_str = a_tree.toStringTree(recog=a_parser)
 	#return lisp_tree_str
 
@@ -39,11 +39,11 @@ def main(argv):
 	""" 
 	"""
 	if len(argv) > 1:
-		print parse_file(FileStream(argv[1], encoding='utf-8'))
+		parse_file(FileStream(argv[1], encoding='utf-8'))
 	else:
 		while True:
 			sys.stdout.write('>> ')
-			print parse_file(InputStream(sys.stdin.readline()))
+			parse_file(InputStream(sys.stdin.readline()))
 	return 0
 
 if __name__ == '__main__':

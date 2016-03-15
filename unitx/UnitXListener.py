@@ -58,24 +58,6 @@ class UnitXListener(ParseTreeListener):
         pass
 
 
-    # Enter a parse tree produced by UnitXParser#statement.
-    def enterStatement(self, ctx):
-        pass
-
-    # Exit a parse tree produced by UnitXParser#statement.
-    def exitStatement(self, ctx):
-        pass
-
-
-    # Enter a parse tree produced by UnitXParser#borderPrinter.
-    def enterBorderPrinter(self, ctx):
-        pass
-
-    # Exit a parse tree produced by UnitXParser#borderPrinter.
-    def exitBorderPrinter(self, ctx):
-        pass
-
-
     # Enter a parse tree produced by UnitXParser#block.
     def enterBlock(self, ctx):
         pass
@@ -91,6 +73,78 @@ class UnitXListener(ParseTreeListener):
 
     # Exit a parse tree produced by UnitXParser#blockStatement.
     def exitBlockStatement(self, ctx):
+        pass
+
+
+    # Enter a parse tree produced by UnitXParser#statement.
+    def enterStatement(self, ctx):
+        pass
+
+    # Exit a parse tree produced by UnitXParser#statement.
+    def exitStatement(self, ctx):
+        pass
+
+
+    # Enter a parse tree produced by UnitXParser#repStatement.
+    def enterRepStatement(self, ctx):
+        pass
+
+    # Exit a parse tree produced by UnitXParser#repStatement.
+    def exitRepStatement(self, ctx):
+        pass
+
+
+    # Enter a parse tree produced by UnitXParser#ifStatement.
+    def enterIfStatement(self, ctx):
+        pass
+
+    # Exit a parse tree produced by UnitXParser#ifStatement.
+    def exitIfStatement(self, ctx):
+        pass
+
+
+    # Enter a parse tree produced by UnitXParser#expressionStatement.
+    def enterExpressionStatement(self, ctx):
+        pass
+
+    # Exit a parse tree produced by UnitXParser#expressionStatement.
+    def exitExpressionStatement(self, ctx):
+        pass
+
+
+    # Enter a parse tree produced by UnitXParser#returnStatement.
+    def enterReturnStatement(self, ctx):
+        pass
+
+    # Exit a parse tree produced by UnitXParser#returnStatement.
+    def exitReturnStatement(self, ctx):
+        pass
+
+
+    # Enter a parse tree produced by UnitXParser#printStatement.
+    def enterPrintStatement(self, ctx):
+        pass
+
+    # Exit a parse tree produced by UnitXParser#printStatement.
+    def exitPrintStatement(self, ctx):
+        pass
+
+
+    # Enter a parse tree produced by UnitXParser#dumpStatement.
+    def enterDumpStatement(self, ctx):
+        pass
+
+    # Exit a parse tree produced by UnitXParser#dumpStatement.
+    def exitDumpStatement(self, ctx):
+        pass
+
+
+    # Enter a parse tree produced by UnitXParser#borderStatement.
+    def enterBorderStatement(self, ctx):
+        pass
+
+    # Exit a parse tree produced by UnitXParser#borderStatement.
+    def exitBorderStatement(self, ctx):
         pass
 
 

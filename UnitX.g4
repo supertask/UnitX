@@ -38,7 +38,7 @@ grammar UnitX;
  * Parser from Here.
  *
  * A starting point of Parser RULE is 'program'.
- * memo: If someone or future's I could add RULES of import statement or name space, add the RULES to a 'program' RULE.
+ * memo: If someone or future's I could add RULES of import statement or name space, Add the RULES to a 'typeDeclaration' RULE.
  */
 program
 	: typeDeclaration* EOF 
@@ -65,22 +65,6 @@ formalParameter
     :  Identifier ('=' expression)?
     ;
 
-statement
-	: block
-	| 'rep' '(' repControl ')' statement
-	| 'if' parExpression statement ('else' statement)?
-	| 'print' expression
-	| 'return' expression
-	| 'break'
-	| 'continue'
-	| ('>' '>')? expression
-	| borderPrinter
-	;
-
-borderPrinter
-	: '---' '-'*
-	;
-
 block
     : '{' blockStatement* '}'
     ;
@@ -88,6 +72,47 @@ block
 blockStatement
     : statement
     ;
+
+statement
+	: block
+	| repStatement
+	| ifStatement
+	| expressionStatement
+	| returnStatement
+	| 'break'
+	| 'continue'
+	| printStatement
+	| dumpStatement
+	| borderStatement
+	;
+
+repStatement
+    : 'rep' '(' repControl ')' statement 
+	;
+
+ifStatement
+    : 'if' parExpression statement ('else' statement)?
+	;
+
+expressionStatement
+	: expression
+	;
+
+returnStatement
+	: 'return' expression
+	;
+
+printStatement
+	:'print' expression? (',' expression)*
+	;
+
+dumpStatement
+	: '>' '>' expression? (',' expression)*
+	;
+
+borderStatement
+	: '---' '-'*
+	;
 
 expressionList
     : expression (',' expression)*

@@ -9,46 +9,56 @@ class UnitXObject:
 		ex: 5{MB}, 20{kg->g}, 3{N*m}
 	"""
 
-	def __init__(self, value_or_varnmae, is_identifier=False):
+	""" すべてのスコープを束縛するインスタンス．
+	"""
+	scopes = None #static変数
+
+	def __init__(self, value, varname):
 		""" UnitXObjectの初期化
 			ここでのvalueとは，数値，文字列，変数名を表す．
 		"""
-		self.is_identifier = is_identifier
-		if self.is_identifier:
-			self.varname = value_or_varnmae
-		else:
-			self.value = value_or_varnmae
+		self.value = value
+		self.varname = varname
 
-	def set_scopes(self, scopes):
-		""" スコープインスタンスを束縛する．
-		"""
-		self._scopes = scopes
-	
 	def get_scopes(self):
-		""" スコープインスタンスを返す．
+		""" すべてのスコープを束縛するインスタンスを応答する．
 		"""
-		return self._scopes
+		return UnitXObject.scopes
 
-	def get_value(self):
+
+	def get_value(self, error=True):
 		""" UnitXObjectに束縛する数値，文字列，または変数の値を応答する．
+			また，呼び出した際にエラー出力したくない場合はerrorをオフにする必要がある．
 		"""
-		if self.is_identifier:
+		if self.value: return self.value
+		else:
 			current_scope = self.get_scopes()[-1]
 			found_scope = current_scope.find_scope_of(self.get_varname())
 			if found_scope:
-				return found_scope[self.varname]
+				return found_scope[self.varname].get_value()
 			else:
-				sys.stderr.write("""NameError: name '%s' is not defined.\n""" % self.get_varname())
-				sys.exit(1)
-		else: return self.value
-	
-	def get_varname(self):
+				if error:
+					sys.stderr.write("""NameError: name '%s' is not defined.\n""" % self.get_varname())
+					sys.exit(1)
+				else: return None
+
+
+	def get_varname(self, error=True):
 		""" 変数名を応答する．
+			また，呼び出した際にエラー出力したくない場合はerrorをオフにする必要がある．
 		"""
-		if self.is_identifier: return self.varname
+		if self.varname: return self.varname
 		else:
-			sys.stderr.write("""SyntaxError: can't assign to literal.\n""")
-			sys.exit(1)
+			if error:
+				raise Exception("SystemError: UnitXObjectの値が設定されていない．\n")
+				sys.exit(1)
+			else: return None
+	
+	def dump_both(self):
+		""" 値と変数を詳細に表示する．
+		"""
+		print "value, varname: %s, %s" % (self.get_value(error=False), self.get_varname(error=False))
+
 
 def main():
 	return 0

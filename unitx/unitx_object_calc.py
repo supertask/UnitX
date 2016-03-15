@@ -12,46 +12,37 @@ class UnitXObjectCalc:
 	def __init__(self, scopes):
 		""" scopesを設定して，応答する．
 		"""
-		self._scopes = scopes #scopesの参照をself.const.scopesに渡す．またscopesは読み取りのみでなければならない．
+		self.scopes = scopes #scopesの参照をself.scopesに渡す．またscopesは読み取りのみでなければならない．
 
 	def get_scopes(self):
 		""" スコープの情報を応答する．
 			また，self.const.scopesは書き込むと参照渡しが無効になるため，読み取りのみでなければならない．
 		"""
-		return self._scopes
-
-	def inject_scopes_to(self, unitx_objs):
-		""" スコープの情報を引数で与えられたUnitXObjectたちに注入する． 
-		"""
-		for an_obj in unitx_objs: an_obj.set_scopes(self.get_scopes())
+		return self.scopes
 
 	def add(self,x,y):
 		""" スコープの情報をx,yに注入し，x,yを足して，結果を応答する．
 		"""
-		self.inject_scopes_to([x,y])
 		a_value = (x.get_value() + y.get_value())
-		return UnitXObject(a_value)
+		return UnitXObject(value = a_value, varname=None)
 
 	def subtract(self,x,y):
 		""" スコープの情報をx,yに注入し，x,yを引いて，結果を応答する．
 		"""
-		self.inject_scopes_to([x,y])
 		a_value = (x.get_value() - y.get_value())
-		return UnitXObject(a_value)
+		return UnitXObject(value = a_value, varname=None)
 
 	def multiply(self,x,y):
 		""" スコープの情報をx,yに注入し，x,yを掛けて，結果を応答する．
 		"""
-		self.inject_scopes_to([x,y])
 		a_value = (x.get_value() * y.get_value())
-		return UnitXObject(a_value)
+		return UnitXObject(value = a_value, varname=None)
 
 	def divide(self,x,y):
 		""" スコープの情報をx,yに注入し，x,yを割って，結果を応答する．
 		"""
-		self.inject_scopes_to([x,y])
 		a_value = (x.get_value() / y.get_value())
-		return UnitXObject(a_value)
+		return UnitXObject(value = a_value, varname=None)
 
 	def increment(self,x):
 		""" スコープの情報をx,yに注入し，xをインクリメントして，結果を応答する．
@@ -63,16 +54,22 @@ class UnitXObjectCalc:
 		"""
 		return self.subtract_assign(x, Constants.ONE)
 
+	## 
+	# スコープに値を入れる唯一の関数
+	##
 	def assign(self, x, y):
 		""" スコープの情報をx,yに注入し，変数xに値yを代入して，結果を応答する．
 		"""
-		self.inject_scopes_to([x,y])
-		varname = x.get_varname()
+		varname = x.get_varname(error=True) #変数名が登録されていなければ，error処理をする
 		current_scope = self.get_scopes()[-1]
 		found_scope = current_scope.find_scope_of(varname)
-		if found_scope: found_scope[varname] = y.get_value() #Already created variable.
-		else: current_scope[varname] = y.get_value() #Create variable.
-		return y.get_value()
+
+		an_obj = UnitXObject(value = y.get_value(), varname=varname)
+		if found_scope:
+			found_scope[varname] = an_obj #Already created variable.
+		else:
+			current_scope[varname] = an_obj #Create variable.
+		return an_obj
 
 	def add_assign(self, x, y):
 		""" スコープの情報をx,yに注入し，x,yを足してxに代入して，結果を応答する．

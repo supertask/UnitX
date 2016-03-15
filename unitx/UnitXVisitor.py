@@ -35,16 +35,6 @@ class UnitXVisitor(ParseTreeVisitor):
         return self.visitChildren(ctx)
 
 
-    # Visit a parse tree produced by UnitXParser#statement.
-    def visitStatement(self, ctx):
-        return self.visitChildren(ctx)
-
-
-    # Visit a parse tree produced by UnitXParser#borderPrinter.
-    def visitBorderPrinter(self, ctx):
-        return self.visitChildren(ctx)
-
-
     # Visit a parse tree produced by UnitXParser#block.
     def visitBlock(self, ctx):
         return self.visitChildren(ctx)
@@ -52,6 +42,46 @@ class UnitXVisitor(ParseTreeVisitor):
 
     # Visit a parse tree produced by UnitXParser#blockStatement.
     def visitBlockStatement(self, ctx):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by UnitXParser#statement.
+    def visitStatement(self, ctx):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by UnitXParser#repStatement.
+    def visitRepStatement(self, ctx):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by UnitXParser#ifStatement.
+    def visitIfStatement(self, ctx):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by UnitXParser#expressionStatement.
+    def visitExpressionStatement(self, ctx):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by UnitXParser#returnStatement.
+    def visitReturnStatement(self, ctx):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by UnitXParser#printStatement.
+    def visitPrintStatement(self, ctx):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by UnitXParser#dumpStatement.
+    def visitDumpStatement(self, ctx):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by UnitXParser#borderStatement.
+    def visitBorderStatement(self, ctx):
         return self.visitChildren(ctx)
 
 

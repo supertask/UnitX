@@ -1,42 +1,35 @@
-UnitX 
-===
-UnitX is a script language for Unit.  
-
-Copyright &copy; 2015-2016 Tasuku TAKAHASHI
-All rights reserved.
+![UnitX logo image](doc/images/unitx_logo.png)
 
 *Read this in other languages: [English](README.md), [日本語](README.ja.md)*
 
-VERSION
------
-1.0.0
 
-INTRODUCTION
+What is UnitX
 -----
+UnitX is a script language for Unit.
 
-INSTALL
+
+How to install
 -----
 	
 	git clone https://github.com/supertask/UnitX
 	make
 	sudo make install
 
-HOW TO USE
+Example
 -----
 Run Demo program like below.
 
-	make demo0
+	make demo
 
-TEST
+
+Coding style
 -----
-Run xUnit, if you wanna try it.
+Following a [Google Python Style Guide](https://google.github.io/styleguide/pyguide.html) for using UnitX or developing UnitX.  
+However, as a parser generator, we use ANTLR4. So, we use LCC in the visitor(UnitXEvalVisitor) for ANTLR4.
 
-	make unittest
-
-
-AUTHOR
+The Author
 -----
-Tasuku TAKAHASHI([supertask.jp](http://supertask.jp))
+Tasuku TAKAHASHI ([supertask.jp](http://supertask.jp))
 
 LICENSE
 -----
@@ -44,12 +37,12 @@ MIT
 
 RELEASED
 -----
-None
+Nothing
 
 RELEASE SCHEDULE
 -----
 |   Version   | scheduled day |
 |:------------|--------------:|
-| 1.0.0 alpha |   2016-03-31  |
-| 1.0.0 beta  |   2016-05-01  |
-| 1.1.0 alpha |   2018-04-01  |
+| 0.7.0 alpha |   2016-03-31  |
+| 0.7.0 beta  |   2016-05-01  |
+| 0.8.0 alpha |   2018-09-01  |

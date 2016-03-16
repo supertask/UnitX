@@ -62,7 +62,7 @@ formalParameterList
     ;
 
 formalParameter
-    :  Identifier ('=' expression)?
+    : Identifier ('=' expression)?
     ;
 
 block
@@ -139,11 +139,12 @@ endRep
 
 expression
 	: primary
+	| expression '(' expressionList? ')' // Now function
 	| expression ('*'|'/'|'%') expression
 	| expression ('+'|'-') expression
-	| expression ('<='|'>='|'>'|'<') expression
-	| expression ('=='|'!=') expression
-    | expression
+	| expression ('<='|'>='|'>'|'<') expression // Still
+	| expression ('=='|'!=') expression // Still
+    | expression // Almost
 		( '='
 		| '+='
 		| '-='
@@ -154,14 +155,13 @@ expression
 		| '^='
 		| '%='
 		) expression
-	| expression
+	| expression // Still
 		( '&'
 		| '^'
 		| '|'
 		| '&&'
 		| '||'
 		) expression
-	| expression '(' expressionList ')'
 	| ('++'|'--') expression
 	;
 

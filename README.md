@@ -25,7 +25,7 @@ HOW TO USE
 -----
 Run Demo program like below.
 
-	make demo0
+	make demo
 
 TEST
 -----

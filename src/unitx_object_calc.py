@@ -74,17 +74,19 @@ class UnitXObjectCalc:
 		self.check_unitx_objects([x]) # 代入される側のみcheckする．
 
 		varname = x.get_varname(error=True) # 変数名が登録されていなければ，error処理をする
+		if y.is_none():
+			an_obj = UnitXObject(value = None, varname=varname, is_none=y.is_none())
+		else:
+			an_obj = UnitXObject(value = y.get_value(), varname=varname, is_none=y.is_none())
+
+		self.scopes.regist_unitx_obj(varname, an_obj)
+		"""
+		# スコープに，登録する
 		current_scope = self.get_scopes().peek()
 		found_scope = current_scope.find_scope_of(varname)
-
-		if y.is_none(): an_obj = UnitXObject(value = None, varname=varname, is_none=y.is_none())
-		else: an_obj = UnitXObject(value = y.get_value(), varname=varname, is_none=y.is_none())
-
 		if found_scope: found_scope[varname] = an_obj #Already created variable.
 		else: current_scope[varname] = an_obj #Create variable in the scope.
-
-		#found_scope = current_scope.find_scope_of(varname)
-		#found_scope[varname].dump()
+		"""
 
 		return an_obj
 

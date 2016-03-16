@@ -13,13 +13,13 @@ class ScopeList(list):
 		self.append(Scope(parent=None))
 
 	def new_scope(self):
-		"""現在のスコープ内のメモリを確保する．
+		""" 現在のスコープ内のメモリを確保して，応答する．
 		"""
 		self.append(Scope(self.peek()))
 		return
 
 	def del_scope(self):
-		""" 現在のスコープ内のメモリを解放する．
+		""" 現在のスコープ内のメモリを解放して，応答する．
 		"""
 		self.pop()
 		return
@@ -32,6 +32,18 @@ class ScopeList(list):
 			I defined because a list of python don't have peek method.
 		"""
 		return self[-1]
+
+	def regist_unitx_obj(self, varname, unitx_obj):
+		""" スコープに，変数名とその値（UnitXObject）を登録して，応答する．
+
+			varname -- A key registing in a scope
+			unitx_obj -- A value registing in a scope
+		"""
+		current_scope = self.peek()
+		found_scope = current_scope.find_scope_of(varname)
+		if found_scope: found_scope[varname] = unitx_obj #Already created variable.
+		else: current_scope[varname] = unitx_obj #Create variable in the scope.
+		return
 
 def main():
 	return 0

@@ -28,21 +28,47 @@ class UnitXEvalVisitor(UnitXVisitor):
 		self.calc = UnitXObjectCalc(self.scopes)
 
 	# Visit a parse tree produced by UnitXParser#program.
-	def visitProgram(self, ctx):
-		return self.visitChildren(ctx)
-
+	def visitProgram(self, ctx): return self.visitChildren(ctx)
 
 	# Visit a parse tree produced by UnitXParser#typeDeclaration.
-	def visitTypeDeclaration(self, ctx):
-		return self.visitChildren(ctx)
+	def visitTypeDeclaration(self, ctx): return self.visitChildren(ctx)
+
 
 	# Visit a parse tree produced by UnitXParser#functionDeclaration.
-	def visitFunctionDeclaration(self, ctx):
-		return self.visitChildren(ctx)
+	def visitFunctionDeclaration(self, ctx, func_arguments=None, is_declaration=True):
+		""" 関数宣言をする．
+		"""
+		if is_declaration:
+			func_name = ctx.Identifier().getText()
+			unitx_obj = UnitXObject(value=ctx, varname=func_name)
+			self.scopes.regist_unitx_obj(func_name, unitx_obj)
+		else:
+			# 引数を取り付ける
+			self.visitBlock(ctx.block())
+			return
+
+
+	def call_function(self, func_name, func_arguments):
+		"""
+		"""
+		found_scope = self.scopes.peek().find_scope_of(func_name)
+		if found_scope:
+			func_pointer = found_scope[func_name].get_value()
+			if isinstance(func_pointer, ParserRuleContext):
+				self.visitFunctionDeclaration(func_pointer, func_arguments, is_declaration=False)
+			else:
+				pass
+		else:
+			pass # error
+		
+		return None # res of func
 
 
 	# Visit a parse tree produced by UnitXParser#formalParameters.
 	def visitFormalParameters(self, ctx):
+		#if ctx.formalParameterList():
+		#	return ctx
+		#return
 		return self.visitChildren(ctx)
 
 
@@ -54,7 +80,8 @@ class UnitXEvalVisitor(UnitXVisitor):
 	# Visit a parse tree produced by UnitXParser#formalParameter.
 	def visitFormalParameter(self, ctx):
 		return self.visitChildren(ctx)
-		
+
+
 	def visitBlock(self, ctx):
 		"""
 		for a_statement in ctx.blockStatement():
@@ -100,7 +127,7 @@ class UnitXEvalVisitor(UnitXVisitor):
 		""" 線を出力して応答する(borderとして3~10個の-を使える）．
 			ex: ---, ----, -----
 		"""
-		print ctx.start.text
+		sys.stdout.write(ctx.start.text + '\n')
 		return
 
 	# Visit a parse tree produced by UnitXParser#repStatement.
@@ -175,7 +202,7 @@ class UnitXEvalVisitor(UnitXVisitor):
 					dump_line = "%s: %s" % (varname, unitx_obj.get_value())
 				else: dump_line = str(unitx_obj.get_value())
 			unitx_strs.append(dump_line)
-		print ' '.join(unitx_strs)
+		sys.stdout.write(' '.join(unitx_strs) + '\n')
 		return
 
 	# Visit a parse tree produced by UnitXParser#expressionList.
@@ -210,26 +237,32 @@ class UnitXEvalVisitor(UnitXVisitor):
 			return: UnitXObject
 		"""
 		if ctx.expression(i=0):
-			# x,y: UnitXObject
-			x = self.visitExpression(ctx.expression(i=0))
+			x = self.visitExpression(ctx.expression(i=0)) # x,y: UnitXObject
 
+			second_token = ctx.getChild(i=1).getSymbol().type
 			if ctx.start.type == UnitXLexer.INC: res = self.calc.increment(x)
 			elif ctx.start.type == UnitXLexer.DEC: res = self.calc.decrement(x)
+			elif second_token == UnitXLexer.LPAREN:
+				func_name = x.get_varname()
+				func_arguments = []
+				if ctx.expressionList():
+					func_arguments = self.visitExpressionList(ctx.expressionList())
+				a_value = self.call_function(func_name, func_arguments)
+				res = UnitXObject(value=a_value, varname=func_name)
 			else:
 				y = self.visitExpression(ctx.expression(i=1))
-				
-				an_operator = ctx.getChild(i=1).getSymbol()
-				if an_operator.type == UnitXLexer.ADD: res = self.calc.add(x,y)
-				elif an_operator.type == UnitXLexer.SUB: res = self.calc.subtract(x,y)
-				elif an_operator.type == UnitXLexer.MUL: res = self.calc.multiply(x,y)
-				elif an_operator.type == UnitXLexer.DIV: res = self.calc.divide(x,y)
-				elif an_operator.type == UnitXLexer.ASSIGN: res = self.calc.assign(x,y)
-				elif an_operator.type == UnitXLexer.ADD_ASSIGN: res = self.calc.add_assign(x,y)
-				elif an_operator.type == UnitXLexer.SUB_ASSIGN: res = self.calc.substract_assign(x,y)
-				elif an_operator.type == UnitXLexer.MUL_ASSIGN: res = self.calc.multiply(x,y)
-				elif an_operator.type == UnitXLexer.DIV_ASSIGN: res = self.calc.divide(x,y)
-				elif an_operator.type == UnitXLexer.MOD_ASSIGN: res = None
-				else: res = None
+				if second_token == UnitXLexer.ADD: res = self.calc.add(x,y)
+				elif second_token == UnitXLexer.SUB: res = self.calc.subtract(x,y)
+				elif second_token == UnitXLexer.MUL: res = self.calc.multiply(x,y)
+				elif second_token == UnitXLexer.DIV: res = self.calc.divide(x,y)
+				elif second_token == UnitXLexer.ASSIGN: res = self.calc.assign(x,y)
+				elif second_token == UnitXLexer.ADD_ASSIGN: res = self.calc.add_assign(x,y)
+				elif second_token == UnitXLexer.SUB_ASSIGN: res = self.calc.substract_assign(x,y)
+				elif second_token == UnitXLexer.MUL_ASSIGN: res = self.calc.multiply(x,y)
+				elif second_token == UnitXLexer.DIV_ASSIGN: res = self.calc.divide(x,y)
+				elif second_token == UnitXLexer.MOD_ASSIGN: res = None
+				else:
+					res = None
 		elif ctx.primary(): res = self.visitPrimary(ctx.primary())
 		else:
 			raise Exception("Syntax error. UnitXEvalVisitor#visitExpression") # Never happen.
@@ -266,7 +299,7 @@ class UnitXEvalVisitor(UnitXVisitor):
 			varname = ctx.Identifier().getText()
 			found_scope = self.scopes.peek().find_scope_of(varname)
 			if found_scope: res = found_scope[varname]
-			else: res = UnitXObject(value=None, varname=varname) #Bug
+			else: res = UnitXObject(value=None, varname=varname)
 
 		elif ctx.literal():
 			a_value = self.visitLiteral(ctx.literal())

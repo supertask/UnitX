@@ -111,7 +111,14 @@ dumpStatement
 	;
 
 borderStatement
-	: '---' '-'*
+	: '---'
+	| '----'
+	| '-----'
+	| '------'
+	| '-------'
+	| '--------'
+	| '---------'
+	| '----------'
 	;
 
 expressionList
@@ -157,8 +164,6 @@ expression
 	| expression '(' expressionList ')'
 	| ('++'|'--') expression
 	;
-
-// | expression ('++' | '--')
 
 unit
 	: '{' unitSingleOrPairOperator '}'
@@ -244,6 +249,13 @@ DOT             : '.';
 
 // Operators
 THREE_BORDER	: '---';
+FOUR_BORDER		: '----';
+FIVE_BORDER		: '-----';
+SIX_BORDER		: '------';
+SEVEN_BORDER	: '-------';
+EIGHT_BORDER	: '--------';
+NINE_BORDER		: '---------';
+TEN_BORDER		: '----------';
 ASSIGN          : '=';
 GT              : '>';
 LT              : '<';

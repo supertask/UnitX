@@ -13,7 +13,7 @@ from UnitXLexer import UnitXLexer
 
 from unitx_object import UnitXObject
 from unitx_object_calc import UnitXObjectCalc
-from scope import Scope
+from scope_list import ScopeList
 from util import Util
 from constants import Constants
 
@@ -23,8 +23,7 @@ class UnitXEvalVisitor(UnitXVisitor):
 		""" UnitXEvalVisitorを初期化して応答する．
 		"""
 		self.is_break = False
-		self.scopes = []
-		self.scopes.append(Scope(parent=None))
+		self.scopes = ScopeList()
 		UnitXObject.scopes = self.scopes
 		self.calc = UnitXObjectCalc(self.scopes)
 
@@ -56,19 +55,6 @@ class UnitXEvalVisitor(UnitXVisitor):
 	def visitFormalParameter(self, ctx):
 		return self.visitChildren(ctx)
 		
-	def __new_scope(self):
-		"""現在のスコープ内のメモリを確保する．
-		"""
-		self.scopes.append(Scope(self.scopes[-1]))
-		return
-
-	def __del_scope(self):
-		""" 現在のスコープ内のメモリを解放する．
-		"""
-		self.scopes.pop()
-		return
-
-
 	def visitBlock(self, ctx):
 		"""
 		for a_statement in ctx.blockStatement():
@@ -81,9 +67,9 @@ class UnitXEvalVisitor(UnitXVisitor):
 		if is_special_block:
 			self.visitChildren(ctx)
 		else:
-			self.__new_scope()
+			self.scopes.new_scope()
 			self.visitChildren(ctx)
-			self.__del_scope()
+			self.scopes.del_scope()
 		return 
 
 
@@ -95,7 +81,6 @@ class UnitXEvalVisitor(UnitXVisitor):
 	def visitStatement(self, ctx):
 		""" それぞれの文を辿って，応答する．
 		"""
-		#print Util.dump(self.scopes)
 		if ctx.block(): self.visitBlock(ctx.block())
 		elif ctx.repStatement(): self.visitRepStatement(ctx.repStatement())
 		elif ctx.ifStatement(): self.visitIfStatement(ctx.ifStatement())
@@ -112,12 +97,11 @@ class UnitXEvalVisitor(UnitXVisitor):
 
 
 	def visitBorderStatement(self, ctx):
-		""" 線を出力して応答する．
+		""" 線を出力して応答する(borderとして3~10個の-を使える）．
 			ex: ---, ----, -----
 		"""
 		print ctx.start.text
 		return
-
 
 	# Visit a parse tree produced by UnitXParser#repStatement.
 	def visitRepStatement(self, ctx):
@@ -129,18 +113,29 @@ class UnitXEvalVisitor(UnitXVisitor):
 		end_value = end_control.get_value()
 		if isinstance(end_value, int): repeat_list = [UnitXObject(value=x,varname=None) for x in range(end_value)]
 		else: repeat_list = end_value
-		self.__new_scope()
+		self.scopes.new_scope()
 		for i in repeat_list:
 			# var_obj: 変数名=O,値=X，i: 変数名=X,値=O
 			self.calc.assign(var_obj, i) # i=UnitXObject
 			self.visitStatement(ctx.statement())
-		self.__del_scope()
+		self.scopes.del_scope()
 		return
 
 
 	# Visit a parse tree produced by UnitXParser#ifStatement.
 	def visitIfStatement(self, ctx):
-		return self.visitChildren(ctx)
+		""" 与えられたexpressionの結果
+			BNF: 'if' parExpression statement ('else' statement)?
+		"""
+		unitx_obj = self.visitParExpression(ctx.parExpression())
+		is_run_ifStatement = unitx_obj.get_value()
+		if is_run_ifStatement:
+			self.visitStatement(ctx.statement(i=0))
+		else:
+			if ctx.getChildCount() > 3: self.visitStatement(ctx.statement(i=1))
+			else: pass # do nothing
+		return		
+
 
 	def visitExpressionStatement(self, ctx): return self.visitChildren(ctx)
 
@@ -150,35 +145,48 @@ class UnitXEvalVisitor(UnitXVisitor):
 		return self.visitChildren(ctx)
 
 
-	# Visit a parse tree produced by UnitXParser#printStatement.
 	def visitPrintStatement(self, ctx):
-		unitx_strs = [str(self.visitExpression(an_expr).get_value()) for an_expr in ctx.expression()]
-		print ' '.join(unitx_strs)
+		""" 与えられたexpressionのUnitXObjectたちを出力して，応答する．
+			printモードでself.print_variablesを起動する．
+		"""
+		self.print_variables(ctx, 'print')
 		return
 
-
-	# Visit a parse tree produced by UnitXParser#dumpStatement.
 	def visitDumpStatement(self, ctx):
+		""" 与えられたexpressionのUnitXObjectたちを出力して，応答する．
+			dumpモードでself.print_variablesを起動する．
+		"""
+		self.print_variables(ctx, 'dump')
+		return
+
+	def print_variables(self, ctx, mode):
+		""" 与えられたexpressionのUnitXObjectたちを出力して，応答する．
+			dumpモードでは，変数名とその変数に束縛されたUnitXObjectの値を出力する．
+			printモードでは，UnitXObjectの値のみを出力する．
+		"""
 		unitx_strs = []
 		for an_expr in ctx.expression():
 			unitx_obj = self.visitExpression(an_expr)
-			varname = unitx_obj.get_varname(error=False) #変数に格納されていない値もdumpで見るため
-			if varname:
-				unitx_strs.append("%s: %s" % (varname, unitx_obj.get_value()))
-			else:
-				unitx_strs.append("%s" % unitx_obj.get_value())
+			if unitx_obj.is_none():
+				dump_line = 'None' #None
+			else: 
+				varname = unitx_obj.get_varname(error=False) #変数に格納されていない値もdumpで見るため
+				if varname and mode == 'dump':
+					dump_line = "%s: %s" % (varname, unitx_obj.get_value())
+				else: dump_line = str(unitx_obj.get_value())
+			unitx_strs.append(dump_line)
 		print ' '.join(unitx_strs)
-		return		
+		return
 
 	# Visit a parse tree produced by UnitXParser#expressionList.
 	def visitExpressionList(self, ctx):
 		return self.visitChildren(ctx)
 
 
-	# Visit a parse tree produced by UnitXParser#parExpression.
 	def visitParExpression(self, ctx):
-		return self.visitChildren(ctx)
-
+		""" LPARENとRPARENは無視して，expressionのみを辿って，結果を応答する．
+		"""
+		return self.visitExpression(ctx.expression())
 
 	def visitRepControl(self, ctx):
 		""" Visit a parse tree produced by UnitXParser#repControl.
@@ -192,10 +200,9 @@ class UnitXEvalVisitor(UnitXVisitor):
 		""" 
 			It checks a value of expr to be able to cast by int().
 		"""
-		if ctx.expression():
-			an_expr = self.visitExpression(ctx.expression())
-			# You must check value of expr to be able to cast by int().
-			return an_expr
+		an_expr = self.visitExpression(ctx.expression())
+		# You must check value of expr to be able to cast by int().
+		return an_expr
 
 
 	def visitExpression(self, ctx):
@@ -210,7 +217,7 @@ class UnitXEvalVisitor(UnitXVisitor):
 			elif ctx.start.type == UnitXLexer.DEC: res = self.calc.decrement(x)
 			else:
 				y = self.visitExpression(ctx.expression(i=1))
-				#print y.dump_both()
+				
 				an_operator = ctx.getChild(i=1).getSymbol()
 				if an_operator.type == UnitXLexer.ADD: res = self.calc.add(x,y)
 				elif an_operator.type == UnitXLexer.SUB: res = self.calc.subtract(x,y)
@@ -226,7 +233,8 @@ class UnitXEvalVisitor(UnitXVisitor):
 		elif ctx.primary(): res = self.visitPrimary(ctx.primary())
 		else:
 			raise Exception("Syntax error. UnitXEvalVisitor#visitExpression") # Never happen.
-		assert(isinstance(res, UnitXObject) or isinstance(res, None))
+
+		assert(isinstance(res, UnitXObject))
 
 		return res
 
@@ -253,19 +261,27 @@ class UnitXEvalVisitor(UnitXVisitor):
 			PAREN=(): expression
 			BRACK=[]: list
 		"""
-		if ctx.Identifier(): res = UnitXObject(value=None, varname = ctx.Identifier().getText())
+		if ctx.Identifier():
+			# Here: ここで変数がスコープにあるかを判定し，見つかったオブジェクトを格納する．
+			varname = ctx.Identifier().getText()
+			found_scope = self.scopes.peek().find_scope_of(varname)
+			if found_scope: res = found_scope[varname]
+			else: res = UnitXObject(value=None, varname=varname) #Bug
+
 		elif ctx.literal():
 			a_value = self.visitLiteral(ctx.literal())
-			if a_value is None: res = None
-			else: res = UnitXObject(value=a_value, varname=None)
-		elif ctx.start.type == UnitXLexer.LPAREN:
-			res = self.visitExpression(ctx.expression(i=0))
+			if a_value is None: res = UnitXObject(value=None, varname=None, is_none=True)
+			else:
+				res = UnitXObject(value=a_value, varname=None)
+
+		elif ctx.start.type == UnitXLexer.LPAREN: res = self.visitExpression(ctx.expression(i=0))
 		elif ctx.start.type == UnitXLexer.LBRACK:
 			unitx_objs = [self.visitExpression(an_expr) for an_expr in ctx.expression()]
 			return UnitXObject(value = unitx_objs, varname = None)
-		else: raise Exception("Syntax error. UnitXEvalVisitor#visitPrimary") # Never happen.
+		else:
+			raise Exception("Syntax error. UnitXEvalVisitor#visitPrimary") # Never happen.
 
-		assert(isinstance(res, UnitXObject) or isinstance(res, None))
+		assert(isinstance(res, UnitXObject))
 		return res
 
 
@@ -309,6 +325,6 @@ class UnitXEvalVisitor(UnitXVisitor):
 	def visitBoolean(self, ctx):
 		""" 文字列からbooleanへ変換し，応答する．
 		"""
-		a_value = True if ctx.start.type == 'true' else False
+		a_value = True if ctx.start.text == 'true' else False
 		return a_value
 

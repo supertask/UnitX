@@ -16,6 +16,8 @@ INTRODUCTION
 
 INSTALL
 -----
+	
+	git clone https://github.com/supertask/UnitX
 	make
 	sudo make install
 

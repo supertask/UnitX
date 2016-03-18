@@ -1,12 +1,11 @@
 ![UnitX logo image](doc/images/unitx_logo.png)
 
-*Read this in other languages: [English](README.md), [日本語](README.ja.md)*
-
 
 What is UnitX
 -----
 UnitX is a script language for Unit.
 
+[English](README.md), [日本語](README.ja.md)
 
 How to install
 -----

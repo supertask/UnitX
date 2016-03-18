@@ -1,9 +1,6 @@
 #!/usr/bin/env python
 # -*- coding:utf-8 -*-
 
-"""
-"""
-
 import sys
 
 from antlr4 import *
@@ -16,97 +13,136 @@ from unitx_object_calc import UnitXObjectCalc
 from scope_list import ScopeList
 from util import Util
 from constants import Constants
+from defined_function import DefinedFunction
 
 class UnitXEvalVisitor(UnitXVisitor):
+	""" UnitXの構文木をたどり，その振る舞いを行うクラス．
+
+	UnitXParserから，このクラスにある各visit関数が呼ばれ，実行される．それぞれの構文ごとに振る舞いが行われ，それが言語としてのアウトプットとなる．
+	また，このファイルを呼び出す側のUnitXParserは，Grammarファイル(UnitX.g4)のBNFを元にANTLRが生成したクラスであるため，UnitX.g4のBNFとこのクラスの関数は対応関係にある．例えば，<statement>というルールは，このクラスのvisitStatement(ctx)に対応する．
+
+	Attributes:
+		_scopes: すべてのスコープ情報が入っているリスト
+		_calc: UnitXObjectの演算を行うクラスのインスタンス
+	"""
 	
 	def __init__(self):
 		""" UnitXEvalVisitorを初期化して応答する．
 		"""
-		self.is_break = False
-		self.scopes = ScopeList()
-		UnitXObject.scopes = self.scopes
-		self.calc = UnitXObjectCalc(self.scopes)
-
-	# Visit a parse tree produced by UnitXParser#program.
-	def visitProgram(self, ctx): return self.visitChildren(ctx)
-
-	# Visit a parse tree produced by UnitXParser#typeDeclaration.
-	def visitTypeDeclaration(self, ctx): return self.visitChildren(ctx)
+		self._scopes = ScopeList()
+		self._calc = UnitXObjectCalc(self._scopes)
+		self._is_break = False
+		UnitXObject.scopes = self._scopes
 
 
-	# Visit a parse tree produced by UnitXParser#functionDeclaration.
-	def visitFunctionDeclaration(self, ctx, func_arguments=None, is_declaration=True):
+	def visitProgram(self, ctx):
+		""" Just visiting child nodes of UnitX syntax.
+			ALSO, This <program> rule is A STARTING POINT of UnitX parser.
+		"""
+		return self.visitChildren(ctx)
+
+	def visitTypeDeclaration(self, ctx):
+		""" Just visiting child nodes of UnitX syntax."""
+		return self.visitChildren(ctx)
+
+
+	def visitFunctionDeclaration(self, ctx):
 		""" 関数宣言をする．
 		"""
-		if is_declaration:
-			func_name = ctx.Identifier().getText()
-			unitx_obj = UnitXObject(value=ctx, varname=func_name)
-			self.scopes.regist_unitx_obj(func_name, unitx_obj)
-		else:
-			# 引数を取り付ける
-			self.visitBlock(ctx.block())
-			return
+		func_name, func_args = ctx.Identifier().getText(), self.visitFormalParameters(ctx.formalParameters())
+		current_scope = self._scopes.peek()
+		def_func = DefinedFunction(func_name, func_args, ctx, current_scope)
 
-	def call_function(self, func_name, func_arguments):
+		unitx_obj = UnitXObject(value=def_func, varname=func_name)
+		self._scopes.regist_unitx_obj(func_name, unitx_obj)
+		return
+
+	def call_function(self, called_func_name, called_args):
+		""" expressionから呼ばれる．
 		"""
-		"""
-		found_scope = self.scopes.peek().find_scope_of(func_name)
+		found_scope = self._scopes.peek().find_scope_of(called_func_name)
 		if found_scope:
-			func_pointer = found_scope[func_name].get_value()
-			if isinstance(func_pointer, ParserRuleContext):
-				self.visitFunctionDeclaration(func_pointer, func_arguments, is_declaration=False)
-			else:
-				pass
+			def_func = found_scope[called_func_name].get_value()
+
+			self._scopes.new_scope()
+			if called_args:
+				args_without_default = [[var, unitx_obj] for var, unitx_obj in def_func.args if not unitx_obj]
+				print len(args_without_default), len(called_args)
+				if len(called_args) < len(args_without_default):
+					sys.stderr.write('引数足りないError') #引数足りないerror
+					sys.exit(1)
+				if len(called_args) > len(def_func.args):
+					sys.stderr.write('引数多すぎError') #引数多すぎerror
+					sys.exit(1)
+				#Util.dump(def_func.args)
+				for i in range(len(def_func.args)):
+					varname, default_value = def_func.args[i]
+					if i < len(called_args):
+						unitx_obj = called_args[i]
+					else:
+						if not default_value: default_value = UnitXObject(value=None, varname=None, is_none=True)
+						unitx_obj = default_value
+					self._calc.assign(UnitXObject(value=None, varname=varname), unitx_obj)
+
+			# TODO(Tasuku): 現在は定義した関数のみ使用可能だが，組み込み関数はまだなので，それを後で追加
+			self.visitBlock(def_func.ctx.block())
+			self._scopes.del_scope()
 		else:
 			pass # error
 		
 		return None # res of func
 
 
-	# Visit a parse tree produced by UnitXParser#formalParameters.
 	def visitFormalParameters(self, ctx):
-		#if ctx.formalParameterList():
-		#	return ctx
-		#return
-		return self.visitChildren(ctx)
+		"""
+		"""
+		if ctx.formalParameterList(): return self.visitFormalParameterList(ctx.formalParameterList())
+		return None
 
 
-	# Visit a parse tree produced by UnitXParser#formalParameterList.
 	def visitFormalParameterList(self, ctx):
-		return self.visitChildren(ctx)
+		""" 
+		"""
+		return [self.visitFormalParameter(a_param) for a_param in ctx.formalParameter()]
 
 
-	# Visit a parse tree produced by UnitXParser#formalParameter.
 	def visitFormalParameter(self, ctx):
-		return self.visitChildren(ctx)
+		"""
+			 varname -- A key registing in a scope
+		"""
+		varname = ctx.Identifier().getText()
+		if ctx.expression():
+			default_value = self.visitExpression(ctx.expression())
+		else:
+			default_value = None #UnitXObject(value=None, varname=None, is_none=True)
+
+		return [varname, default_value]
 
 
 	def visitBlock(self, ctx):
 		"""
-		for a_statement in ctx.blockStatement():
-			if is_happened_break: break
-			unitx_objs.append(self.visitExpression(an_expr))
 		"""
-		a_grandparent = ctx.parentCtx.parentCtx
-		is_special_block = (isinstance(a_grandparent, UnitXParser.RepStatementContext) or isinstance(a_grandparent, UnitXParser.IfStatementContext) or isinstance(a_grandparent, UnitXParser.FunctionDeclarationContext))
+		a_parent, a_grandparent = ctx.parentCtx, ctx.parentCtx.parentCtx
+		is_special_block = (isinstance(a_grandparent, UnitXParser.RepStatementContext) or isinstance(a_grandparent, UnitXParser.IfStatementContext) or isinstance(a_parent, UnitXParser.FunctionDeclarationContext))
 
 		if is_special_block:
 			self.visitChildren(ctx)
 		else:
-			self.scopes.new_scope()
+			self._scopes.new_scope()
 			self.visitChildren(ctx)
-			self.scopes.del_scope()
+			self._scopes.del_scope()
 		return 
 
 
-	# Visit a parse tree produced by UnitXParser#blockStatement.
 	def visitBlockStatement(self, ctx):
+		""" Just visiting child nodes of UnitX syntax."""
 		return self.visitChildren(ctx)
 
 
 	def visitStatement(self, ctx):
 		""" それぞれの文を辿って，応答する．
 		"""
+		#Util.dump(self._scopes)
 		if ctx.block(): self.visitBlock(ctx.block())
 		elif ctx.repStatement(): self.visitRepStatement(ctx.repStatement())
 		elif ctx.ifStatement(): self.visitIfStatement(ctx.ifStatement())
@@ -139,12 +175,12 @@ class UnitXEvalVisitor(UnitXVisitor):
 		end_value = end_control.get_value()
 		if isinstance(end_value, int): repeat_list = [UnitXObject(value=x,varname=None) for x in range(end_value)]
 		else: repeat_list = end_value
-		self.scopes.new_scope()
+		self._scopes.new_scope()
 		for i in repeat_list:
 			# var_obj: 変数名=O,値=X，i: 変数名=X,値=O
-			self.calc.assign(var_obj, i) # i=UnitXObject
+			self._calc.assign(var_obj, i) # i=UnitXObject
 			self.visitStatement(ctx.statement())
-		self.scopes.del_scope()
+		self._scopes.del_scope()
 		return
 
 
@@ -163,11 +199,13 @@ class UnitXEvalVisitor(UnitXVisitor):
 		return		
 
 
-	def visitExpressionStatement(self, ctx): return self.visitChildren(ctx)
+	def visitExpressionStatement(self, ctx):
+		""" Just visiting child nodes of UnitX syntax."""
+		return self.visitChildren(ctx)
 
 
-	# Visit a parse tree produced by UnitXParser#returnStatement.
 	def visitReturnStatement(self, ctx):
+		""" Just visiting child nodes of UnitX syntax."""
 		return self.visitChildren(ctx)
 
 
@@ -204,9 +242,9 @@ class UnitXEvalVisitor(UnitXVisitor):
 		sys.stdout.write(' '.join(unitx_strs) + '\n')
 		return
 
-	# Visit a parse tree produced by UnitXParser#expressionList.
 	def visitExpressionList(self, ctx):
-		return self.visitChildren(ctx)
+		""" Just visiting child nodes of UnitX syntax."""
+		return [self.visitExpression(an_expr) for an_expr in ctx.expression()]
 
 
 	def visitParExpression(self, ctx):
@@ -239,26 +277,25 @@ class UnitXEvalVisitor(UnitXVisitor):
 			x = self.visitExpression(ctx.expression(i=0)) # x,y: UnitXObject
 
 			second_token = ctx.getChild(i=1).getSymbol().type
-			if ctx.start.type == UnitXLexer.INC: res = self.calc.increment(x)
-			elif ctx.start.type == UnitXLexer.DEC: res = self.calc.decrement(x)
+			if ctx.start.type == UnitXLexer.INC: res = self._calc.increment(x)
+			elif ctx.start.type == UnitXLexer.DEC: res = self._calc.decrement(x)
 			elif second_token == UnitXLexer.LPAREN:
-				func_name = x.get_varname()
-				func_arguments = []
+				called_func_name, called_args = x.get_varname(), []
 				if ctx.expressionList():
-					func_arguments = self.visitExpressionList(ctx.expressionList())
-				a_value = self.call_function(func_name, func_arguments)
-				res = UnitXObject(value=a_value, varname=func_name)
+					called_args = self.visitExpressionList(ctx.expressionList())
+				a_value = self.call_function(called_func_name, called_args)
+				res = UnitXObject(value=a_value, varname=called_func_name)
 			else:
 				y = self.visitExpression(ctx.expression(i=1))
-				if second_token == UnitXLexer.ADD: res = self.calc.add(x,y)
-				elif second_token == UnitXLexer.SUB: res = self.calc.subtract(x,y)
-				elif second_token == UnitXLexer.MUL: res = self.calc.multiply(x,y)
-				elif second_token == UnitXLexer.DIV: res = self.calc.divide(x,y)
-				elif second_token == UnitXLexer.ASSIGN: res = self.calc.assign(x,y)
-				elif second_token == UnitXLexer.ADD_ASSIGN: res = self.calc.add_assign(x,y)
-				elif second_token == UnitXLexer.SUB_ASSIGN: res = self.calc.substract_assign(x,y)
-				elif second_token == UnitXLexer.MUL_ASSIGN: res = self.calc.multiply(x,y)
-				elif second_token == UnitXLexer.DIV_ASSIGN: res = self.calc.divide(x,y)
+				if second_token == UnitXLexer.ADD: res = self._calc.add(x,y)
+				elif second_token == UnitXLexer.SUB: res = self._calc.subtract(x,y)
+				elif second_token == UnitXLexer.MUL: res = self._calc.multiply(x,y)
+				elif second_token == UnitXLexer.DIV: res = self._calc.divide(x,y)
+				elif second_token == UnitXLexer.ASSIGN: res = self._calc.assign(x,y)
+				elif second_token == UnitXLexer.ADD_ASSIGN: res = self._calc.add_assign(x,y)
+				elif second_token == UnitXLexer.SUB_ASSIGN: res = self._calc.substract_assign(x,y)
+				elif second_token == UnitXLexer.MUL_ASSIGN: res = self._calc.multiply(x,y)
+				elif second_token == UnitXLexer.DIV_ASSIGN: res = self._calc.divide(x,y)
 				elif second_token == UnitXLexer.MOD_ASSIGN: res = None
 				else:
 					res = None
@@ -296,7 +333,7 @@ class UnitXEvalVisitor(UnitXVisitor):
 		if ctx.Identifier():
 			# Here: ここで変数がスコープにあるかを判定し，見つかったオブジェクトを格納する．
 			varname = ctx.Identifier().getText()
-			found_scope = self.scopes.peek().find_scope_of(varname)
+			found_scope = self._scopes.peek().find_scope_of(varname)
 			if found_scope: res = found_scope[varname]
 			else: res = UnitXObject(value=None, varname=varname)
 

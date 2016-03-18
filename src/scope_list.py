@@ -11,17 +11,20 @@ class ScopeList(list):
 		""" スコープのルートを初期化して，応答する．
 		"""
 		self.append(Scope(parent=None))
+		self._current_scope = self.peek()
 
 	def new_scope(self):
 		""" 現在のスコープ内のメモリを確保して，応答する．
 		"""
 		self.append(Scope(self.peek()))
+		self.set_current_scope()
 		return
 
 	def del_scope(self):
 		""" 現在のスコープ内のメモリを解放して，応答する．
 		"""
 		self.pop()
+		self.set_current_scope()
 		return
 
 	def peek(self):
@@ -32,14 +35,25 @@ class ScopeList(list):
 			I defined because a list of python don't have peek method.
 		"""
 		return self[-1]
+	
+	def set_current_scope(self, current_scope=None):
+		"""
+		"""
+		if current_scope is None: current_scope = self.peek()
+		self._current_scope = current_scope
+
+	def get_current_scope(self):
+		"""
+		"""
+		return self._current_scope
 
 	def regist_unitx_obj(self, varname, unitx_obj):
 		""" スコープに，変数名とその値（UnitXObject）を登録して，応答する．
 
-			varname -- A key registing in a scope
-			unitx_obj -- A value registing in a scope
+			varname: A string of variable registing in a scope
+			unitx_obj: An instance of UnitXObject registing in a scope
 		"""
-		current_scope = self.peek()
+		current_scope = self.get_current_scope()
 		found_scope = current_scope.find_scope_of(varname)
 		if found_scope: found_scope[varname] = unitx_obj #Already created variable.
 		else: current_scope[varname] = unitx_obj #Create variable in the scope.

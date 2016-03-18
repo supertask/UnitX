@@ -82,7 +82,6 @@ class UnitXObjectCalc:
 		self.scopes.regist_unitx_obj(varname, an_obj)
 		"""
 		# スコープに，登録する
-		current_scope = self.get_scopes().peek()
 		found_scope = current_scope.find_scope_of(varname)
 		if found_scope: found_scope[varname] = an_obj #Already created variable.
 		else: current_scope[varname] = an_obj #Create variable in the scope.

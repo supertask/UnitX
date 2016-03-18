@@ -47,7 +47,7 @@ class UnitXObject:
 			else:
 				if error:
 					sys.stderr.write("NameError: name '%s' is not defined.\n" % varname)
-					raise Exception()
+					#raise Exception()
 					sys.exit(1)
 				else: return None
 		else:
@@ -69,7 +69,7 @@ class UnitXObject:
 	def dump(self):
 		""" 値と変数を詳細に表示する．
 		"""
-		print "_value, _varname, _is_none: %s, %s, %s" % (self.get_value(error=False), self.get_varname(error=False), self.is_none())
+		sys.stdout.write("UnitXObject: _value=%s, _varname=%s, _is_none=%s\n" % (self.get_value(error=False), self.get_varname(error=False), self.is_none()) )
 
 
 def main():

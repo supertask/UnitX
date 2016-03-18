@@ -8,7 +8,7 @@ class Scope(dict):
 	def __init__(self, parent):
 		""" 親スコープを初期化して，応答する．
 		"""
-		self.parent = parent
+		self._parent = parent
 
 
 	def find_scope_of(self, varname):
@@ -16,8 +16,8 @@ class Scope(dict):
 		"""
 		if varname in self: return self
 		else:
-			if not self.parent: return None #終了条件
-			return self.parent.find_scope_of(varname) #再帰的に探す
+			if not self._parent: return None #終了条件
+			return self._parent.find_scope_of(varname) #再帰的に探す
 
 def main():
 	return 0

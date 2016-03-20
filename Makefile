@@ -66,7 +66,7 @@ demo1:
 	$(TARGET) $(DEMO1)
 	@date
 
-inline:
+inline: all
 	$(TARGET)
 	@date
 

@@ -26,12 +26,14 @@ class UnitXEvalVisitor(UnitXVisitor):
 		_calc: UnitXObjectの演算を行うクラスのインスタンス
 	"""
 	
-	def __init__(self):
+	def __init__(self, is_intaractive_run, an_errhandler):
 		""" UnitXEvalVisitorを初期化して応答する．
 		"""
+		self.is_intaractive_run = is_intaractive_run
+		self.errhandler = an_errhandler
 		self._scopes = ScopeList()
-		self._calc = UnitXObjectCalc(self._scopes)
-		self._is_break = False
+		self.calc = UnitXObjectCalc(self._scopes)
+		self.is_break = False
 		UnitXObject.scopes = self._scopes
 
 
@@ -82,7 +84,7 @@ class UnitXEvalVisitor(UnitXVisitor):
 					else:
 						if not default_value: default_value = UnitXObject(value=None, varname=None, is_none=True)
 						unitx_obj = default_value
-					self._calc.assign(UnitXObject(value=None, varname=varname), unitx_obj)
+					self.calc.assign(UnitXObject(value=None, varname=varname), unitx_obj)
 
 			# TODO(Tasuku): 現在は定義した関数のみ使用可能だが，組み込み関数はまだなので，それを後で追加
 			self.visitBlock(def_func.ctx.block())
@@ -125,6 +127,22 @@ class UnitXEvalVisitor(UnitXVisitor):
 		a_parent, a_grandparent = ctx.parentCtx, ctx.parentCtx.parentCtx
 		is_special_block = (isinstance(a_grandparent, UnitXParser.RepStatementContext) or isinstance(a_grandparent, UnitXParser.IfStatementContext) or isinstance(a_parent, UnitXParser.FunctionDeclarationContext))
 
+		#
+		# In intaractive programing, we have to ignore runtime errors in a block statement.
+		# So, we control it by turning on a variable, "is_ignore_block".
+		#
+		print 'Debug: ', self.errhandler.is_ignore_block
+		if ctx.start.type == UnitXLexer.LBRACE and ctx.stop.type == UnitXLexer.RBRACE:
+			self.errhandler.is_ignore_block = False
+		else:
+			self.errhandler.is_ignore_block = True
+		if self.is_intaractive_run and self.errhandler.is_ignore_block: return
+
+		#
+		# If the block is "rep", "if", and "fucntion" statements,
+		# don't create a scope in this visitBlock function because of initializing it in another function.
+		# Also, the block is a "block" statement which is like a '{' .... '}', must create a scope.
+		#
 		if is_special_block:
 			self.visitChildren(ctx)
 		else:
@@ -155,6 +173,7 @@ class UnitXEvalVisitor(UnitXVisitor):
 		elif ctx.borderStatement(): self.visitBorderStatement(ctx.borderStatement())
 		else:
 			raise Exception("Syntax error. UnitXEvalVisitor#visitStatement") # Never happen.
+
 		return
 
 
@@ -176,10 +195,12 @@ class UnitXEvalVisitor(UnitXVisitor):
 		if isinstance(end_value, int): repeat_list = [UnitXObject(value=x,varname=None) for x in range(end_value)]
 		else: repeat_list = end_value
 		self._scopes.new_scope()
+
 		for i in repeat_list:
 			# var_obj: 変数名=O,値=X，i: 変数名=X,値=O
-			self._calc.assign(var_obj, i) # i=UnitXObject
+			self.calc.assign(var_obj, i) # i=UnitXObject
 			self.visitStatement(ctx.statement())
+
 		self._scopes.del_scope()
 		return
 
@@ -228,6 +249,7 @@ class UnitXEvalVisitor(UnitXVisitor):
 			dumpモードでは，変数名とその変数に束縛されたUnitXObjectの値を出力する．
 			printモードでは，UnitXObjectの値のみを出力する．
 		"""
+		#if self.is_intaractive_run and  
 		unitx_strs = []
 		for an_expr in ctx.expression():
 			unitx_obj = self.visitExpression(an_expr)
@@ -277,8 +299,8 @@ class UnitXEvalVisitor(UnitXVisitor):
 			x = self.visitExpression(ctx.expression(i=0)) # x,y: UnitXObject
 
 			second_token = ctx.getChild(i=1).getSymbol().type
-			if ctx.start.type == UnitXLexer.INC: res = self._calc.increment(x)
-			elif ctx.start.type == UnitXLexer.DEC: res = self._calc.decrement(x)
+			if ctx.start.type == UnitXLexer.INC: res = self.calc.increment(x)
+			elif ctx.start.type == UnitXLexer.DEC: res = self.calc.decrement(x)
 			elif second_token == UnitXLexer.LPAREN:
 				called_func_name, called_args = x.get_varname(), []
 				if ctx.expressionList():
@@ -287,15 +309,15 @@ class UnitXEvalVisitor(UnitXVisitor):
 				res = UnitXObject(value=a_value, varname=called_func_name)
 			else:
 				y = self.visitExpression(ctx.expression(i=1))
-				if second_token == UnitXLexer.ADD: res = self._calc.add(x,y)
-				elif second_token == UnitXLexer.SUB: res = self._calc.subtract(x,y)
-				elif second_token == UnitXLexer.MUL: res = self._calc.multiply(x,y)
-				elif second_token == UnitXLexer.DIV: res = self._calc.divide(x,y)
-				elif second_token == UnitXLexer.ASSIGN: res = self._calc.assign(x,y)
-				elif second_token == UnitXLexer.ADD_ASSIGN: res = self._calc.add_assign(x,y)
-				elif second_token == UnitXLexer.SUB_ASSIGN: res = self._calc.substract_assign(x,y)
-				elif second_token == UnitXLexer.MUL_ASSIGN: res = self._calc.multiply(x,y)
-				elif second_token == UnitXLexer.DIV_ASSIGN: res = self._calc.divide(x,y)
+				if second_token == UnitXLexer.ADD: res = self.calc.add(x,y)
+				elif second_token == UnitXLexer.SUB: res = self.calc.subtract(x,y)
+				elif second_token == UnitXLexer.MUL: res = self.calc.multiply(x,y)
+				elif second_token == UnitXLexer.DIV: res = self.calc.divide(x,y)
+				elif second_token == UnitXLexer.ASSIGN: res = self.calc.assign(x,y)
+				elif second_token == UnitXLexer.ADD_ASSIGN: res = self.calc.add_assign(x,y)
+				elif second_token == UnitXLexer.SUB_ASSIGN: res = self.calc.substract_assign(x,y)
+				elif second_token == UnitXLexer.MUL_ASSIGN: res = self.calc.multiply(x,y)
+				elif second_token == UnitXLexer.DIV_ASSIGN: res = self.calc.divide(x,y)
 				elif second_token == UnitXLexer.MOD_ASSIGN: res = None
 				else:
 					res = None
@@ -396,4 +418,9 @@ class UnitXEvalVisitor(UnitXVisitor):
 		"""
 		a_value = True if ctx.start.text == 'true' else False
 		return a_value
+
+	"""
+	def visitErrorNode(self, node):
+		print node.getSymbol().text
+	"""
 

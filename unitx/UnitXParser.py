@@ -7,7 +7,7 @@ from io import StringIO
 def serializedATN():
     with StringIO() as buf:
         buf.write(u"\3\u0430\ud6d1\u8206\uad2d\u4417\uaef1\u8d80\uaadd\3")
-        buf.write(u"L\u0121\4\2\t\2\4\3\t\3\4\4\t\4\4\5\t\5\4\6\t\6\4\7\t")
+        buf.write(u"M\u0121\4\2\t\2\4\3\t\3\4\4\t\4\4\5\t\5\4\6\t\6\4\7\t")
         buf.write(u"\7\4\b\t\b\4\t\t\t\4\n\t\n\4\13\t\13\4\f\t\f\4\r\t\r")
         buf.write(u"\4\16\t\16\4\17\t\17\4\20\t\20\4\21\t\21\4\22\t\22\4")
         buf.write(u"\23\t\23\4\24\t\24\4\25\t\25\4\26\t\26\4\27\t\27\4\30")
@@ -177,7 +177,7 @@ class UnitXParser ( Parser ):
                       u"MOD_ASSIGN", u"AT", u"STRING_LITERAL", u"BYTES_LITERAL", 
                       u"DECIMAL_INTEGER", u"OCT_INTEGER", u"HEX_INTEGER", 
                       u"BIN_INTEGER", u"FLOAT_NUMBER", u"IMAG_NUMBER", u"Identifier", 
-                      u"NEWLINE", u"WS", u"COMMENT", u"LINE_COMMENT" ]
+                      u"NEWLINE", u"WS", u"COMMENT", u"LINE_COMMENT", u"C_LINE_COMMENT" ]
 
     RULE_program = 0
     RULE_typeDeclaration = 1
@@ -296,6 +296,7 @@ class UnitXParser ( Parser ):
     WS=72
     COMMENT=73
     LINE_COMMENT=74
+    C_LINE_COMMENT=75
 
     def __init__(self, input):
         super(UnitXParser, self).__init__(input)

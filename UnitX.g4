@@ -139,7 +139,7 @@ endRep
 
 expression
 	: primary
-	| expression '(' expressionList? ')' // Now function
+	| expression '(' expressionList? ')'
 	| expression ('*'|'/'|'%') expression
 	| expression ('+'|'-') expression
 	| expression ('<='|'>='|'>'|'<') expression // Still
@@ -500,10 +500,10 @@ UnitXLetterOrDigit
 // Whitespace and comments
 
 NEWLINE
-	:  ['\n']+ -> skip
+	: ['\n']+ -> skip
     ;
 
-WS  :  [ \t\r\u000C]+ -> skip
+WS  : [ \t\r\u000C]+ -> skip
     ;
 
 COMMENT
@@ -513,5 +513,9 @@ COMMENT
     ;
 
 LINE_COMMENT
-    :   '#' ~[\r\n]* -> skip
+    : '#' ~[\r\n]* -> skip
+	;
+
+C_LINE_COMMENT
+	: '//' ~[\r\n]* -> skip
     ;

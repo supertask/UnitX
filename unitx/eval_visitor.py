@@ -15,7 +15,7 @@ from util import Util
 from constants import Constants
 from defined_function import DefinedFunction
 
-class UnitXEvalVisitor(UnitXVisitor):
+class EvalVisitor(UnitXVisitor):
 	""" UnitXの構文木をたどり，その振る舞いを行うクラス．
 
 	UnitXParserから，このクラスにある各visit関数が呼ばれ，実行される．それぞれの構文ごとに振る舞いが行われ，それが言語としてのアウトプットとなる．
@@ -27,7 +27,7 @@ class UnitXEvalVisitor(UnitXVisitor):
 	"""
 	
 	def __init__(self, is_intaractive_run, an_errhandler):
-		""" UnitXEvalVisitorを初期化して応答する．
+		""" EvalVisitorを初期化して応答する．
 		"""
 		self.is_intaractive_run = is_intaractive_run
 		self.errhandler = an_errhandler
@@ -51,7 +51,7 @@ class UnitXEvalVisitor(UnitXVisitor):
 	def visitFunctionDeclaration(self, ctx):
 		""" 関数宣言をする．
 		"""
-		if self._ignore_block(ctx.block()): return
+		if self._is_ignored_block(ctx.block()): return
 
 		func_name, func_args = ctx.Identifier().getText(), self.visitFormalParameters(ctx.formalParameters())
 		current_scope = self._scopes.peek()
@@ -124,22 +124,23 @@ class UnitXEvalVisitor(UnitXVisitor):
 		return [varname, default_value]
 
 
-	def _ignore_block(self, ctx):
-		""" Ignores block 
+	def _is_ignored_block(self, ctx):
+		""" Returns whether ignored block exists for intaractive programing.
+			Ignored block is like bellow.
+			Example:
+				$ unitx
+				unitx> rep(i,5) {
+				...... }
 			In intaractive programing, we have to ignore runtime errors in a block statement.
-			So, we control it by turning on a variable, "is_ignore_block".
+			So, we control it by turning on a variable "is_ignored_block" in EvalError.
+			And the controled result is turned off by a user input an empty string.
 		"""
-		if ctx.start.type == UnitXLexer.LBRACE and ctx.stop.type == UnitXLexer.RBRACE:
-			self.errhandler.is_ignore_block = False
-		else:
-			self.errhandler.is_ignore_block = True
-		return self.is_intaractive_run and self.errhandler.is_ignore_block
+		return self.is_intaractive_run and self.errhandler.is_ignored_block
 
 
 	def visitBlock(self, ctx):
 		"""
 		"""
-		if self._ignore_block(ctx): return
 
 		a_parent, a_grandparent = ctx.parentCtx, ctx.parentCtx.parentCtx
 		is_special_block = (isinstance(a_grandparent, UnitXParser.RepStatementContext) or isinstance(a_grandparent, UnitXParser.IfStatementContext) or isinstance(a_parent, UnitXParser.FunctionDeclarationContext))
@@ -178,7 +179,7 @@ class UnitXEvalVisitor(UnitXVisitor):
 		elif ctx.dumpStatement(): self.visitDumpStatement(ctx.dumpStatement()) #still
 		elif ctx.borderStatement(): self.visitBorderStatement(ctx.borderStatement())
 		else:
-			raise Exception("Syntax error. UnitXEvalVisitor#visitStatement") # Never happen.
+			raise Exception("Syntax error. EvalVisitor#visitStatement") # Never happen.
 
 		return
 
@@ -196,6 +197,8 @@ class UnitXEvalVisitor(UnitXVisitor):
 			また，繰り返し処理の前にスコープのメモリ領域を確保し，繰り返し処理の後にそのスコープのメモリ領域を解放する．すなわち，スコープを管理する．
 			ex: rep(i,5){...}, rep(i,[1,2,3]){...}, rep(i,[{B},{KB},{MB}])
 		"""
+		if self._is_ignored_block(ctx.statement()): return
+
 		var_obj, end_control = self.visitRepControl(ctx.repControl())
 		end_value = end_control.get_value()
 		if isinstance(end_value, int): repeat_list = [UnitXObject(value=x,varname=None) for x in range(end_value)]
@@ -219,9 +222,12 @@ class UnitXEvalVisitor(UnitXVisitor):
 		unitx_obj = self.visitParExpression(ctx.parExpression())
 		is_run_ifStatement = unitx_obj.get_value()
 		if is_run_ifStatement:
+			if self._is_ignored_block(ctx.statement(i=0)): return
 			self.visitStatement(ctx.statement(i=0))
 		else:
-			if ctx.getChildCount() > 3: self.visitStatement(ctx.statement(i=1))
+			if ctx.getChildCount() > 3:
+				if self._is_ignored_block(ctx.statement(i=1)): return
+				self.visitStatement(ctx.statement(i=1))
 			else: pass # do nothing
 		return		
 
@@ -329,7 +335,7 @@ class UnitXEvalVisitor(UnitXVisitor):
 					res = None
 		elif ctx.primary(): res = self.visitPrimary(ctx.primary())
 		else:
-			raise Exception("Syntax error. UnitXEvalVisitor#visitExpression") # Never happen.
+			raise Exception("Syntax error. EvalVisitor#visitExpression") # Never happen.
 
 		assert(isinstance(res, UnitXObject))
 
@@ -376,7 +382,7 @@ class UnitXEvalVisitor(UnitXVisitor):
 			unitx_objs = [self.visitExpression(an_expr) for an_expr in ctx.expression()]
 			return UnitXObject(value = unitx_objs, varname = None)
 		else:
-			raise Exception("Syntax error. UnitXEvalVisitor#visitPrimary") # Never happen.
+			raise Exception("Syntax error. EvalVisitor#visitPrimary") # Never happen.
 
 		assert(isinstance(res, UnitXObject))
 		return res
@@ -389,7 +395,7 @@ class UnitXEvalVisitor(UnitXVisitor):
 		elif ctx.string(): return self.visitString(ctx.string())
 		elif ctx.boolean(): return self.visitBoolean(ctx.boolean())
 		elif ctx.none(): return None
-		else: raise Exception("Syntax error. UnitXEvalVisitor#visitLiteral") # Never happen.
+		else: raise Exception("Syntax error. EvalVisitor#visitLiteral") # Never happen.
 
 
 	def visitString(self, ctx):

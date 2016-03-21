@@ -10,8 +10,8 @@ from antlr4.InputStream import InputStream
 from antlr4.error.ErrorStrategy import DefaultErrorStrategy
 from UnitXLexer import UnitXLexer
 from UnitXParser import UnitXParser
-from unitx_eval_visitor import UnitXEvalVisitor
-from unitx_error_strategy import UnitXErrorStrategy
+from eval_visitor import EvalVisitor
+from eval_error import EvalError
 
 class Example(object):
 	"""
@@ -20,8 +20,8 @@ class Example(object):
 	def __init__(self, is_intaractive_run):
 		"""
 		"""
-		self.errhandler = UnitXErrorStrategy(is_intaractive_run)
-		self.visitor = UnitXEvalVisitor(is_intaractive_run, self.errhandler)
+		self.errhandler = EvalError(is_intaractive_run)
+		self.visitor = EvalVisitor(is_intaractive_run, self.errhandler)
 		self.parser = UnitXParser(None)
 		self.parser._errHandler = self.errhandler
 
@@ -36,18 +36,24 @@ class Example(object):
 		return
 
 	def talk(self):
-		a_line = ""
-		stock_line = ""
+		a_line, stock_line = "", ""
 		while True:
-			if self.errhandler.is_ignore_block: sys.stdout.write('.....> ')
+			if self.errhandler.is_ignored_block: sys.stdout.write('...... ')
 			else: sys.stdout.write('unitx> ')
 			a_line = sys.stdin.readline()
 
-			if self.errhandler.is_ignore_block: a_stream = InputStream(stock_line + a_line)
+			if self.errhandler.is_ignored_block:
+				#
+				# In block statement, Errors never happen until coming empty char,
+				# because 'is_ignored_block' are written by EvalError class.
+				#
+				if not a_line.strip():
+					self.errhandler.is_ignored_block = False
+				a_stream = InputStream(stock_line + a_line)
 			else: a_stream = InputStream(a_line)
 			self.parse(a_stream)
 			
-			if self.errhandler.is_ignore_block: stock_line = stock_line + a_line
+			if self.errhandler.is_ignored_block: stock_line = stock_line + a_line
 			else: stock_line = ""
 
 	def test_run(input_str):

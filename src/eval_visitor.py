@@ -261,7 +261,6 @@ class EvalVisitor(UnitXVisitor):
 			dumpモードでは，変数名とその変数に束縛されたUnitXObjectの値を出力する．
 			printモードでは，UnitXObjectの値のみを出力する．
 		"""
-		#if self.is_intaractive_run and  
 		unitx_strs = []
 		for an_expr in ctx.expression():
 			unitx_obj = self.visitExpression(an_expr)

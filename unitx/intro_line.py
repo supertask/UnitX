@@ -24,7 +24,6 @@
 
 def get_line():
 	"""
-
 		Use a command for generating LOGO:
 			$ figlet -kw 120 -f slant UnitX
 			$ jp2a -i --width=30 --chars=" XY" --output=sample.txt unit.jpg
@@ -40,7 +39,7 @@ def get_line():
 """
 	unitx_info = """\
 UnitX 0.7.0 (%s)
-Type "help()" or "demo(<number>)" for UnitX life.""" % (now_time)
+Type "help" or "demo <number(0-2)>" for UnitX life.""" % (now_time)
 	console_info = ascii_art + unitx_info
 
 	return console_info

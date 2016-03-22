@@ -1,10 +1,11 @@
 def xjapan(x, y, z='hey') {
 	print x, y, z
+	a = 5+2
 }
 
 def dfs(a) {
 	>> 学校代 = a
-	print 'Hello, world'
+	print 'Hello, world.'
 }
 
 def main() {

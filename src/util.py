@@ -14,9 +14,22 @@ class Util:
 		"""
 		sys.stderr.write(prettyprint.pp_str(an_object) + '\n')
 
+	@classmethod
+	def filter_to_white(self, a_str):
+		spaces = ''
+		for a_char in a_str:
+			if a_char == '\t':
+				spaces += '\t'
+			else:
+				spaces += ' '
+		return spaces
+
 def main():
 	Util.dump(['あ', 'い', 'う'])
 	Util.dump({'title':'ねじまき鳥', 'author':'村上春樹'})
+	indent = Util.indent('  \t\tIndent from here')
+	print indent
+	print len(indent)
 
 	return 0
 

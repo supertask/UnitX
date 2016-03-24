@@ -42,10 +42,10 @@ class UnitXCmd(Cmd):
 		return True
 	
 	def emptyline(self):
-		self.talk('')
+		self.talk('' + '\n')
 
 	def default(self, a_line):
-		self.talk(a_line)
+		self.talk(a_line + '\n')
 
 	def cmdloop(self):
 		try: Cmd.cmdloop(self)

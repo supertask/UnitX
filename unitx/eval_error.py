@@ -23,6 +23,13 @@ class EvalErrorStrategy(DefaultErrorStrategy):
 		self.is_intaractive_run = is_intaractive_run
 		self.is_ignored_block = False
 
+	def _filter_newline(self, tokens):
+		res = []
+		for name in tokens:
+			if name == u"'\n'": res.append(u"'\\n'")
+			else: res.append(name)
+		return res
+
 	def reportError(self, recognizer, e):
 		""" Reports each error.
 
@@ -71,14 +78,13 @@ class EvalErrorStrategy(DefaultErrorStrategy):
 	def reportFailedPredicate(self, recognizer, e):
 		""" Reports failed predicate error.
 		"""
-		ruleName = recognizer.ruleNames[recognizer._ctx.getRuleIndex()]
-		msg = "rule " + ruleName + " " + e.message
+		rule_name = recognizer.ruleNames[recognizer._ctx.getRuleIndex()]
+		msg = "rule " + rule_name + " " + e.message
 		recognizer.notifyErrorListeners(msg, e.offendingToken, e)
-
-
 
 	def reportUnwantedToken(self, recognizer):
 		""" Reports unwanted token error.
+			Wrote in 3/24/2016.
 		"""
 		if self.is_block(recognizer): return
 
@@ -86,10 +92,11 @@ class EvalErrorStrategy(DefaultErrorStrategy):
 			return
 		super(EvalErrorStrategy, self).beginErrorCondition(recognizer)
 		t = recognizer.getCurrentToken()
-		tokenName = super(EvalErrorStrategy, self).getTokenErrorDisplay(t)
+		token_name = super(EvalErrorStrategy, self).getTokenErrorDisplay(t)
 		expecting = super(EvalErrorStrategy, self).getExpectedTokens(recognizer)
-		msg = "extraneous input " + tokenName + " expecting " \
-			+ expecting.toString(recognizer.literalNames, recognizer.symbolicNames)
+
+		msg = "unexpecting " + token_name + ", expecting " \
+			+ expecting.toString(self._filter_newline(recognizer.literalNames), recognizer.symbolicNames)
 		recognizer.notifyErrorListeners(msg, t, None)
 
 
@@ -151,7 +158,7 @@ class EvalErrorListener(ErrorListener):
 		whites = list(white_line)
 		whites[column] = '^'
 		white_line = ''.join(whites)
-		print '%s:%s: SyntaxError: %s' % (filename, row, msg)
+		print '%s: row %s: SyntaxError: %s' % (filename, row, msg)
 		print target_line
 		print white_line
 		linecache.clearcache() 

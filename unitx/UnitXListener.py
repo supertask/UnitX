@@ -256,6 +256,24 @@ class UnitXListener(ParseTreeListener):
         pass
 
 
+    # Enter a parse tree produced by UnitXParser#terminator.
+    def enterTerminator(self, ctx):
+        pass
+
+    # Exit a parse tree produced by UnitXParser#terminator.
+    def exitTerminator(self, ctx):
+        pass
+
+
+    # Enter a parse tree produced by UnitXParser#newlines.
+    def enterNewlines(self, ctx):
+        pass
+
+    # Exit a parse tree produced by UnitXParser#newlines.
+    def exitNewlines(self, ctx):
+        pass
+
+
     # Enter a parse tree produced by UnitXParser#integer.
     def enterInteger(self, ctx):
         pass

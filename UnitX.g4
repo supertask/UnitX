@@ -54,11 +54,11 @@ functionDeclaration
 	;
 
 formalParameters
-    : '(' formalParameterList? ')'
+    : '(' newlines? formalParameterList? newlines? ')'
     ;
 
 formalParameterList
-    : formalParameter (',' formalParameter)* 
+    : formalParameter (',' newlines? formalParameter)* 
     ;
 
 formalParameter
@@ -66,7 +66,7 @@ formalParameter
     ;
 
 block
-    : '{' blockStatement* '}'
+    : newlines? '{' newlines? blockStatement*  newlines? '}' newlines?
     ;
 
 blockStatement
@@ -77,13 +77,13 @@ statement
 	: block
 	| repStatement
 	| ifStatement
-	| expressionStatement
-	| returnStatement
-	| 'break'
-	| 'continue'
-	| printStatement
-	| dumpStatement
-	| borderStatement
+	| expressionStatement terminator
+	| returnStatement terminator
+	| 'break' terminator
+	| 'continue' terminator
+	| printStatement terminator
+	| dumpStatement terminator
+	| borderStatement terminator
 	;
 
 repStatement
@@ -206,6 +206,18 @@ number
 	| IMAG_NUMBER
 	;
 
+terminator
+	: terminator SEMI
+	| terminator NEWLINE
+	| SEMI
+	| NEWLINE
+	;
+
+newlines
+	: newlines NEWLINE
+	| NEWLINE
+	;
+
 /// integer        ::=  decimalinteger | octinteger | hexinteger | bininteger
 integer
 	 : DECIMAL_INTEGER
@@ -291,7 +303,7 @@ XOR_ASSIGN      : '^=';
 MOD_ASSIGN      : '%=';
 
 AT				: '@';
-//NEWLINE			: '\n';
+NEWLINE			: '\n';
 
 
 
@@ -499,9 +511,6 @@ UnitXLetterOrDigit
 
 // Whitespace and comments
 
-NEWLINE
-	: ['\n']+ -> skip
-    ;
 
 WS  : [ \t\r\u000C]+ -> skip
     ;

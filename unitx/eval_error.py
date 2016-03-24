@@ -135,7 +135,6 @@ class EvalErrorListener(ErrorListener):
 	def set_codepath(self, a_path):
 		self.codepath = a_path
 
-
 	def syntaxError(self, recognizer, offendingSymbol, row, column, msg, e):
 		import linecache
 		from util import Util

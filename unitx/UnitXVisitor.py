@@ -145,16 +145,6 @@ class UnitXVisitor(ParseTreeVisitor):
         return self.visitChildren(ctx)
 
 
-    # Visit a parse tree produced by UnitXParser#terminator.
-    def visitTerminator(self, ctx):
-        return self.visitChildren(ctx)
-
-
-    # Visit a parse tree produced by UnitXParser#newlines.
-    def visitNewlines(self, ctx):
-        return self.visitChildren(ctx)
-
-
     # Visit a parse tree produced by UnitXParser#integer.
     def visitInteger(self, ctx):
         return self.visitChildren(ctx)

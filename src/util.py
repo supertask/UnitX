@@ -24,12 +24,16 @@ class Util:
 				spaces += ' '
 		return spaces
 
+	@classmethod
+	def split_without_removing(self, s, sep):
+		lines = []
+		for i,line in enumerate(s.split(sep)):
+			if i < len(s)-1: lines.append(line + sep)
+		return lines
+
 def main():
 	Util.dump(['あ', 'い', 'う'])
 	Util.dump({'title':'ねじまき鳥', 'author':'村上春樹'})
-	indent = Util.indent('  \t\tIndent from here')
-	print indent
-	print len(indent)
 
 	return 0
 

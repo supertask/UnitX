@@ -1,12 +1,15 @@
-def xjapan(x, y, z='hey') {
-	print x, y, z
-	a = 5+2
+def xjapan(x, y, z='hey')
+{
+	print x, y, z, 5
+	a = 5 + 2
 }
 
 def dfs(a) {
 	>> 学校代 = a
 	print 'Hello, world.'
 }
+
+
 
 def main() {
 	dfs(6{万円/月->i})

@@ -10,6 +10,7 @@ from UnitXParser import UnitXParser
 from eval_visitor import EvalVisitor
 from eval_error import EvalErrorStrategy
 from eval_error import EvalErrorListener
+from util import Util
 
 from cmd import Cmd
 import readline

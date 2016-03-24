@@ -66,7 +66,7 @@ formalParameter
     ;
 
 block
-    : '{' blockStatement* '}'
+    : '{' blockStatement*  '}'
     ;
 
 blockStatement
@@ -77,13 +77,13 @@ statement
 	: block
 	| repStatement
 	| ifStatement
-	| expressionStatement
-	| returnStatement
-	| 'break'
-	| 'continue'
-	| printStatement
-	| dumpStatement
-	| borderStatement
+	| expressionStatement SEMI?
+	| returnStatement SEMI?
+	| 'break' SEMI?
+	| 'continue' SEMI?
+	| printStatement SEMI?
+	| dumpStatement SEMI?
+	| borderStatement SEMI?
 	;
 
 repStatement
@@ -205,6 +205,14 @@ number
 	| FLOAT_NUMBER
 	| IMAG_NUMBER
 	;
+
+
+/*
+newlines
+	: newlines NEWLINE
+	| NEWLINE
+	;
+*/
 
 /// integer        ::=  decimalinteger | octinteger | hexinteger | bininteger
 integer
@@ -498,10 +506,9 @@ UnitXLetterOrDigit
 
 
 // Whitespace and comments
-
 NEWLINE
-	: ['\n']+ -> skip
-    ;
+	: '\n' -> skip
+	;
 
 WS  : [ \t\r\u000C]+ -> skip
     ;

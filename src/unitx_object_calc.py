@@ -78,14 +78,7 @@ class UnitXObjectCalc:
 			an_obj = UnitXObject(value = None, varname=varname, is_none=y.is_none())
 		else:
 			an_obj = UnitXObject(value = y.get_value(), varname=varname, is_none=y.is_none())
-
 		self.scopes.regist_unitx_obj(varname, an_obj)
-		"""
-		# スコープに，登録する
-		found_scope = current_scope.find_scope_of(varname)
-		if found_scope: found_scope[varname] = an_obj #Already created variable.
-		else: current_scope[varname] = an_obj #Create variable in the scope.
-		"""
 
 		return an_obj
 

@@ -17,7 +17,7 @@ import readline
 import rlcompleter
 
 class UnitXCmd(Cmd):
-	Cmd.prompt = ''
+	Cmd.prompt = 'unitx> '
 
 	def __init__(self, is_intaractive_run):
 		Cmd.__init__(self)
@@ -85,6 +85,7 @@ class UnitXCmd(Cmd):
 		else:
 			codeline = a_line
 
+		codeline = codeline.decode('utf-8')
 		a_listener = EvalErrorListener(self.is_intaractive_run)
 		lines = codeline.split('\n')
 		a_listener.set_codelines(lines)
@@ -116,7 +117,7 @@ def main(argv):
 	else:
 		import intro_line
 		print intro_line.get_line()
-		sys.stdout.write('unitx> ')
+		#sys.stdout.write('unitx> ')
 		cmd = UnitXCmd(is_intaractive_run=True)
 		cmd.cmdloop()
 	return 0

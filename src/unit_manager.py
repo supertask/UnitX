@@ -5,12 +5,12 @@ import sys
 import codecs
 from fractions import Fraction
 
-class UnitReader(object):
+class UnitManager(object):
 	""" 単位の情報を読み取り保存するクラス．
 	"""
 
 	def __init__(self, filename):
-		""" UnitReaderの初期化
+		""" UnitManagerの初期化
 		"""
 		self.filename = filename
 		self.unit_dict = {}
@@ -61,6 +61,7 @@ class UnitReader(object):
 	def get_unit_id(self, unit_str):
 		"""
 		"""
+		from util import Util
 		if unit_str in self._unit_id_dict:
 			return self._unit_id_dict[unit_str]
 		else:
@@ -69,16 +70,15 @@ class UnitReader(object):
 
 
 def main():
-	reader = UnitReader('unit_table.txt')
-	minute = reader.get_criterion(u'分')
-	hour = reader.get_criterion(u'時')
+	manager = UnitManager('unit_table.txt')
+	minute = manager.get_criterion(u'分')
+	hour = manager.get_criterion(u'時')
 	value = 120 * (hour / minute)
-	value = float(value)
-	if value.is_integer(): value = int(value)
 	
 	from util import Util
-	Util.dump(reader.unit_dict)
-	print type(value), value
+	Util.dump(manager.unit_dict)
+	print u'kind of unit:', manager.get_unit_id(u'分')
+	print value
 
 	return 0
 

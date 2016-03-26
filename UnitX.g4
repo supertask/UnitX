@@ -54,7 +54,8 @@ functionDeclaration
 	;
 
 formalParameters
-    : '(' formalParameterList? ')'
+    : formalParameterList?
+    | '(' formalParameterList? ')'
     ;
 
 formalParameterList
@@ -77,17 +78,18 @@ statement
 	: block
 	| repStatement
 	| ifStatement
-	| expressionStatement SEMI?
-	| returnStatement SEMI?
-	| 'break' SEMI?
-	| 'continue' SEMI?
-	| printStatement SEMI?
-	| dumpStatement SEMI?
-	| borderStatement SEMI?
+	| expressionStatement SEMICOLON?
+	| returnStatement SEMICOLON?
+	| 'break' SEMICOLON?
+	| 'continue' SEMICOLON?
+	| printStatement SEMICOLON?
+	| dumpStatement SEMICOLON?
+	| borderStatement SEMICOLON?
 	;
 
 repStatement
-    : 'rep' '(' repControl ')' statement 
+    : 'rep' repControl statement 
+    | 'rep' '(' repControl ')' statement 
 	;
 
 ifStatement
@@ -126,7 +128,8 @@ expressionList
     ;
 
 parExpression
-	: '(' expression ')'
+	: expression
+	| '(' expression ')'
 	;
 
 repControl
@@ -166,18 +169,17 @@ expression
 	;
 
 unit
-	: '{' unitSingleOrPairOperator '}'
+	: '{' '@'? unitSingleOrPairOperator '}'
 	;
 
 unitSingleOrPairOperator
-	: unitOperator? '/' unitOperator?
-	| unitOperator
+	: unitOperator
+	| unitOperator '/' unitOperator
 	;
 
 unitOperator
 	: Identifier
 	| Identifier '->' Identifier
-	| '->' Identifier
 	;
 
 primary
@@ -238,32 +240,32 @@ none
  */
 
 // Keywords
-DEF           	: 'def';
-REP           	: 'rep';
-PRINT         	: 'print';
-IF          	: 'if';
+DEF             : 'def';
+REP             : 'rep';
+PRINT           : 'print';
+IF              : 'if';
 RETURN          : 'return';
 BREAK           : 'break';
-CONTINUE      	: 'continue';
+CONTINUE        : 'continue';
 LPAREN          : '(';
 RPAREN          : ')';
 LBRACE          : '{';
 RBRACE          : '}';
 LBRACK          : '[';
 RBRACK          : ']';
-SEMI            : ';';
+SEMICOLON       : ';';
 COMMA           : ',';
 DOT             : '.';
 
 // Operators
-THREE_BORDER	: '---';
-FOUR_BORDER		: '----';
-FIVE_BORDER		: '-----';
-SIX_BORDER		: '------';
-SEVEN_BORDER	: '-------';
-EIGHT_BORDER	: '--------';
-NINE_BORDER		: '---------';
-TEN_BORDER		: '----------';
+THREE_BORDER    : '---';
+FOUR_BORDER     : '----';
+FIVE_BORDER     : '-----';
+SIX_BORDER      : '------';
+SEVEN_BORDER    : '-------';
+EIGHT_BORDER    : '--------';
+NINE_BORDER     : '---------';
+TEN_BORDER      : '----------';
 ASSIGN          : '=';
 GT              : '>';
 LT              : '<';
@@ -274,7 +276,7 @@ COLON           : ':';
 EQUAL           : '==';
 LE              : '<=';
 GE              : '>=';
-ALLOW			: '->';
+ALLOW           : '->';
 NOTEQUAL        : '!=';
 AND             : '&&';
 OR              : '||';
@@ -298,8 +300,8 @@ OR_ASSIGN       : '|=';
 XOR_ASSIGN      : '^=';
 MOD_ASSIGN      : '%=';
 
-AT				: '@';
-//NEWLINE			: '\n';
+AT              : '@';
+//NEWLINE      : '\n';
 
 
 

@@ -1,2 +1,12 @@
-None,万,億,兆 == 1,10000,10000**2,10000**3
-秒,分,時,日,(ヶ月,月),年 == 1,1/60,1/(60*60),1/(60*60*24),1/(60*60*24*30),1/(60*60*24*365)
+--
+万 億 兆
+{u'万': Fraction(10000), u'億': Fraction(10000**2), u'兆': Fraction(10000**3)}
+--
+秒 分 時 日 月 ヶ月 年
+{u'秒': 1, u'分': Fraction(1,60), u'時': Fraction(1,60*60), u'日': Fraction(1,60*60*24), u'月': Fraction(1,60*60*24*30),u'ヶ月': Fraction(1,60*60*24*30), u'年': Fraction(1,60*60*24*365)}
+--
+sec minute hour day month year
+{u'sec': 1, u'minute': Fraction(1,60), u'hour': Fraction(1,60*60), u'day': Fraction(1,60*60*24), u'month': Fraction(1,60*60*24*30), u'year': Fraction(1,60*60*24*365)}
+--
+pm nm μm mm cm m km 
+{u'pm': Fraction(1), u'nm': Fraction(1000), u'nm': Fraction(1000**2),  u'μm': Fraction(1000**3),  u'mm': Fraction(1000**4),  u'cm': Fraction((1000**4)*10),  u'm': Fraction(1000**5),  u'km': Fraction(1000**6)}

@@ -16,7 +16,6 @@ from antlr4.error.Errors import ParseCancellationException
 class EvalErrorStrategy(DefaultErrorStrategy):
 	"""
 	"""
-	# TODO(Tasuku): インタラクティブのとき，rep() { if() {} } で不具合
 
 	def __init__(self, is_intaractive_run):
 		super(EvalErrorStrategy, self).__init__()
@@ -143,6 +142,8 @@ class EvalErrorListener(ErrorListener):
 		self.codepath = a_path
 
 	def syntaxError(self, recognizer, offendingSymbol, row, column, msg, e):
+		# TODO(Tasuku): 対話型のときのエラー描画のバグ
+
 		import linecache
 		from util import Util
 		target_line = ''
@@ -156,21 +157,14 @@ class EvalErrorListener(ErrorListener):
 		target_line = target_line.rstrip()
 		white_line = Util.filter_to_white(target_line)
 		whites = list(white_line)
+
 		whites[column] = '^'
-		white_line = ''.join(whites)
-		print '%s: row %s: SyntaxError: %s' % (filename, row, msg)
-		print target_line
-		print white_line
+		mark_line = ''.join(whites)
+		error_line = '%s: row %s: SyntaxError: %s\n' % (filename, row, msg)
+		error_line = target_line + '\n' + mark_line + '\n'
+		sys.stderr.write(error_line)
+
 		linecache.clearcache() 
-		sys.exit()
+		sys.exit(1)
 
-	"""
-	def reportAmbiguity(self, recognizer, dfa, startIndex, stopIndex, exact, ambigAlts, configs):
-		pass
 
-	def reportAttemptingFullContext(self, recognizer, dfa, startIndex, stopIndex, conflictingAlts, configs):
-		pass
-
-	def reportContextSensitivity(self, recognizer, dfa, startIndex, stopIndex, prediction, configs):
-		pass
-	"""

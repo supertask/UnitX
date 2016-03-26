@@ -17,6 +17,7 @@ class Util:
 	@classmethod
 	def filter_to_white(self, a_str):
 		spaces = ''
+		print len(a_str)
 		for a_char in a_str:
 			if a_char == '\t':
 				spaces += '\t'
@@ -24,12 +25,14 @@ class Util:
 				spaces += ' '
 		return spaces
 
+	"""
 	@classmethod
 	def split_without_removing(self, s, sep):
 		lines = []
 		for i,line in enumerate(s.split(sep)):
 			if i < len(s)-1: lines.append(line + sep)
 		return lines
+	"""
 
 def main():
 	Util.dump(['あ', 'い', 'う'])

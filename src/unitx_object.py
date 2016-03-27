@@ -21,27 +21,32 @@ class UnitXObject:
 	"""
 	unit_manager = None 
 
-	def __init__(self, value, varname, is_none=False, unit=None):
+	def __init__(self, value, varname, unit, is_none=False):
 		""" UnitXObjectの初期化
 			ここでのvalueとは，数値，文字列，変数名を表す．
 		"""
 		self._value = value
 		self._varname = varname
 		self._is_none = is_none
-		self._unit = unit
+		self.unit = unit
 
 	def get_value(self, error=True):
 		""" UnitXObjectに束縛する数値，文字列，または変数の値を応答する．
 			また，呼び出した際にエラー出力したくない場合はerrorをオフにする必要がある．
 		"""
 		if self._value is None:
-			varname = self.get_varname(error)
+			varname = self.get_varname()
+			if not varname:
+				sys.stderr.write('SystemError: value and varname are None.\n')
+				sys.exit(1)
 			found_scope = self.get_scopes().peek().find_scope_of(varname)
 			if found_scope:
 				unitx_obj = found_scope[varname]
 				if unitx_obj.is_none(): return None
 				else:
-					return self._trans_unit(unitx_obj.get_value())
+					value = unitx_obj.get_value()
+					ex_unit = unitx_obj.get_unit()
+					return self._trans_unit(value, ex_unit)
 			else:
 				if error:
 					sys.stderr.write("NameError: name '%s' is not defined.\n" % varname)
@@ -49,27 +54,30 @@ class UnitXObject:
 					sys.exit(1)
 				else: return None
 		else:
-			return self._trans_unit(self._value)
+			return self._trans_unit(self._value, None)
 
 
-	def _trans_unit(self, value):
+	def _trans_unit(self, value, ex_unit):
 		"""
 		"""
-		unit, ex_unit = self.get_unit(), self.get_ex_unit()
+		if isinstance(value, bool): return value
+		elif isinstance(value, str): return value
+		unit = self.get_unit()
+		if not unit: return value
 		if ex_unit: self._check_unit(unit, ex_unit)
-
-		if isinstance(value, bool):
-			pass #エラー
-		elif isinstance(value, str):
-			pass #エラー
 
 		# TODO(Tasuku): ここからエラー
 		if unit.numer and unit.ex_numer:
-			value = value * (self.get_unit_manager().get_criterion(unit.ex_numer) / self.get_unit_manager().get_criterion(unit.numer))
+			ex_numer_value = self.get_unit_manager().get_criterion(unit.ex_numer)
+			numer_value = self.get_unit_manager().get_criterion(unit.numer)
+			value = value * (ex_numer_value / numer_value)
 		if unit.denom and unit.ex_denom:
-			value = value * (self.get_unit_manager().get_criterion(unit.ex_denom) / self.get_unit_manager().get_criterion(unit.denom))
+			ex_denom_value = self.get_unit_manager().get_criterion(unit.ex_denom)
+			denom_value = self.get_unit_manager().get_criterion(unit.denom)
+			value = value * (ex_denom_value / denom_value)
 		value = float(value)
 		if value.is_integer(): value = int(value)
+
 		return value
 
 
@@ -88,28 +96,11 @@ class UnitXObject:
 				sys.exit(1)
 
 
-	def get_ex_unit(self):
-		"""
-		"""
-		varname = self.get_varname()
-		found_scope = self.get_scopes().peek().find_scope_of(varname)
-		if found_scope:
-			unitx_obj = found_scope[varname]
-			return unitx_obj.get_unit()
-		else:
-			return None
-
-
-	def get_varname(self, error=True):
+	def get_varname(self):
 		""" 変数名を応答する．
 			また，呼び出した際にエラー出力したくない場合はerrorをオフにする必要がある．
 		"""
-		if self._varname: return self._varname
-		else:
-			if error:
-				raise Exception("SystemError: UnitXObjectの値が設定されていない．\n")
-				sys.exit(1)
-			else: return None
+		return self._varname
 
 	def is_none(self):
 		""" UnitXObjectがNoneオブジェクトを束縛するかを応答する．
@@ -125,8 +116,7 @@ class UnitXObject:
 		return UnitXObject.unit_manager
 	
 	def get_unit(self):
-		return self._unit
-	
+		return self.unit
 
 	def __unicode__(self):
 		""" 値と変数を詳細に表示する．

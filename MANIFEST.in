@@ -1,0 +1,2 @@
+include unitx/data/unit_table.dat
+recursive-include unitx data/unit_table.dat

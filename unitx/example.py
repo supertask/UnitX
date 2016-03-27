@@ -117,7 +117,6 @@ def main(argv):
 	else:
 		import intro_line
 		print intro_line.get_line()
-		#sys.stdout.write('unitx> ')
 		cmd = UnitXCmd(is_intaractive_run=True)
 		cmd.cmdloop()
 	return 0

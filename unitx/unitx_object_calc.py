@@ -31,28 +31,28 @@ class UnitXObjectCalc:
 		"""
 		self.check_unitx_objects([x,y])
 		a_value = (x.get_value() + y.get_value())
-		return UnitXObject(value = a_value, varname=None)
+		return UnitXObject(value = a_value, varname=None, unit=None)
 
 	def subtract(self,x,y):
 		""" スコープの情報をx,yに注入し，x,yを引いて，結果を応答する．
 		"""
 		self.check_unitx_objects([x,y])
 		a_value = (x.get_value() - y.get_value())
-		return UnitXObject(value = a_value, varname=None)
+		return UnitXObject(value = a_value, varname=None, unit=None)
 
 	def multiply(self,x,y):
 		""" スコープの情報をx,yに注入し，x,yを掛けて，結果を応答する．
 		"""
 		self.check_unitx_objects([x,y])
 		a_value = (x.get_value() * y.get_value())
-		return UnitXObject(value = a_value, varname=None)
+		return UnitXObject(value = a_value, varname=None, unit=None)
 
 	def divide(self,x,y):
 		""" スコープの情報をx,yに注入し，x,yを割って，結果を応答する．
 		"""
 		self.check_unitx_objects([x,y])
 		a_value = (x.get_value() / y.get_value())
-		return UnitXObject(value = a_value, varname=None)
+		return UnitXObject(value = a_value, varname=None, unit=None)
 
 	def increment(self,x):
 		""" スコープの情報をx,yに注入し，xをインクリメントして，結果を応答する．
@@ -73,11 +73,11 @@ class UnitXObjectCalc:
 		"""
 		self.check_unitx_objects([x]) # 代入される側のみcheckする．
 
-		varname = x.get_varname(error=True) # 変数名が登録されていなければ，error処理をする
+		varname = x.get_varname() # 変数名が登録されていなければ，error処理をする
 		if y.is_none():
-			an_obj = UnitXObject(value = None, varname=varname, is_none=y.is_none())
+			an_obj = UnitXObject(value = None, varname=varname, unit=None, is_none=y.is_none())
 		else:
-			an_obj = UnitXObject(value = y.get_value(), varname=varname, is_none=y.is_none())
+			an_obj = UnitXObject(value = y.get_value(), varname=varname, unit=None, is_none=y.is_none())
 		self.scopes.regist_unitx_obj(varname, an_obj)
 
 		return an_obj

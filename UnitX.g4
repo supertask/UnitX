@@ -169,12 +169,12 @@ expression
 	;
 
 unit
-	: '{' '@'? unitSingleOrPairOperator '}'
+	: '{' unitSingleOrPairOperator '}'
 	;
 
 unitSingleOrPairOperator
-	: unitOperator
-	| unitOperator '/' unitOperator
+	: '@'? unitOperator
+	| '@'? unitOperator '/' unitOperator
 	;
 
 unitOperator
@@ -186,7 +186,7 @@ primary
 	: Identifier unit?
 	| literal unit?
 	| '(' expression ')' unit?
-	| '[' expression? (',' expression)* ']'
+	| '[' expression? (',' expression)* ']' unit?
 	;
 
 literal

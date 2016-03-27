@@ -360,7 +360,7 @@ class UnitXLexer(Lexer):
     RBRACE = 15
     LBRACK = 16
     RBRACK = 17
-    SEMI = 18
+    SEMICOLON = 18
     COMMA = 19
     DOT = 20
     THREE_BORDER = 21
@@ -436,7 +436,7 @@ class UnitXLexer(Lexer):
     symbolicNames = [ u"<INVALID>",
             u"DEF", u"REP", u"PRINT", u"IF", u"RETURN", u"BREAK", u"CONTINUE", 
             u"LPAREN", u"RPAREN", u"LBRACE", u"RBRACE", u"LBRACK", u"RBRACK", 
-            u"SEMI", u"COMMA", u"DOT", u"THREE_BORDER", u"FOUR_BORDER", 
+            u"SEMICOLON", u"COMMA", u"DOT", u"THREE_BORDER", u"FOUR_BORDER", 
             u"FIVE_BORDER", u"SIX_BORDER", u"SEVEN_BORDER", u"EIGHT_BORDER", 
             u"NINE_BORDER", u"TEN_BORDER", u"ASSIGN", u"GT", u"LT", u"BANG", 
             u"TILDE", u"QUESTION", u"COLON", u"EQUAL", u"LE", u"GE", u"ALLOW", 
@@ -450,8 +450,8 @@ class UnitXLexer(Lexer):
 
     ruleNames = [ u"T__0", u"T__1", u"T__2", u"T__3", u"DEF", u"REP", u"PRINT", 
                   u"IF", u"RETURN", u"BREAK", u"CONTINUE", u"LPAREN", u"RPAREN", 
-                  u"LBRACE", u"RBRACE", u"LBRACK", u"RBRACK", u"SEMI", u"COMMA", 
-                  u"DOT", u"THREE_BORDER", u"FOUR_BORDER", u"FIVE_BORDER", 
+                  u"LBRACE", u"RBRACE", u"LBRACK", u"RBRACK", u"SEMICOLON", 
+                  u"COMMA", u"DOT", u"THREE_BORDER", u"FOUR_BORDER", u"FIVE_BORDER", 
                   u"SIX_BORDER", u"SEVEN_BORDER", u"EIGHT_BORDER", u"NINE_BORDER", 
                   u"TEN_BORDER", u"ASSIGN", u"GT", u"LT", u"BANG", u"TILDE", 
                   u"QUESTION", u"COLON", u"EQUAL", u"LE", u"GE", u"ALLOW", 

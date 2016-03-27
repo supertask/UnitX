@@ -15,6 +15,8 @@ with open('./README.md','r') as rf:
 setup(
 	name='UnitX',
 	packages=['unitx'],
+	include_package_data=True,
+	package_data={'unitx': ['data/*.dat']},
 	version=unitx.__version__,
 	description='UnitX is a script launguage.',
 	long_description=readme,

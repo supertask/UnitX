@@ -28,8 +28,9 @@ install:
 	@echo "\nSUCCESS: The overall installation is successful!"
 
 prepare:
-	mkdir -p $(DEST_SRC_DIR)
-	cp $(SRC_DIR)/*.{py,txt} $(DEST_SRC_DIR)/
+	mkdir -p $(DEST_SRC_DIR)/data
+	cp $(SRC_DIR)/*.py $(DEST_SRC_DIR)/
+	cp $(SRC_DIR)/data/*.dat $(DEST_SRC_DIR)/data/
 	@date
 
 # That generate lexer and parser from a grammar of ANTLR.

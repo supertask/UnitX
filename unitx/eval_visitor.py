@@ -1,7 +1,9 @@
 #!/usr/bin/env python
 # -*- coding:utf-8 -*-
 
+import os
 import sys
+import pkgutil
 
 from antlr4 import *
 from UnitXVisitor import UnitXVisitor
@@ -14,6 +16,8 @@ from scope_list import ScopeList
 from util import Util
 from constants import Constants
 from defined_function import DefinedFunction
+from unit import Unit
+from unit_manager import UnitManager
 
 class EvalVisitor(UnitXVisitor):
 	""" UnitXの構文木をたどり，その振る舞いを行うクラス．
@@ -36,6 +40,10 @@ class EvalVisitor(UnitXVisitor):
 		self.is_break = False
 		UnitXObject.scopes = self._scopes
 
+		this_dir, _ = os.path.split(__file__)
+		data_path = os.path.join(this_dir, "data/unit_table.dat")
+		UnitXObject.unit_manager = UnitManager(data_path)
+
 
 	def visitProgram(self, ctx):
 		""" Just visiting child nodes of UnitX syntax.
@@ -57,7 +65,7 @@ class EvalVisitor(UnitXVisitor):
 		current_scope = self._scopes.peek()
 		def_func = DefinedFunction(func_name, func_args, ctx, current_scope)
 
-		unitx_obj = UnitXObject(value=def_func, varname=func_name)
+		unitx_obj = UnitXObject(value=def_func, varname=func_name, unit=None)
 		self._scopes.regist_unitx_obj(func_name, unitx_obj)
 		return
 
@@ -85,9 +93,10 @@ class EvalVisitor(UnitXVisitor):
 					if i < len(called_args):
 						unitx_obj = called_args[i]
 					else:
-						if not default_value: default_value = UnitXObject(value=None, varname=None, is_none=True)
+						if not default_value:
+							default_value = UnitXObject(value=None,varname=None,unit=None,is_none=True)
 						unitx_obj = default_value
-					self.calc.assign(UnitXObject(value=None, varname=varname), unitx_obj)
+					self.calc.assign(UnitXObject(value=None,varname=varname,unit=None),unitx_obj)
 
 			# TODO(Tasuku): 現在は定義した関数のみ使用可能だが，組み込み関数はまだなので，それを後で追加
 			self.visitBlock(def_func.ctx.block())
@@ -119,7 +128,7 @@ class EvalVisitor(UnitXVisitor):
 		if ctx.expression():
 			default_value = self.visitExpression(ctx.expression())
 		else:
-			default_value = None #UnitXObject(value=None, varname=None, is_none=True)
+			default_value = None
 
 		return [varname, default_value]
 
@@ -201,8 +210,10 @@ class EvalVisitor(UnitXVisitor):
 
 		var_obj, end_control = self.visitRepControl(ctx.repControl())
 		end_value = end_control.get_value()
-		if isinstance(end_value, int): repeat_list = [UnitXObject(value=x,varname=None) for x in range(end_value)]
-		else: repeat_list = end_value
+		if isinstance(end_value, int):
+			repeat_list = [UnitXObject(value=x,varname=None,unit=None) for x in range(end_value)]
+		else:
+			repeat_list = end_value
 		self._scopes.new_scope()
 
 		for i in repeat_list:
@@ -267,7 +278,7 @@ class EvalVisitor(UnitXVisitor):
 			if unitx_obj.is_none():
 				dump_line = 'None' #None
 			else: 
-				varname = unitx_obj.get_varname(error=False) #変数に格納されていない値もdumpで見るため
+				varname = unitx_obj.get_varname()
 				if varname and mode == 'dump':
 					dump_line = "%s: %s" % (varname, unitx_obj.get_value())
 				else: dump_line = str(unitx_obj.get_value())
@@ -290,7 +301,7 @@ class EvalVisitor(UnitXVisitor):
 			ex: [i,5], [i,[1,2,3]]
 		"""
 		varname = ctx.Identifier().getText()
-		return [UnitXObject(value=None, varname=varname), self.visitEndRep(ctx.endRep())]
+		return [UnitXObject(value=None, varname=varname, unit=None), self.visitEndRep(ctx.endRep())]
 
 
 	def visitEndRep(self, ctx):
@@ -310,49 +321,71 @@ class EvalVisitor(UnitXVisitor):
 			x = self.visitExpression(ctx.expression(i=0)) # x,y: UnitXObject
 
 			second_token = ctx.getChild(i=1).getSymbol().type
-			if ctx.start.type == UnitXLexer.INC: res = self.calc.increment(x)
-			elif ctx.start.type == UnitXLexer.DEC: res = self.calc.decrement(x)
+			if ctx.start.type == UnitXLexer.INC: unitx_obj = self.calc.increment(x)
+			elif ctx.start.type == UnitXLexer.DEC: unitx_obj = self.calc.decrement(x)
 			elif second_token == UnitXLexer.LPAREN:
 				called_func_name, called_args = x.get_varname(), []
 				if ctx.expressionList():
 					called_args = self.visitExpressionList(ctx.expressionList())
 				a_value = self._call_function(called_func_name, called_args)
-				res = UnitXObject(value=a_value, varname=called_func_name)
+				unitx_obj = UnitXObject(value=a_value, varname=called_func_name, unit=None)
 			else:
 				y = self.visitExpression(ctx.expression(i=1))
-				if second_token == UnitXLexer.ADD: res = self.calc.add(x,y)
-				elif second_token == UnitXLexer.SUB: res = self.calc.subtract(x,y)
-				elif second_token == UnitXLexer.MUL: res = self.calc.multiply(x,y)
-				elif second_token == UnitXLexer.DIV: res = self.calc.divide(x,y)
-				elif second_token == UnitXLexer.ASSIGN: res = self.calc.assign(x,y)
-				elif second_token == UnitXLexer.ADD_ASSIGN: res = self.calc.add_assign(x,y)
-				elif second_token == UnitXLexer.SUB_ASSIGN: res = self.calc.substract_assign(x,y)
-				elif second_token == UnitXLexer.MUL_ASSIGN: res = self.calc.multiply(x,y)
-				elif second_token == UnitXLexer.DIV_ASSIGN: res = self.calc.divide(x,y)
-				elif second_token == UnitXLexer.MOD_ASSIGN: res = None
+				if second_token == UnitXLexer.ADD: unitx_obj = self.calc.add(x,y)
+				elif second_token == UnitXLexer.SUB: unitx_obj = self.calc.subtract(x,y)
+				elif second_token == UnitXLexer.MUL: unitx_obj = self.calc.multiply(x,y)
+				elif second_token == UnitXLexer.DIV: unitx_obj = self.calc.divide(x,y)
+				elif second_token == UnitXLexer.ASSIGN: unitx_obj = self.calc.assign(x,y)
+				elif second_token == UnitXLexer.ADD_ASSIGN: unitx_obj = self.calc.add_assign(x,y)
+				elif second_token == UnitXLexer.SUB_ASSIGN: unitx_obj = self.calc.substract_assign(x,y)
+				elif second_token == UnitXLexer.MUL_ASSIGN: unitx_obj = self.calc.multiply(x,y)
+				elif second_token == UnitXLexer.DIV_ASSIGN: unitx_obj = self.calc.divide(x,y)
+				elif second_token == UnitXLexer.MOD_ASSIGN: unitx_obj = None
 				else:
-					res = None
-		elif ctx.primary(): res = self.visitPrimary(ctx.primary())
+					unitx_obj = None
+		elif ctx.primary(): unitx_obj = self.visitPrimary(ctx.primary())
 		else:
 			raise Exception("Syntax error. EvalVisitor#visitExpression") # Never happen.
 
-		assert(isinstance(res, UnitXObject))
+		assert(isinstance(unitx_obj, UnitXObject))
 
-		return res
+		return unitx_obj
 
-	# Visit a parse tree produced by UnitXParser#unit.
+
 	def visitUnit(self, ctx):
-		return self.visitChildren(ctx)
+		""" Just visiting child nodes of UnitX syntax."""
+		unit = self.visitUnitSingleOrPairOperator(ctx.unitSingleOrPairOperator())
+		return unit
 
 
-	# Visit a parse tree produced by UnitXParser#unitSingleOrPairOperator.
 	def visitUnitSingleOrPairOperator(self, ctx):
-		return self.visitChildren(ctx)
+		"""
+		"""
+		if ctx.start.type == UnitXLexer.AT: return None
+		if ctx.unitOperator(i=1):
+			unit = Unit()
+			numers = self.visitUnitOperator(ctx.unitOperator(i=0))
+			denoms = self.visitUnitOperator(ctx.unitOperator(i=1))
+			if len(numers) == 2: unit.ex_numer, unit.numer = numers
+			else: unit.numer = numers[0]
+			if len(denoms) == 2: unit.ex_denom, unit.denom = denoms
+			else: unit.denom = denoms[0]
+			return unit
+		else:
+			unit = Unit()
+			numers = self.visitUnitOperator(ctx.unitOperator(i=0))
+			if len(numers) == 2: unit.ex_numer, unit.numer = numers
+			else: unit.numer = numers[0]
+			return unit
 
 
-	# Visit a parse tree produced by UnitXParser#unitOperator.
 	def visitUnitOperator(self, ctx):
-		return self.visitChildren(ctx)
+		"""
+		"""
+		if ctx.Identifier(i=1):
+			return [ctx.Identifier(i=0).getText(), ctx.Identifier(i=1).getText()]
+		else:
+			return [ctx.Identifier(i=0).getText()]
 
 
 	def visitPrimary(self, ctx):
@@ -363,28 +396,36 @@ class EvalVisitor(UnitXVisitor):
 			PAREN=(): expression
 			BRACK=[]: list
 		"""
+		unit = None
+		if ctx.unit(): unit = self.visitUnit(ctx.unit())
+
 		if ctx.Identifier():
 			# Here: ここで変数がスコープにあるかを判定し，見つかったオブジェクトを格納する．
 			varname = ctx.Identifier().getText()
 			found_scope = self._scopes.peek().find_scope_of(varname)
-			if found_scope: res = found_scope[varname]
-			else: res = UnitXObject(value=None, varname=varname)
+			if found_scope:
+				unitx_obj = found_scope[varname]
+			else:
+				unitx_obj = UnitXObject(value=None, varname=varname, unit=unit)
 
 		elif ctx.literal():
 			a_value = self.visitLiteral(ctx.literal())
-			if a_value is None: res = UnitXObject(value=None, varname=None, is_none=True)
+			if a_value is None:
+				unitx_obj = UnitXObject(value=None, varname=None, unit=unit, is_none=True)
 			else:
-				res = UnitXObject(value=a_value, varname=None)
+				unitx_obj = UnitXObject(value=a_value, varname=None, unit=unit)
+				unitx_obj.unit = unit
+		elif ctx.start.type == UnitXLexer.LPAREN:
+			unitx_obj = self.visitExpression(ctx.expression(i=0))
 
-		elif ctx.start.type == UnitXLexer.LPAREN: res = self.visitExpression(ctx.expression(i=0))
 		elif ctx.start.type == UnitXLexer.LBRACK:
 			unitx_objs = [self.visitExpression(an_expr) for an_expr in ctx.expression()]
-			return UnitXObject(value = unitx_objs, varname = None)
+			unitx_obj = UnitXObject(value = unitx_objs, varname = None, unit=unit)
 		else:
 			raise Exception("Syntax error. EvalVisitor#visitPrimary") # Never happen.
 
-		assert(isinstance(res, UnitXObject))
-		return res
+		assert(isinstance(unitx_obj, UnitXObject))
+		return unitx_obj
 
 
 	def visitLiteral(self, ctx):

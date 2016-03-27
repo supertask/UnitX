@@ -8,8 +8,8 @@ from unitx_object import UnitXObject
 """ 複数のクラスを跨って必要な定数を定義する定義ファイル．
 """
 class Constants(object):
-	ZERO = UnitXObject(value=0, varname=None)
-	ONE = UnitXObject(value=1, varname=None)
+	ZERO = UnitXObject(value=0, varname=None, unit=None)
+	ONE = UnitXObject(value=1, varname=None, unit=None)
 	
 def main():
 	print Constants.ZERO, Constants.ZERO.get_value()

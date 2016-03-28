@@ -77,12 +77,12 @@ class UnitXObjectCalc:
 		"""
 		self.check_unitx_objects([x]) # 代入される側のみcheckする．
 
-		#an_obj = UnitXObject(value=y.get_value(), varname=x.varname, unit=y.unit, is_none=y.is_none)
 		x.set_value(y.get_value())
 		x.unit = y.unit
 		x.unit.remove_ex()
 		x.is_none = y.is_none
 		self.scopes.regist_unitx_obj(x.varname, x)
+		#print self.scopes
 		return x
 
 

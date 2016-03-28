@@ -80,7 +80,7 @@ class EvalVisitor(UnitXVisitor):
 			self._scopes.new_scope()
 			if called_args:
 				args_without_default = [[var, unitx_obj] for var, unitx_obj in def_func.args if not unitx_obj]
-				print len(args_without_default), len(called_args)
+				#print len(args_without_default), len(called_args)
 				if len(called_args) < len(args_without_default):
 					sys.stderr.write('引数足りないError') #引数足りないerror
 					sys.exit(1)
@@ -216,9 +216,8 @@ class EvalVisitor(UnitXVisitor):
 			repeat_list = end_value
 		self._scopes.new_scope()
 
-		for i in repeat_list:
-			# var_obj: 変数名=O,値=X，i: 変数名=X,値=O
-			self.calc.assign(var_obj, i) # i=UnitXObject
+		for unitx_obj in repeat_list:
+			self.calc.assign(var_obj, unitx_obj)
 			self.visitStatement(ctx.statement())
 
 		self._scopes.del_scope()
@@ -274,6 +273,7 @@ class EvalVisitor(UnitXVisitor):
 			dumpモードでは，変数名とその変数に束縛されたUnitXObjectの値を出力する．
 			printモードでは，UnitXObjectの値のみを出力する．
 		"""
+		#print self._scopes
 		unitx_strs = []
 		for an_expr in ctx.expression():
 			unitx_obj = self.visitExpression(an_expr)
@@ -408,6 +408,8 @@ class EvalVisitor(UnitXVisitor):
 			found_scope = self._scopes.peek().find_scope_of(varname)
 			if found_scope:
 				unitx_obj = found_scope[varname]
+				if not unit.is_empty():
+					unitx_obj.unit = unit
 			else:
 				unitx_obj = UnitXObject(value=None, varname=varname, unit=unit)
 
@@ -417,12 +419,19 @@ class EvalVisitor(UnitXVisitor):
 				unitx_obj = UnitXObject(value=None, varname=None, unit=unit, is_none=True)
 			else:
 				unitx_obj = UnitXObject(value=a_value, varname=None, unit=unit)
-				unitx_obj.unit = unit
+
 		elif ctx.start.type == UnitXLexer.LPAREN:
 			unitx_obj = self.visitExpression(ctx.expression(i=0))
-			unitx_obj.unit = unit
+			if not unit.is_empty():
+				unitx_obj.unit = unit
+
 		elif ctx.start.type == UnitXLexer.LBRACK:
-			unitx_objs = [self.visitExpression(an_expr) for an_expr in ctx.expression()]
+			unitx_objs = []
+			for an_expr in ctx.expression():
+				an_obj = self.visitExpression(an_expr)
+				if not unit.is_empty():
+					an_obj.unit = unit
+				unitx_objs.append(an_obj)
 			unitx_obj = UnitXObject(value = unitx_objs, varname = None, unit=unit)
 		else:
 			raise Exception("Syntax error. EvalVisitor#visitPrimary") # Never happen.

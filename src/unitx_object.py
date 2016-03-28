@@ -44,29 +44,25 @@ class UnitXObject:
 				if unitx_obj.is_none:
 					return None
 				else:
-					value = unitx_obj.get_value()
-					if isinstance(value, list):
-						list_values = []
-						for v in value:
-							v.set_value(self._trans_unit(v.get_value()))
-							list_values.append(v)
-						return list_values
-					else:
-						return self._trans_unit(value, ex_unit)
+					return self._trans_all_unit(unitx_obj.get_value())
 			else:
 				if error:
 					sys.stderr.write("NameError: name '%s' is not defined.\n" % self.varname)
 					sys.exit(1)
 				else: return None
 		else:
-			if isinstance(self._value, list):
-				list_values = []
-				for v in self._value:
-					v.set_value(self._trans_unit(v.get_value()))
-					list_values.append(v)
-				return list_values
-			else:
-				return self._trans_unit(self._value)
+			return self._trans_all_unit(self._value)
+
+
+	def _trans_all_unit(self, value):
+		if isinstance(value, list):
+			list_values = []
+			for v in value:
+				v.set_value(self._trans_unit(v.get_value()))
+				list_values.append(v)
+			return list_values
+		else:
+			return self._trans_unit(value)
 
 
 	def _trans_unit(self, value):
@@ -78,7 +74,6 @@ class UnitXObject:
 		if not self.unit or self.unit.is_empty(): return value
 		self._check_unit(self.unit)
 
-		# TODO(Tasuku): ここからエラー
 		manager = self.get_unit_manager()
 		if self.unit.numer and self.unit.ex_numer:
 			value = value * (manager.get_criterion(self.unit.ex_numer) / manager.get_criterion(self.unit.numer))

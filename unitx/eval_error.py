@@ -155,16 +155,18 @@ class EvalErrorListener(ErrorListener):
 			filename = self.codepath
 			target_line = linecache.getline(self.codepath, row)
 		target_line = target_line.rstrip()
-		white_line = Util.filter_to_white(target_line)
-		whites = list(white_line)
+		whites = list(Util.filter_to_white(target_line))
 
 		whites[column] = '^'
 		mark_line = ''.join(whites)
-		error_line = '%s: row %s: SyntaxError: %s\n' % (filename, row, msg)
-		error_line = target_line + '\n' + mark_line + '\n'
+		error_line = ""
+		error_line += '%s: row %s: SyntaxError: %s\n' % (filename, row, msg)
+		error_line += target_line + '\n' + mark_line + '\n'
 		sys.stderr.write(error_line)
 
 		linecache.clearcache() 
+		#if self.is_intaractive_run: recognizer.exitRule()
+		#else: sys.exit(1)
 		sys.exit(1)
 
 

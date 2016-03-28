@@ -27,11 +27,17 @@ class DefinedFunction(object):
 		"""
 		return self._current_scope
 	
-	def dump(self):
+	def __unicode__(self):
 		""" Outputs attributes bound by this class.
 		"""
-		sys.stdout.write("DefinedFunction: name=%s, args=%s ctx=%s\n" % (self.name, self.args, self.ctx))
-		return
+		res = "<%s: %s(%s) ctx=%s>" % (self.__class__.__name__, self.name, self.args, self.ctx)
+		return res
+
+	def __str__(self):
+		return unicode(self).encode('utf-8')
+
+	def __repr__(self):
+		return self.__str__()
 
 def main():
 	""" A example code.
@@ -39,13 +45,24 @@ def main():
 		A value of 'func_name' should get by using visitFormalParameters(ctx).
 		Also, a value of 'ctx' should get from argument of visitFunctionDeclaration(ctx).
 	"""
+	# Prepare part
 	from unitx_object import UnitXObject
-	x, y = UnitXObject(None,None,is_none=True), UnitXObject(None,None,is_none=True)
-	func_name = 'dfs'
-	func_args = [['x', x], ['y', y], ['level', None]]
-	ctx = None
-	def_func = DefinedFunction(func_name, func_args, ctx)
-	def_func.dump()
+	from unit_manager import UnitManager
+	from scope_list import ScopeList
+	from util import Util
+	scopes = ScopeList()
+	UnitXObject.unit_manager = UnitManager('data/unit_table.dat')
+	UnitXObject.scopes = scopes
+	scopes.new_scope()
+
+	current_scope = scopes.peek()
+	x, y = UnitXObject(None,None,None,is_none=True), UnitXObject(None,None,None,is_none=True)
+	current_scope['x'] = x
+	current_scope['y'] = y
+	current_scope['dfs'] = DefinedFunction('dfs', [['x', x], ['y', y], ['level', None]], ctx=None)
+	Util.dump(current_scope)
+
+	scopes.del_scope()
 
 	return 0
 

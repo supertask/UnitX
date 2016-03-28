@@ -16,27 +16,35 @@ class Util:
 
 	@classmethod
 	def filter_to_white(self, a_str):
-		spaces = ''
-		print len(a_str)
+		spaces = u''
 		for a_char in a_str:
-			if a_char == '\t':
-				spaces += '\t'
+			a_char
+			if a_char == u'\t':
+				spaces += u'\t'
+			elif Util.is_ascii(a_char):
+				spaces += u' '
 			else:
-				spaces += ' '
+				spaces += u'　'
 		return spaces
 
-	"""
 	@classmethod
-	def split_without_removing(self, s, sep):
-		lines = []
-		for i,line in enumerate(s.split(sep)):
-			if i < len(s)-1: lines.append(line + sep)
-		return lines
-	"""
+	def is_ascii(self, string):
+		""" Returns true if non ascii characters are detected in the given string.
+		"""
+		if string:
+			return max([ord(char) for char in string]) < 128
+		return True
 
 def main():
 	Util.dump(['あ', 'い', 'う'])
 	Util.dump({'title':'ねじまき鳥', 'author':'村上春樹'})
+
+	print Util.is_ascii(u"""abc m(__)m""")
+	print Util.is_ascii(u'あいうえお')
+
+	code = u'面積 = 距離 * 高さ'
+	print "|%s|" % code
+	print "|%s|" % Util.filter_to_white(code)
 
 	return 0
 

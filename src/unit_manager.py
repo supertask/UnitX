@@ -65,6 +65,7 @@ class UnitManager(object):
 		if unit_str in self._unit_id_dict:
 			return self._unit_id_dict[unit_str]
 		else:
+			raise Exception()
 			sys.stderr.write('Unitががありません\n')
 			sys.exit(1)
 

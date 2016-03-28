@@ -16,27 +16,45 @@ class Unit:
 		self.ex_denom = ex_denom
 		self.denom = denom
 	
+	def remove_ex(self):
+		self.ex_numer = self.ex_denom = None
+	
+	def is_empty(self):
+		return self.ex_numer == self.numer == self.ex_denom == self.denom == None
+
 	def add(self, unit):
 		if self.numer == unit.numer and self.denom == unit.denom: return self
-		else: return None #error
+		elif not self.numer and not self.denom: return unit
+		elif not unit.numer and not unit.denom: return self
+		else:
+			sys.stderr.write('二つのUnitが一致しない\n')
+			sys.exit(1)
 	
 	def subtract(self, unit):
 		if self.numer == unit.numer and self.denom == unit.denom: return self
-		else: return None #error
+		elif not self.numer and not self.denom: return unit
+		elif not unit.numer and not unit.denom: return self
+		else:
+			sys.stderr.write('二つのUnitが一致しない\n')
+			sys.exit(1)
 
 	def multiply(self, unit):
 		if self.numer == unit.denom: return Unit(numer=unit.numer)
 		elif self.denom == unit.numer: return Unit(numer=self.numer)
 		elif not self.numer and not self.denom: return unit
 		elif not unit.numer and not unit.denom: return self
-		else: return None #error
+		else:
+			sys.stderr.write('二つのUnitが一致しない\n')
+			sys.exit(1)
 
 	def divide(self, unit):
 		if self.numer == unit.numer and self.denom == unit.denom: return Unit()
 		elif (not self.denom) and self.numer == unit.numer: return Unit(numer=unit.denom)
 		elif not self.numer and not self.denom: return unit
 		elif not unit.numer and not unit.denom: return self
-		else: return None #error
+		else:
+			sys.stderr.write('二つのUnitが一致しない\n')
+			sys.exit(1)
 
 	def formal_str(self):
 		if self.numer and self.denom:
@@ -44,7 +62,7 @@ class Unit:
 		elif self.numer and not self.denom:
 			return '{%s}' % (self.numer)
 		else:
-			return '{}'
+			return ''
 
 	def __unicode__(self):
 		""" 値と変数を詳細に表示する．
@@ -90,8 +108,8 @@ def main():
 	left, right = Unit(None, None, None, None), Unit(None, u'km', None, u'時')
 	print "%s * %s\t-> %s" % (left.formal_str(), right.formal_str(), left.multiply(right).formal_str())
 
-	left, right = Unit(None, u'km', None, u'時'), Unit(None, u'km', None, u'時')
-	print "%s * %s\t-> %s" % (left.formal_str(), right.formal_str(), left.multiply(right)) #error
+	#left, right = Unit(None, u'km', None, u'時'), Unit(None, u'km', None, u'時')
+	#print "%s * %s\t-> %s" % (left.formal_str(), right.formal_str(), left.multiply(right)) #error
 
 	#
 	# divide() demo
@@ -109,8 +127,8 @@ def main():
 	left, right = Unit(None, u'km', None, None), Unit(None, None, None, None)
 	print "%s / %s\t-> %s" % (left.formal_str(), right.formal_str(), left.divide(right).formal_str())
 
-	left, right = Unit(None, u'km', None, u'時'), Unit(None, u'時', None, None)
-	print "%s / %s\t-> %s" % (left.formal_str(), right.formal_str(), left.divide(right)) #error
+	#left, right = Unit(None, u'km', None, u'時'), Unit(None, u'時', None, None)
+	#print "%s / %s\t-> %s" % (left.formal_str(), right.formal_str(), left.divide(right)) #error
 
 	return 0
 

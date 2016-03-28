@@ -211,7 +211,7 @@ class EvalVisitor(UnitXVisitor):
 		var_obj, end_control = self.visitRepControl(ctx.repControl())
 		end_value = end_control.get_value()
 		if isinstance(end_value, int):
-			repeat_list = [UnitXObject(value=x,varname=None,unit=None) for x in range(end_value)]
+			repeat_list = [UnitXObject(value=x,varname=None,unit=Unit()) for x in range(end_value)]
 		else:
 			repeat_list = end_value
 		self._scopes.new_scope()
@@ -225,7 +225,6 @@ class EvalVisitor(UnitXVisitor):
 		return
 
 
-	# Visit a parse tree produced by UnitXParser#ifStatement.
 	def visitIfStatement(self, ctx):
 		""" 与えられたexpressionの結果
 			BNF: 'if' parExpression statement ('else' statement)?
@@ -245,7 +244,10 @@ class EvalVisitor(UnitXVisitor):
 
 	def visitExpressionStatement(self, ctx):
 		""" Just visiting child nodes of UnitX syntax."""
-		return self.visitChildren(ctx)
+		unitx_obj = self.visitExpression(ctx.expression())
+		if self.is_intaractive_run:
+			print "%s%s" % (unitx_obj.get_value(), unitx_obj.unit.formal_str())
+		return
 
 
 	def visitReturnStatement(self, ctx):
@@ -275,13 +277,14 @@ class EvalVisitor(UnitXVisitor):
 		unitx_strs = []
 		for an_expr in ctx.expression():
 			unitx_obj = self.visitExpression(an_expr)
-			if unitx_obj.is_none():
+			if unitx_obj.is_none:
 				dump_line = 'None' #None
 			else: 
-				varname = unitx_obj.get_varname()
+				varname = unitx_obj.varname
 				if varname and mode == 'dump':
-					dump_line = "%s: %s" % (varname, unitx_obj.get_value())
-				else: dump_line = str(unitx_obj.get_value())
+					dump_line = "%s: %s%s" % (varname, unitx_obj.get_value(), unitx_obj.unit.formal_str())
+				else:
+					dump_line = "%s%s" % (unitx_obj.get_value(), unitx_obj.unit.formal_str())
 			unitx_strs.append(dump_line)
 		sys.stdout.write(' '.join(unitx_strs) + '\n')
 		return
@@ -301,7 +304,7 @@ class EvalVisitor(UnitXVisitor):
 			ex: [i,5], [i,[1,2,3]]
 		"""
 		varname = ctx.Identifier().getText()
-		return [UnitXObject(value=None, varname=varname, unit=None), self.visitEndRep(ctx.endRep())]
+		return [UnitXObject(value=None, varname=varname, unit=Unit()), self.visitEndRep(ctx.endRep())]
 
 
 	def visitEndRep(self, ctx):
@@ -324,11 +327,11 @@ class EvalVisitor(UnitXVisitor):
 			if ctx.start.type == UnitXLexer.INC: unitx_obj = self.calc.increment(x)
 			elif ctx.start.type == UnitXLexer.DEC: unitx_obj = self.calc.decrement(x)
 			elif second_token == UnitXLexer.LPAREN:
-				called_func_name, called_args = x.get_varname(), []
+				called_func_name, called_args = x.varname, []
 				if ctx.expressionList():
 					called_args = self.visitExpressionList(ctx.expressionList())
 				a_value = self._call_function(called_func_name, called_args)
-				unitx_obj = UnitXObject(value=a_value, varname=called_func_name, unit=None)
+				unitx_obj = UnitXObject(value=a_value, varname=called_func_name, unit=Unit())
 			else:
 				y = self.visitExpression(ctx.expression(i=1))
 				if second_token == UnitXLexer.ADD: unitx_obj = self.calc.add(x,y)
@@ -361,7 +364,7 @@ class EvalVisitor(UnitXVisitor):
 	def visitUnitSingleOrPairOperator(self, ctx):
 		"""
 		"""
-		if ctx.start.type == UnitXLexer.AT: return None
+		if ctx.start.type == UnitXLexer.AT: return Unit()
 		if ctx.unitOperator(i=1):
 			unit = Unit()
 			numers = self.visitUnitOperator(ctx.unitOperator(i=0))
@@ -396,7 +399,7 @@ class EvalVisitor(UnitXVisitor):
 			PAREN=(): expression
 			BRACK=[]: list
 		"""
-		unit = None
+		unit = Unit()
 		if ctx.unit(): unit = self.visitUnit(ctx.unit())
 
 		if ctx.Identifier():
@@ -417,7 +420,7 @@ class EvalVisitor(UnitXVisitor):
 				unitx_obj.unit = unit
 		elif ctx.start.type == UnitXLexer.LPAREN:
 			unitx_obj = self.visitExpression(ctx.expression(i=0))
-
+			unitx_obj.unit = unit
 		elif ctx.start.type == UnitXLexer.LBRACK:
 			unitx_objs = [self.visitExpression(an_expr) for an_expr in ctx.expression()]
 			unitx_obj = UnitXObject(value = unitx_objs, varname = None, unit=unit)
@@ -470,9 +473,4 @@ class EvalVisitor(UnitXVisitor):
 		"""
 		a_value = True if ctx.start.text == 'true' else False
 		return a_value
-
-	"""
-	def visitErrorNode(self, node):
-		print node.getSymbol().text
-	"""
 

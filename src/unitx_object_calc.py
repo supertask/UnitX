@@ -16,7 +16,7 @@ class UnitXObjectCalc:
 
 	def check_unitx_objects(self, unitx_objs):
 		for an_obj in unitx_objs:
-			if an_obj.is_none():
+			if an_obj.is_none:
 				sys.stderr.write("型Error: Noneを演算しようとしている．")
 				sys.exit(1)
 
@@ -31,28 +31,32 @@ class UnitXObjectCalc:
 		"""
 		self.check_unitx_objects([x,y])
 		a_value = (x.get_value() + y.get_value())
-		return UnitXObject(value = a_value, varname=None, unit=None)
+		a_unit = x.unit.add(y.unit)
+		return UnitXObject(value = a_value, varname=None, unit=a_unit)
 
 	def subtract(self,x,y):
 		""" スコープの情報をx,yに注入し，x,yを引いて，結果を応答する．
 		"""
 		self.check_unitx_objects([x,y])
 		a_value = (x.get_value() - y.get_value())
-		return UnitXObject(value = a_value, varname=None, unit=None)
+		a_unit = x.unit.subtract(y.unit)
+		return UnitXObject(value = a_value, varname=None, unit=a_unit)
 
 	def multiply(self,x,y):
 		""" スコープの情報をx,yに注入し，x,yを掛けて，結果を応答する．
 		"""
 		self.check_unitx_objects([x,y])
 		a_value = (x.get_value() * y.get_value())
-		return UnitXObject(value = a_value, varname=None, unit=None)
+		a_unit = x.unit.multiply(y.unit)
+		return UnitXObject(value = a_value, varname=None, unit=a_unit)
 
 	def divide(self,x,y):
 		""" スコープの情報をx,yに注入し，x,yを割って，結果を応答する．
 		"""
 		self.check_unitx_objects([x,y])
 		a_value = (x.get_value() / y.get_value())
-		return UnitXObject(value = a_value, varname=None, unit=None)
+		a_unit = x.unit.divide(y.unit)
+		return UnitXObject(value = a_value, varname=None, unit=a_unit)
 
 	def increment(self,x):
 		""" スコープの情報をx,yに注入し，xをインクリメントして，結果を応答する．
@@ -73,14 +77,13 @@ class UnitXObjectCalc:
 		"""
 		self.check_unitx_objects([x]) # 代入される側のみcheckする．
 
-		varname = x.get_varname() # 変数名が登録されていなければ，error処理をする
-		if y.is_none():
-			an_obj = UnitXObject(value = None, varname=varname, unit=None, is_none=y.is_none())
-		else:
-			an_obj = UnitXObject(value = y.get_value(), varname=varname, unit=None, is_none=y.is_none())
-		self.scopes.regist_unitx_obj(varname, an_obj)
-
-		return an_obj
+		#an_obj = UnitXObject(value=y.get_value(), varname=x.varname, unit=y.unit, is_none=y.is_none)
+		x.set_value(y.get_value())
+		x.unit = y.unit
+		x.unit.remove_ex()
+		x.is_none = y.is_none
+		self.scopes.regist_unitx_obj(x.varname, x)
+		return x
 
 
 	def add_assign(self, x, y):

@@ -26,86 +26,85 @@ class UnitXObject:
 			ここでのvalueとは，数値，文字列，変数名を表す．
 		"""
 		self._value = value
-		self._varname = varname
-		self._is_none = is_none
+		self.varname = varname
+		self.is_none = is_none
 		self.unit = unit
 
 	def get_value(self, error=True):
 		""" UnitXObjectに束縛する数値，文字列，または変数の値を応答する．
+			もし，値がなければ変数をスコープから辿り，その値を返す．
 			また，呼び出した際にエラー出力したくない場合はerrorをオフにする必要がある．
 		"""
 		if self._value is None:
-			varname = self.get_varname()
-			if not varname:
-				sys.stderr.write('SystemError: value and varname are None.\n')
-				sys.exit(1)
-			found_scope = self.get_scopes().peek().find_scope_of(varname)
+			if not self.varname:
+				return None
+			found_scope = self.get_scopes().peek().find_scope_of(self.varname)
 			if found_scope:
-				unitx_obj = found_scope[varname]
-				if unitx_obj.is_none(): return None
+				unitx_obj = found_scope[self.varname]
+				if unitx_obj.is_none:
+					return None
 				else:
 					value = unitx_obj.get_value()
-					ex_unit = unitx_obj.get_unit()
-					return self._trans_unit(value, ex_unit)
+					if isinstance(value, list):
+						list_values = []
+						for v in value:
+							v.set_value(self._trans_unit(v.get_value()))
+							list_values.append(v)
+						return list_values
+					else:
+						return self._trans_unit(value, ex_unit)
 			else:
 				if error:
-					sys.stderr.write("NameError: name '%s' is not defined.\n" % varname)
-					#raise Exception()
+					sys.stderr.write("NameError: name '%s' is not defined.\n" % self.varname)
 					sys.exit(1)
 				else: return None
 		else:
-			return self._trans_unit(self._value, None)
+			if isinstance(self._value, list):
+				list_values = []
+				for v in self._value:
+					v.set_value(self._trans_unit(v.get_value()))
+					list_values.append(v)
+				return list_values
+			else:
+				return self._trans_unit(self._value)
 
 
-	def _trans_unit(self, value, ex_unit):
+	def _trans_unit(self, value):
 		"""
 		"""
 		if isinstance(value, bool): return value
-		elif isinstance(value, str): return value
-		unit = self.get_unit()
-		if not unit: return value
-		if ex_unit: self._check_unit(unit, ex_unit)
+		if isinstance(value, str): return value
+		if isinstance(value, unicode): return value
+		if not self.unit or self.unit.is_empty(): return value
+		self._check_unit(self.unit)
 
 		# TODO(Tasuku): ここからエラー
-		if unit.numer and unit.ex_numer:
-			ex_numer_value = self.get_unit_manager().get_criterion(unit.ex_numer)
-			numer_value = self.get_unit_manager().get_criterion(unit.numer)
-			value = value * (ex_numer_value / numer_value)
-		if unit.denom and unit.ex_denom:
-			ex_denom_value = self.get_unit_manager().get_criterion(unit.ex_denom)
-			denom_value = self.get_unit_manager().get_criterion(unit.denom)
-			value = value * (ex_denom_value / denom_value)
+		manager = self.get_unit_manager()
+		if self.unit.numer and self.unit.ex_numer:
+			value = value * (manager.get_criterion(self.unit.ex_numer) / manager.get_criterion(self.unit.numer))
+		if self.unit.denom and self.unit.ex_denom:
+			value = value * (manager.get_criterion(self.unit.ex_denom) / manager.get_criterion(self.unit.denom))
 		value = float(value)
 		if value.is_integer(): value = int(value)
 
 		return value
 
 
-	def _check_unit(self, unit, ex_unit):
+	def _check_unit(self, unit):
 		"""
 		"""
-		if not unit.ex_numer: unit.ex_numer = ex_unit.numer
-		if not unit.ex_denom: unit.ex_denom = ex_unit.denom
+		manager = self.get_unit_manager()
 		if unit.numer and unit.ex_numer:
-			if self.get_unit_manager().get_unit_id(unit.numer) != self.get_unit_manager().get_unit_id(unit.ex_numer):
+			if manager.get_unit_id(unit.numer) != manager.get_unit_id(unit.ex_numer):
 				sys.stderr.write('Unitが合わない\n')
 				sys.exit(1)
 		if unit.denom and unit.ex_denom:
-			if self.get_unit_manager().get_unit_id(unit.denom) != self.get_unit_manager().get_unit_id(unit.ex_denom):
+			if manager.get_unit_id(unit.denom) != manager.get_unit_id(unit.ex_denom):
 				sys.stderr.write('Unitが合わない\n')
 				sys.exit(1)
 
-
-	def get_varname(self):
-		""" 変数名を応答する．
-			また，呼び出した際にエラー出力したくない場合はerrorをオフにする必要がある．
-		"""
-		return self._varname
-
-	def is_none(self):
-		""" UnitXObjectがNoneオブジェクトを束縛するかを応答する．
-		"""
-		return self._is_none
+	def set_value(self, value):
+		self._value = value
 
 	def get_scopes(self):
 		""" すべてのスコープを束縛するインスタンスを応答する．
@@ -122,7 +121,7 @@ class UnitXObject:
 		""" 値と変数を詳細に表示する．
 		"""
 		return u"<%s: value=%s, varname=%s, is_none=%s unit=%s>" \
-			% (self.__class__.__name__, self.get_value(), self.get_varname(), self.is_none(), self.get_unit())
+			% (self.__class__.__name__, self.get_value(), self.varname, self.is_none, self.unit)
 
 	def __str__(self):
 		return unicode(self).encode('utf-8')
@@ -139,7 +138,7 @@ def main():
 	from scope_list import ScopeList
 	from util import Util
 	scopes = ScopeList()
-	UnitXObject.unit_manager = UnitManager('unit_table.txt')
+	UnitXObject.unit_manager = UnitManager('data/unit_table.dat')
 	UnitXObject.scopes = scopes
 	scopes.new_scope()
 	

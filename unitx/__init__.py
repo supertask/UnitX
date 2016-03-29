@@ -1,3 +1,3 @@
 __author__ = 'Tasuku TAKAHASHI'
-__version__ = '1.0.0'
-__date__ = '02/24/2016'
+__version__ = '0.7.0'
+__date__ = '03/31/2016'

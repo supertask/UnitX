@@ -2,10 +2,11 @@
 # -*- coding:utf-8 -*-
 
 from scope import Scope
+from collegue import Collegue
 
 """ 変数またはインスタンスのスコープたちを管理するクラス．
 """
-class ScopeList(list):
+class ScopeList(list, Collegue):
 
 	def __init__(self):
 		""" スコープのルートを初期化して，応答する．
@@ -58,6 +59,9 @@ class ScopeList(list):
 		if found_scope: found_scope[varname] = unitx_obj #Already created variable.
 		else: current_scope[varname] = unitx_obj #Create variable in the scope.
 		return
+
+	def set_mediator(self, mediator):
+		self.mediator = mediator
 
 def main():
 	return 0

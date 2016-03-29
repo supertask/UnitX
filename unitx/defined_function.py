@@ -2,8 +2,9 @@
 # -*- coding:utf-8 -*-
 
 import sys
+from collegue import Collegue
 
-class DefinedFunction(object):
+class DefinedFunction(Collegue):
 	""" A Class for saving a info of defined function.
 	
 	Attributes:
@@ -38,6 +39,10 @@ class DefinedFunction(object):
 
 	def __repr__(self):
 		return self.__str__()
+
+	@classmethod
+	def set_mediator(self, mediator):
+		self.mediator = mediator
 
 def main():
 	""" A example code.

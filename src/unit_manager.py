@@ -4,8 +4,9 @@
 import sys
 import codecs
 from fractions import Fraction
+from collegue import Collegue
 
-class UnitManager(object):
+class UnitManager(Collegue):
 	""" 単位の情報を読み取り保存するクラス．
 	"""
 
@@ -69,6 +70,8 @@ class UnitManager(object):
 			sys.stderr.write('Unitががありません\n')
 			sys.exit(1)
 
+	def set_mediator(self, mediator):
+		self.mediator = mediator
 
 def main():
 	manager = UnitManager('unit_table.txt')

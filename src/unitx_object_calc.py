@@ -4,27 +4,22 @@
 import sys
 from unitx_object import UnitXObject
 from constants import Constants
+from collegue import Collegue
 
-class UnitXObjectCalc:
+class UnitXObjectCalc(Collegue):
 	""" UnitXObject同士の値を計算するクラス．
 	"""
 
-	def __init__(self, scopes):
+	def __init__(self):
 		""" scopesを設定して，応答する．
 		"""
-		self.scopes = scopes #scopesの参照をself.scopesに渡す．またscopesは読み取りのみでなければならない．
+		pass
 
 	def check_unitx_objects(self, unitx_objs):
 		for an_obj in unitx_objs:
 			if an_obj.is_none:
 				sys.stderr.write("型Error: Noneを演算しようとしている．")
 				sys.exit(1)
-
-	def get_scopes(self):
-		""" スコープの情報を応答する．
-			また，self.const.scopesは書き込むと参照渡しが無効になるため，読み取りのみでなければならない．
-		"""
-		return self.scopes
 
 	def add(self,x,y):
 		""" スコープの情報をx,yに注入し，x,yを足して，結果を応答する．
@@ -81,7 +76,7 @@ class UnitXObjectCalc:
 		x.unit = y.unit
 		x.unit.remove_ex()
 		x.is_none = y.is_none
-		self.scopes.regist_unitx_obj(x.varname, x)
+		self.mediator.get_scopes().regist_unitx_obj(x.varname, x)
 		#print self.scopes
 		return x
 
@@ -106,6 +101,9 @@ class UnitXObjectCalc:
 		"""
 		return self.assign(x, self.divide(x,y))
 
+
+	def set_mediator(self, mediator):
+		self.mediator = mediator
 
 def main():
 	return 0

@@ -3,23 +3,15 @@
 
 import sys
 from unit import Unit
+from collegue import Collegue
+from util import Util
 
-class UnitXObject:
+class UnitXObject(Collegue):
 	""" Primary情報（数値，文字列，真偽値，リスト，変数，関数などの情報）を持つクラス．
 		手動または自動による単位計算などを計算する関数も束縛する．
 
 		ex: 5, "Tasuku", true, [1,2,3], is_first, 5{MB}, 20{kg->g}, 3{N*m}
 	"""
-
-	""" すべてのスコープを束縛するインスタンス．
-		Also, this is a static variable.
-	"""
-	scopes = None
-
-	""" Unitの管理者を束縛するインスタンス．
-		Also, this is a static variable.
-	"""
-	unit_manager = None 
 
 	def __init__(self, value, varname, unit, is_none=False):
 		""" UnitXObjectの初期化
@@ -38,7 +30,7 @@ class UnitXObject:
 		if self._value is None:
 			if not self.varname:
 				return None
-			found_scope = self.get_scopes().peek().find_scope_of(self.varname)
+			found_scope = self.mediator.get_scopes().peek().find_scope_of(self.varname)
 			if found_scope:
 				unitx_obj = found_scope[self.varname]
 				if unitx_obj.is_none:
@@ -74,11 +66,11 @@ class UnitXObject:
 		if not self.unit or self.unit.is_empty(): return value
 		self._check_unit(self.unit)
 
-		manager = self.get_unit_manager()
+		manager = self.mediator.get_unit_manager()
 		if self.unit.numer and self.unit.ex_numer:
 			value = value * (manager.get_criterion(self.unit.ex_numer) / manager.get_criterion(self.unit.numer))
 		if self.unit.denom and self.unit.ex_denom:
-			value = value * (manager.get_criterion(self.unit.ex_denom) / manager.get_criterion(self.unit.denom))
+			value = value * (manager.get_criterion(self.unit.denom) / manager.get_criterion(self.unit.ex_denom))
 		value = float(value)
 		if value.is_integer(): value = int(value)
 
@@ -88,7 +80,7 @@ class UnitXObject:
 	def _check_unit(self, unit):
 		"""
 		"""
-		manager = self.get_unit_manager()
+		manager = self.mediator.get_unit_manager()
 		if unit.numer and unit.ex_numer:
 			if manager.get_unit_id(unit.numer) != manager.get_unit_id(unit.ex_numer):
 				sys.stderr.write('Unitが合わない\n')
@@ -101,14 +93,6 @@ class UnitXObject:
 	def set_value(self, value):
 		self._value = value
 
-	def get_scopes(self):
-		""" すべてのスコープを束縛するインスタンスを応答する．
-		"""
-		return UnitXObject.scopes
-	
-	def get_unit_manager(self):
-		return UnitXObject.unit_manager
-	
 	def get_unit(self):
 		return self.unit
 
@@ -124,6 +108,9 @@ class UnitXObject:
 	def __repr__(self):
 		return self.__str__()
 
+	@classmethod
+	def set_mediator(self, mediator):
+		self.mediator = mediator
 
 def main():
 	""" Example: UnitXObjectの変数を保存し，取り出し，確認する．

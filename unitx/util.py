@@ -4,7 +4,7 @@
 import sys
 import prettyprint
 
-class Util:
+class Util(object):
 	""" 汎用的なユーティリティ関数をまとめたクラス．
 	"""
 

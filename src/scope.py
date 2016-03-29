@@ -1,10 +1,11 @@
 #!/usr/bin/env python
 # -*- coding:utf-8 -*-
 
-""" 変数またはインスタンスのスコープを管理するクラス．
-"""
-class Scope(dict):
+from collegue import Collegue
 
+class Scope(dict, Collegue):
+	""" 変数またはインスタンスのスコープを管理するクラス．
+	"""
 	def __init__(self, parent):
 		""" 親スコープを初期化して，応答する．
 		"""
@@ -18,6 +19,10 @@ class Scope(dict):
 		else:
 			if not self._parent: return None #終了条件
 			return self._parent.find_scope_of(varname) #再帰的に探す
+
+	@classmethod
+	def set_mediator(self, mediator):
+		self.mediator = mediator
 
 def main():
 	return 0

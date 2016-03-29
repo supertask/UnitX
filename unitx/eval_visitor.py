@@ -18,8 +18,10 @@ from constants import Constants
 from defined_function import DefinedFunction
 from unit import Unit
 from unit_manager import UnitManager
+from mediator import Mediator
+from scope import Scope
 
-class EvalVisitor(UnitXVisitor):
+class EvalVisitor(UnitXVisitor, Mediator):
 	""" UnitXの構文木をたどり，その振る舞いを行うクラス．
 
 	UnitXParserから，このクラスにある各visit関数が呼ばれ，実行される．それぞれの構文ごとに振る舞いが行われ，それが言語としてのアウトプットとなる．
@@ -33,18 +35,53 @@ class EvalVisitor(UnitXVisitor):
 	def __init__(self, is_intaractive_run, an_errhandler):
 		""" EvalVisitorを初期化して応答する．
 		"""
+		#self.is_break = False
 		self.is_intaractive_run = is_intaractive_run
 		self.errhandler = an_errhandler
 		self._scopes = ScopeList()
-		self.calc = UnitXObjectCalc(self._scopes)
-		self.is_break = False
-		UnitXObject.scopes = self._scopes
+		self.calc = UnitXObjectCalc()
 
 		this_dir, _ = os.path.split(__file__)
 		data_path = os.path.join(this_dir, "data/unit_table.dat")
-		UnitXObject.unit_manager = UnitManager(data_path)
+		self.unit_manager = UnitManager(data_path) # Sets a database(data/unit_table.dat) for calculating units.
+		
+		#
+		# Sets a mediator to each classes for a management,
+		# because this class is a mediator class.
+		# Also, UnitXObject, Unit, Scope classes have to create many new instances.
+		# So, We set a mediator by using classmethod.
+		#
+		self.calc.set_mediator(self)
+		self._scopes.set_mediator(self)
+		self.unit_manager.set_mediator(self)
+		UnitXObject.set_mediator(self)
+		Unit.set_mediator(self)
+		Scope.set_mediator(self)
 
 
+	#
+	# Implementations of Mediator are below.
+	# =======================================
+	#
+	def get_parser(self):
+		return self
+	
+	def get_scopes(self):
+		return self._scopes
+
+	def get_errhandler(self):
+		return self.errhandler
+	
+	def get_is_intaractive_run(self):
+		return self.is_intaractive_run
+	
+	def get_unit_manager(self):
+		return self.unit_manager
+
+	#
+	# Implementations of UnitXVisitor are below.
+	# =======================================
+	#
 	def visitProgram(self, ctx):
 		""" Just visiting child nodes of UnitX syntax.
 			ALSO, THIS <program> RULE IS A STARTING POINT OF UNITX PARSER.
@@ -358,6 +395,7 @@ class EvalVisitor(UnitXVisitor):
 	def visitUnit(self, ctx):
 		""" Just visiting child nodes of UnitX syntax."""
 		unit = self.visitUnitSingleOrPairOperator(ctx.unitSingleOrPairOperator())
+		unit.replace_tokens()
 		return unit
 
 

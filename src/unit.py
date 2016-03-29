@@ -2,8 +2,9 @@
 # -*- coding: utf-8 -*-
 
 import sys
+from collegue import Collegue
 
-class Unit:
+class Unit(Collegue):
 	""" 単位の情報を持つクラス．
 		ex: {MB}, {kg->g}, {m/s}
 	"""
@@ -15,6 +16,21 @@ class Unit:
 		self.numer = numer
 		self.ex_denom = ex_denom
 		self.denom = denom
+
+	def replace_tokens(self):
+		tokens = [self.ex_numer, self.numer, self.ex_denom, self.denom]
+		scopes = self.mediator.get_scopes()
+		unit_manager = self.mediator.get_unit_manager()
+		new_tokens = []
+		for t in tokens:
+			found_scope = scopes.peek().find_scope_of(t)
+			if found_scope:
+				unitx_obj = found_scope[t]
+				new_tokens.append(unitx_obj.get_value())
+			else:
+				new_tokens.append(t)
+		self.ex_numer, self.numer, self.ex_denom, self.denom = new_tokens
+		return
 	
 	def remove_ex(self):
 		self.ex_numer = self.ex_denom = None
@@ -76,6 +92,9 @@ class Unit:
 	def __repr__(self):
 		return self.__str__()
 
+	@classmethod
+	def set_mediator(self, mediator):
+		self.mediator = mediator
 
 def main():
 	print Unit(u'分', u'時', None, None)

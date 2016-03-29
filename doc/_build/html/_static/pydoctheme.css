@@ -33,7 +33,7 @@ div.related a, div.related a:hover {
 
 div.sphinxsidebar {
     background-color: #eeeeee;
-    border-radius: 5px;
+    /*border-radius: 5px;*/
     line-height: 130%;
     font-size: smaller;
 }

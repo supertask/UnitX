@@ -72,7 +72,7 @@ $(function() {
     sidebarbutton.css({
         'margin-left': '0',
         'height': bodywrapper.height(),
-        'border-radius': '5px'
+        'border-radius': '0px'
     });
     sidebarbutton.find('span').text('»');
     sidebarbutton.attr('title', _('Expand sidebar'));
@@ -86,7 +86,7 @@ $(function() {
     sidebarbutton.css({
         'margin-left': ssb_width_expanded-12,
         'height': bodywrapper.height(),
-        'border-radius': '0 5px 5px 0'
+        'border-radius': '0'
     });
     sidebarbutton.find('span').text('«');
     sidebarbutton.attr('title', _('Collapse sidebar'));
@@ -119,7 +119,7 @@ $(function() {
     sidebarbutton.click(toggle_sidebar);
     sidebarbutton.attr('title', _('Collapse sidebar'));
     sidebarbutton.css({
-        'border-radius': '0 5px 5px 0',
+        'border-radius': '0',
         'color': '#444444',
         'background-color': '#CCCCCC',
         'font-size': '1.2em',
@@ -161,7 +161,6 @@ $(function() {
   var sidebarbutton = $('#sidebarbutton');
   set_position_from_cookie();
 
-  collapse_sidebar();
 
   /* intelligent scrolling */
   function scroll_sidebar() {

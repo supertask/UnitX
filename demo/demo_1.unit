@@ -2,6 +2,8 @@
  * カオス
  */
 
+print "ミーティング時間は16:10 - 17:20です．" {Asia_Tokyo->US_Hawaii}
+
 def xjapan(x, y, z='hey') {
 	print x, y, z, 5
 	a = 5 + 2

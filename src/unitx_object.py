@@ -50,45 +50,67 @@ class UnitXObject(Collegue):
 		if isinstance(value, list):
 			list_values = []
 			for v in value:
-				v.set_value(self._trans_unit(v.get_value()))
+				v.set_value(self._trans_by_unit(v.get_value()))
 				list_values.append(v)
 			return list_values
 		else:
-			return self._trans_unit(value)
+			return self._trans_by_unit(value)
 
 
-	def _trans_unit(self, value):
+	def _trans_by_unit(self, value):
 		"""
 		"""
 		if isinstance(value, bool): return value
-		if isinstance(value, str): return value
-		if isinstance(value, unicode): return value
 		if not self.unit or self.unit.is_empty(): return value
-		self._check_unit(self.unit)
+		self._check_unit()
 
+		manager = self.mediator.get_unit_manager()
+		exec(manager.get_prepare_exec(), globals())
+		trans_value = self._trans_by_original_unit(value)
+
+		if not trans_value:
+			if self.unit.numer and self.unit.ex_numer:
+				value = value * (manager.get_criterion(self.unit.ex_numer) \
+					/ manager.get_criterion(self.unit.numer))
+
+			if self.unit.denom and self.unit.ex_denom:
+				value = value * (manager.get_criterion(self.unit.denom) \
+					/ manager.get_criterion(self.unit.ex_denom))
+
+			trans_value = float(value)
+			if trans_value.is_integer(): trans_value = int(trans_value)
+
+		return trans_value
+
+
+	def _trans_by_original_unit(self, value):
+		"""
+		"""
+		unit = self.unit
+		manager = self.mediator.get_unit_manager()
+		unit_id = manager.get_unit_id(self.unit.numer)
+		res = eval(manager._unit_evals[unit_id])
+		if not isinstance(res, dict):
+			return res
+		else:
+			return None
+			
+
+
+	def _check_unit(self):
+		"""
+		"""
 		manager = self.mediator.get_unit_manager()
 		if self.unit.numer and self.unit.ex_numer:
-			value = value * (manager.get_criterion(self.unit.ex_numer) / manager.get_criterion(self.unit.numer))
+			if manager.get_unit_id(self.unit.numer) != manager.get_unit_id(self.unit.ex_numer):
+				sys.stderr.write('Unitが合わない\n')
+				sys.exit(1)
+
 		if self.unit.denom and self.unit.ex_denom:
-			value = value * (manager.get_criterion(self.unit.denom) / manager.get_criterion(self.unit.ex_denom))
-		value = float(value)
-		if value.is_integer(): value = int(value)
-
-		return value
-
-
-	def _check_unit(self, unit):
-		"""
-		"""
-		manager = self.mediator.get_unit_manager()
-		if unit.numer and unit.ex_numer:
-			if manager.get_unit_id(unit.numer) != manager.get_unit_id(unit.ex_numer):
+			if manager.get_unit_id(self.unit.denom) != manager.get_unit_id(self.unit.ex_denom):
 				sys.stderr.write('Unitが合わない\n')
 				sys.exit(1)
-		if unit.denom and unit.ex_denom:
-			if manager.get_unit_id(unit.denom) != manager.get_unit_id(unit.ex_denom):
-				sys.stderr.write('Unitが合わない\n')
-				sys.exit(1)
+
 
 	def set_value(self, value):
 		self._value = value

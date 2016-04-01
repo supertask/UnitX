@@ -56,14 +56,14 @@ unittest:
 	@date
 
 demo: all
-	$(TARGET) $(DEMO1)
-	@date
-
-demo0:
 	$(TARGET) $(DEMO0)
 	@date
 
-demo1:
+demo0: all
+	$(TARGET) $(DEMO0)
+	@date
+
+demo1: all
 	$(TARGET) $(DEMO1)
 	@date
 

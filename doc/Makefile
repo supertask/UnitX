@@ -57,6 +57,9 @@ html: clean
 	@echo
 	@echo "Build finished. The HTML pages are in $(BUILDDIR)/html."
 
+open:
+	open $(BUILDDIR)/html/index.html
+
 .PHONY: dirhtml
 dirhtml:
 	$(SPHINXBUILD) -b dirhtml $(ALLSPHINXOPTS) $(BUILDDIR)/dirhtml

@@ -3,7 +3,7 @@
 
 What is UnitX
 -----
-UnitX is a script language for Unit.
+UnitX is a script language for Unit. **Especially, Unit handling is better than other languages.**
 
 [English](README.md), [日本語](README.ja.md)
 
@@ -18,11 +18,11 @@ Example
 -----
 Run Demo program like below.
 
-	make demo
+	$ unitx demo/demo_0.unit
 
-or
+And a content in the code is like bellow.
 
-```rb
+```python:demo_0.unit
 >> 飛行機代 = 10{万} * 2{@往復}
 >> 保険料 = 20{万}
 ---
@@ -35,10 +35,32 @@ rep i,['月','年'] {
 }
 ```
 
+The result become like bellow.
+
+```text:result
+飛行機代: 20{万}
+保険料: 20{万}
+---
+学校代: 8{万/月}
+レジデンス代: 10{万/月}
+食費: 2{万/月}
+計: 58{万}
+-----
+学校代: 96{万/年}
+レジデンス代: 120{万/年}
+食費: 24{万/年}
+計: 256{万}
+-----
+```
+
+Regulation
+-----
+If you're going to use UnitX, you must tune to UTF-8 on your command-line shell and editor.
+
 Coding style
 -----
 Following a [Google Python Style Guide](https://google.github.io/styleguide/pyguide.html) for using UnitX or developing UnitX.  
-However, as a parser generator, we use ANTLR4. So, we use LCC in the visitor(UnitXEvalVisitor) for ANTLR4.
+However, as a parser generator, we use ANTLR 4. So, we use LCC(Lower Camel Case) in some code(eval\_visitor.py and eval\_error.py) for receiving messages from ANTLR 4.
 
 The Author
 -----
@@ -50,12 +72,13 @@ MIT
 
 RELEASED
 -----
-Nothing
+|   Version   |    Released   |
+|:------------|--------------:|
+| 0.7.0 alpha |   2016-04-04  |
 
 RELEASE SCHEDULE
 -----
 |   Version   | scheduled day |
 |:------------|--------------:|
-| 0.7.0 alpha |   2016-03-31  |
 | 0.7.0 beta  |   2016-05-01  |
 | 0.8.0 alpha |   2018-09-01  |

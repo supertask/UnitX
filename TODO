@@ -1,4 +1,5 @@
 TODO
-・print関数のフォーマット(ex. print "{i}額")
 ・エラーハンドリングの適用
+・print関数のフォーマット(ex. print "{i}額")
 ・組み込み関数の実装: rangeなど
+・expressionの字句を増やす: %など

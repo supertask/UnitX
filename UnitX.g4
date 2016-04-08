@@ -143,30 +143,38 @@ endRep
 expression
 	: primary
 	| expression '(' expressionList? ')'
-	| expression ('*'|'/'|'%') expression
+	| expression ('*'|'/'|'%') expression //Almost
 	| expression ('+'|'-') expression
 	| expression ('<='|'>='|'>'|'<') expression // Still
-	| expression ('=='|'!=') expression // Still
+	| expression ('=='|'!='|'is') expression // Still
     | expression // Almost
 		( '='
 		| '+='
 		| '-='
 		| '*='
 		| '/='
-		| '&='
-		| '|='
-		| '^='
 		| '%='
 		) expression
 	| expression // Still
-		( '&'
-		| '^'
-		| '|'
-		| '&&'
+		( '&&'
 		| '||'
+		| 'and'
+		| 'or'
 		) expression
 	| ('++'|'--') expression
+	| ('!'|'not') expression
+	| 'not' expression
 	;
+
+/*
+	| '&'
+	| '^'
+	| '|'
+	| '&='
+	| '|='
+	| '^='
+*/
+
 
 unit
 	: '{' unitSingleOrPairOperator '}'
@@ -270,16 +278,20 @@ ASSIGN          : '=';
 GT              : '>';
 LT              : '<';
 BANG            : '!';
+BANG_X          : 'not';
 TILDE           : '~';
 QUESTION        : '?';
 COLON           : ':';
 EQUAL           : '==';
+EQUAL_X         : 'is';
 LE              : '<=';
 GE              : '>=';
 ALLOW           : '->';
 NOTEQUAL        : '!=';
 AND             : '&&';
 OR              : '||';
+AND_X           : 'and';
+OR_X            : 'or';
 INC             : '++';
 DEC             : '--';
 ADD             : '+';

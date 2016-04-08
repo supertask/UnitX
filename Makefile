@@ -56,16 +56,21 @@ unittest:
 	@date
 
 demo: all
-	$(TARGET) $(DEMO0)
+	$(TARGET) demo/demo_0.unit
 	@date
 
 demo0: all
-	$(TARGET) $(DEMO0)
+	$(TARGET) demo/demo_0.unit
 	@date
 
 demo1: all
-	$(TARGET) $(DEMO1)
+	$(TARGET) demo/demo_1.unit
 	@date
+
+demox:
+	$(TARGET) demo/demo_x.unit
+	@date
+	
 
 inline: all
 	$(TARGET)

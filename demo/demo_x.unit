@@ -1,0 +1,45 @@
+/*
+ * カオス
+ */
+
+print "ミーティング時間は16:10 - 17:20です．" {Asia_Tokyo->US_Hawaii}
+
+def xjapan(x, y, z='hey') {
+	print x, y, z, 5
+	a = 5 + 2
+}
+
+def dfs(a) {
+	>> 学校代 = a
+	print 'Hello, world.'
+}
+
+def main() {
+	#dfs(6)
+	#xjapan(5,2)
+
+	>> 飛行機代 = 10{万} * 2{@往復}
+	>> 保険料 = 20{万}
+	---
+	rep i,['月','年'] {
+		print i, '費用'
+		>> 学校代 = 6{万/月->i}
+		>> レジデンス代 = 9{万/月->i}
+		>> 計 = 飛行機代 + 保険料 + (学校代 + レジデンス代){万/i} * 1{i}
+		-----
+	}
+
+	if false {
+		学校代 = 6{万円/月}
+		>> レジデンス代 = 9{万円/月}
+	}
+	else if false {
+		>> Fuck = 9{万円/月}
+	}
+	else {
+		task = 7 + 10 * 2
+		print task, 飛行機代
+	}
+}
+
+main()

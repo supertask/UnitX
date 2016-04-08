@@ -1,5 +1,15 @@
 TODO
 ・エラーハンドリングの適用
+	・UnitXObjectとUnitXObjectCalcを統合
+	・エラーハンドリングが必要なクラス
+		・UnitxObject
+		・Unit
+	・UnitXObjectやUnitの演算の際に，raiseを吐くようにしておく．
+		ex. 'a' + 52
+				^
+
 ・print関数のフォーマット(ex. print "{i}額")
 ・組み込み関数の実装: rangeなど
 ・expressionの字句を増やす: %など
+
+

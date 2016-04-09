@@ -1,11 +1,12 @@
 #!/usr/bin/env python
 # -*- coding:utf-8 -*-
 
+""" A file for running UnitX.
+	Also, you'd like to know a distribution path, type like bellow on python.
+
+		import unitx.example
+		print unitx.example.__file__
 """
-"""
-__author__ = 'Tasuku TAKAHASHI'
-__version__ = '1.0.0'
-__date__ = '02/24/2016'
 
 import sys
 from unitx.example import main

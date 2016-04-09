@@ -9,9 +9,10 @@ class Unit(Collegue):
 		ex: {MB}, {kg->g}, {m/s}
 	"""
 
-	def __init__(self, ex_numer=None, numer=None, ex_denom=None, denom=None):
+	def __init__(self, ex_numer=None, numer=None, ex_denom=None, tokens=None, denom=None):
 		""" Unitの初期化
 		"""
+		self.tokens = tokens
 		self.ex_numer = ex_numer
 		self.numer = numer
 		self.ex_denom = ex_denom

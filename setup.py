@@ -24,7 +24,7 @@ setup(
 	author='Tasuku Takahashi',
 	author_email='lightfox.task@gmail.com',
 	license='MIT',
-	scripts=[TARGET, TARGET+'.cmd'],
+	scripts=[TARGET],
 	test_suite = "totality_test.test",
 	install_requires=[
 		'antlr4-python2-runtime',

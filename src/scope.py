@@ -24,6 +24,7 @@ class Scope(dict, Collegue):
 	def set_mediator(self, mediator):
 		self.mediator = mediator
 
+
 def main():
 	return 0
 

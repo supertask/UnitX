@@ -2,7 +2,8 @@
 # -*- coding:utf-8 -*-
 
 class Collegue(object):
-	""" Collegue interface of Mediator pattern.
-	"""
+	"""Collegue interface for Mediator pattern."""
+
 	def set_mediator(self, mediator):
+		"""Sets a mediator for Mediator pattern."""
 		pass

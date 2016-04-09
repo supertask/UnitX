@@ -21,6 +21,7 @@ class EvalErrorStrategy(DefaultErrorStrategy):
 		super(EvalErrorStrategy, self).__init__()
 		self.is_intaractive_run = is_intaractive_run
 		self.is_ignored_block = False
+		self.default_msg = "SyntaxError: "
 
 	def _filter_newline(self, tokens):
 		res = []
@@ -36,10 +37,10 @@ class EvalErrorStrategy(DefaultErrorStrategy):
 			yet successfully, don't report any errors.
 		"""
 		if self.is_block(recognizer): return
-
 		if super(EvalErrorStrategy, self).inErrorRecoveryMode(recognizer):
 			return # don't report spurious errors
 		super(EvalErrorStrategy, self).beginErrorCondition(recognizer)
+
 		if isinstance( e, NoViableAltException ):
 			self.reportNoViableAlternative(recognizer, e)
 		elif isinstance( e, InputMismatchException ):
@@ -62,14 +63,16 @@ class EvalErrorStrategy(DefaultErrorStrategy):
 				input = tokens.getText((e.startToken, e.offendingToken))
 		else:
 			input = "<unknown input>"
-		msg = "no viable alternative at input " + super(EvalErrorStrategy, self).escapeWSAndQuote(input)
+		msg = self.default_msg
+		msg += "no viable alternative at input " + super(EvalErrorStrategy, self).escapeWSAndQuote(input)
 		recognizer.notifyErrorListeners(msg, e.offendingToken, e)
 	
 
 	def reportInputMismatch(self, recognizer, e):
 		""" Reports input mismatch error.
 		"""
-		msg = "mismatched input " + super(EvalErrorStrategy, self).getTokenErrorDisplay(e.offendingToken) \
+		msg = self.default_msg
+		msg += "mismatched input " + super(EvalErrorStrategy, self).getTokenErrorDisplay(e.offendingToken) \
 			  + " expecting " + e.getExpectedTokens().toString(recognizer.literalNames, recognizer.symbolicNames)
 		recognizer.notifyErrorListeners(msg, e.offendingToken, e)
 
@@ -78,7 +81,8 @@ class EvalErrorStrategy(DefaultErrorStrategy):
 		""" Reports failed predicate error.
 		"""
 		rule_name = recognizer.ruleNames[recognizer._ctx.getRuleIndex()]
-		msg = "rule " + rule_name + " " + e.message
+		msg = self.default_msg
+		msg += "rule " + rule_name + " " + e.message
 		recognizer.notifyErrorListeners(msg, e.offendingToken, e)
 
 	def reportUnwantedToken(self, recognizer):
@@ -94,7 +98,8 @@ class EvalErrorStrategy(DefaultErrorStrategy):
 		token_name = super(EvalErrorStrategy, self).getTokenErrorDisplay(t)
 		expecting = super(EvalErrorStrategy, self).getExpectedTokens(recognizer)
 
-		msg = "unexpecting " + token_name + ", expecting " \
+		msg = self.default_msg
+		msg += "unexpecting " + token_name + ", expecting " \
 			+ expecting.toString(self._filter_newline(recognizer.literalNames), recognizer.symbolicNames)
 		recognizer.notifyErrorListeners(msg, t, None)
 
@@ -117,7 +122,8 @@ class EvalErrorStrategy(DefaultErrorStrategy):
 		t = recognizer.getCurrentToken()
 		expecting = super(EvalErrorStrategy, self).getExpectedTokens(recognizer)
 
-		msg = "missing " + expecting.toString(recognizer.literalNames, recognizer.symbolicNames) \
+		msg = self.default_msg
+		msg += "missing " + expecting.toString(recognizer.literalNames, recognizer.symbolicNames) \
 			  + " at " + super(EvalErrorStrategy, self).getTokenErrorDisplay(t)
 		recognizer.notifyErrorListeners(msg, t, None)
 
@@ -144,12 +150,16 @@ class EvalErrorListener(ErrorListener):
 	def syntaxError(self, recognizer, offendingSymbol, row, column, msg, e):
 		# TODO(Tasuku): 対話型のときのエラー描画のバグ
 
+		print type(offendingSymbol)
+		print dir(offendingSymbol)
 		import linecache
 		from util import Util
 		target_line = ''
 		filename = ''
 		if self.is_intaractive_run:
 			filename = '<stdin>'
+			#print row, column
+			#print 'Here', self.codelines
 			target_line = self.codelines[row-1]
 		else:
 			filename = self.codepath
@@ -157,16 +167,17 @@ class EvalErrorListener(ErrorListener):
 		target_line = target_line.rstrip()
 		whites = list(Util.filter_to_white(target_line))
 
+		#print '-'*10
+		#print column
+		#print '-'*10
 		whites[column] = '^'
 		mark_line = ''.join(whites)
 		error_line = ""
-		error_line += '%s: row %s: SyntaxError: %s\n' % (filename, row, msg)
+		error_line += '%s: row %s: %s\n' % (filename, row, msg)
 		error_line += target_line + '\n' + mark_line + '\n'
 		sys.stderr.write(error_line)
 
 		linecache.clearcache() 
-		#if self.is_intaractive_run: recognizer.exitRule()
-		#else: sys.exit(1)
 		sys.exit(1)
 
 

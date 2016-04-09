@@ -78,6 +78,6 @@ RELEASED
 
 RELEASE SCHEDULE
 -----
-|   Version   | scheduled day |
+|   Version   | Scheduled day |
 |:------------|--------------:|
 | 0.7.0 beta  |   2018-09-01  |

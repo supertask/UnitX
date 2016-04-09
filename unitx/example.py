@@ -16,7 +16,12 @@ from cmd import Cmd
 import readline
 import rlcompleter
 
-class UnitXCmd(Cmd):
+class Example(Cmd):
+	"""A class running a parser on each some mode.
+	
+
+	"""
+
 	Cmd.prompt = 'unitx> '
 
 	def __init__(self, is_intaractive_run):
@@ -27,6 +32,7 @@ class UnitXCmd(Cmd):
 		self.visitor = EvalVisitor(self.is_intaractive_run, self.errhandler)
 		self.parser = UnitXParser(None)
 		self.parser._errHandler = self.errhandler
+		self.visitor.set_parser(self.parser)
 
 	def do_demo(self, arg_line):
 		if arg_line.isdigit(): print "Xdemo", int(arg_line)
@@ -112,12 +118,12 @@ def main(argv):
 	""" 
 	"""
 	if len(argv) > 1:
-		cmd = UnitXCmd(is_intaractive_run=False)
+		cmd = Example(is_intaractive_run=False)
 		cmd.eat_code(argv[1])
 	else:
 		import intro_line
 		print intro_line.get_line()
-		cmd = UnitXCmd(is_intaractive_run=True)
+		cmd = Example(is_intaractive_run=True)
 		cmd.cmdloop()
 	return 0
 

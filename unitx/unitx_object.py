@@ -3,20 +3,23 @@
 
 import sys
 from unit import Unit
-from collegue import Collegue
 from util import Util
+from collegue import Collegue
 
 class UnitXObject(Collegue):
 	""" Primary情報（数値，文字列，真偽値，リスト，変数，関数などの情報）を持つクラス．
 		手動または自動による単位計算などを計算する関数も束縛する．
 
-		ex: 5, "Tasuku", true, [1,2,3], is_first, 5{MB}, 20{kg->g}, 3{N*m}
+		ex: 5, "Tasuku", true, [1,2,3], a_var, 5{MB}, 20{kg->g}, 3{N*m}
 	"""
 
-	def __init__(self, value, varname, unit, is_none=False):
+	is_prepared_unit_table = False # start variable
+
+	def __init__(self, value, varname, unit, token=None, is_none=False):
 		""" UnitXObjectの初期化
 			ここでのvalueとは，数値，文字列，変数名を表す．
 		"""
+		self.token = token
 		self._value = value
 		self.varname = varname
 		self.is_none = is_none
@@ -39,8 +42,10 @@ class UnitXObject(Collegue):
 					return self._trans_all_unit(unitx_obj.get_value())
 			else:
 				if error:
-					sys.stderr.write("NameError: name '%s' is not defined.\n" % self.varname)
-					sys.exit(1)
+					msg = "NameError: name '%s' is not defined.\n" % self.varname
+					token = None
+					self.mediator.get_parser().notifyErrorListeners(msg, token, None)
+					#sys.exit(1)
 				else: return None
 		else:
 			return self._trans_all_unit(self._value)
@@ -65,7 +70,10 @@ class UnitXObject(Collegue):
 		self._check_unit()
 
 		manager = self.mediator.get_unit_manager()
-		exec(manager.get_prepare_exec(), globals())
+		if not UnitXObject.is_prepared_unit_table: 
+			UnitXObject.is_prepared_unit_table = True
+			exec(manager.get_prepare_exec(), globals())
+			
 		trans_value = self._trans_by_original_unit(value)
 
 		if not trans_value:
@@ -129,6 +137,93 @@ class UnitXObject(Collegue):
 
 	def __repr__(self):
 		return self.__str__()
+
+
+	def check_unitx_objects(self, unitx_objs):
+		"""
+		"""
+		for an_obj in unitx_objs:
+			if an_obj.is_none:
+				sys.stderr.write("型Error: Noneを演算しようとしている．")
+				sys.exit(1)
+
+	def add(self, unitx_obj):
+		""" スコープの情報をx,yに注入し，x,yを足して，結果を応答する．
+		"""
+		self.check_unitx_objects([self, unitx_obj])
+		a_value = (self.get_value() + unitx_obj.get_value())
+		a_unit = self.unit.add(unitx_obj.unit)
+		return UnitXObject(value = a_value, varname=None, unit=a_unit)
+
+	def subtract(self, unitx_obj):
+		""" スコープの情報をx,yに注入し，x,yを引いて，結果を応答する．
+		"""
+		self.check_unitx_objects([self, unitx_obj])
+		a_value = (self.get_value() - unitx_obj.get_value())
+		a_unit = self.unit.subtract(unitx_obj.unit)
+		return UnitXObject(value = a_value, varname=None, unit=a_unit)
+
+	def multiply(self, unitx_obj):
+		""" スコープの情報をx,yに注入し，x,yを掛けて，結果を応答する．
+		"""
+		self.check_unitx_objects([self, unitx_obj])
+		a_value = (self.get_value() * unitx_obj.get_value())
+		a_unit = self.unit.multiply(unitx_obj.unit)
+		return UnitXObject(value = a_value, varname=None, unit=a_unit)
+
+	def divide(self,x, unitx_obj):
+		""" スコープの情報をx,yに注入し，x,yを割って，結果を応答する．
+		"""
+		self.check_unitx_objects([self, unitx_obj])
+		a_value = (self.get_value() / unitx_obj.get_value())
+		a_unit = self.unit.divide(unitx_obj.unit)
+		return UnitXObject(value = a_value, varname=None, unit=a_unit)
+
+	def increment(self):
+		""" スコープの情報をx,yに注入し，xをインクリメントして，結果を応答する．
+		"""
+		self.check_unitx_objects([self])
+		return self.add_assign(UnitXObject(value=1, varname=None, unit=Unit()))
+
+	def decrement(self):
+		""" スコープの情報をx,yに注入し，xをデクリメントして，結果を応答する．
+		"""
+		self.check_unitx_objects([self])
+		return self.subtract_assign(UnitXObject(value=1, varname=None, unit=Unit()))
+
+
+	def assign(self, unitx_obj):
+		""" スコープの情報をx,yに注入し，変数xに値yを代入して，結果を応答する．
+			スコープに値を入れる唯一の関数．
+		"""
+		self.check_unitx_objects([self]) # 代入される側のみcheckする．
+
+		self.set_value(unitx_obj.get_value())
+		self.unit = unitx_obj.unit
+		self.unit.remove_ex()
+		self.is_none = unitx_obj.is_none
+		self.mediator.get_scopes().regist_unitx_obj(self.varname, self)
+		return self
+
+	def add_assign(self, unitx_obj):
+		""" スコープの情報をx,yに注入し，x,yを足してxに代入して，結果を応答する．
+		"""
+		return self.assign(self.add(unitx_obj))
+
+	def subtract_assign(self, unitx_obj):
+		""" スコープの情報をx,yに注入し，x,yを引いてxに代入して，結果を応答する．
+		"""
+		return self.assign(self.subtract(unitx_obj))
+		
+	def multiply_assign(self, unitx_obj):
+		""" スコープの情報をx,yに注入し，x,yを掛けてxに代入して，結果を応答する．
+		"""
+		return self.assign(self.multiply(unitx_obj))
+
+	def divide_assign(self, unitx_obj):
+		""" スコープの情報をx,yに注入し，x,yを割ってxに代入して，結果を応答する．
+		"""
+		return self.assign(self.divide(unitx_obj))
 
 	@classmethod
 	def set_mediator(self, mediator):

@@ -11,10 +11,8 @@ from UnitXParser import UnitXParser
 from UnitXLexer import UnitXLexer
 
 from unitx_object import UnitXObject
-from unitx_object_calc import UnitXObjectCalc
 from scope_list import ScopeList
 from util import Util
-from constants import Constants
 from defined_function import DefinedFunction
 from unit import Unit
 from unit_manager import UnitManager
@@ -35,11 +33,9 @@ class EvalVisitor(UnitXVisitor, Mediator):
 	def __init__(self, is_intaractive_run, an_errhandler):
 		""" EvalVisitorを初期化して応答する．
 		"""
-		#self.is_break = False
 		self.is_intaractive_run = is_intaractive_run
 		self.errhandler = an_errhandler
 		self._scopes = ScopeList()
-		self.calc = UnitXObjectCalc()
 
 		this_dir, _ = os.path.split(__file__)
 		data_path = os.path.join(this_dir, "data/unit_table.dat")
@@ -51,7 +47,6 @@ class EvalVisitor(UnitXVisitor, Mediator):
 		# Also, UnitXObject, Unit, Scope classes have to create many new instances.
 		# So, We set a mediator by using classmethod.
 		#
-		self.calc.set_mediator(self)
 		self._scopes.set_mediator(self)
 		self.unit_manager.set_mediator(self)
 		UnitXObject.set_mediator(self)
@@ -63,8 +58,11 @@ class EvalVisitor(UnitXVisitor, Mediator):
 	# Implementations of Mediator are below.
 	# =======================================
 	#
+	def set_parser(self, parser):
+		self.parser = parser
+
 	def get_parser(self):
-		return self
+		return self.parser
 	
 	def get_scopes(self):
 		return self._scopes
@@ -133,7 +131,7 @@ class EvalVisitor(UnitXVisitor, Mediator):
 						if not default_value:
 							default_value = UnitXObject(value=None,varname=None,unit=None,is_none=True)
 						unitx_obj = default_value
-					self.calc.assign(UnitXObject(value=None,varname=varname,unit=None),unitx_obj)
+					UnitXObject(value=None,varname=varname,unit=None).assign(unitx_obj)
 
 			# TODO(Tasuku): 現在は定義した関数のみ使用可能だが，組み込み関数はまだなので，それを後で追加
 			self.visitBlock(def_func.ctx.block())
@@ -254,7 +252,7 @@ class EvalVisitor(UnitXVisitor, Mediator):
 		self._scopes.new_scope()
 
 		for unitx_obj in repeat_list:
-			self.calc.assign(var_obj, unitx_obj)
+			var_obj.assign(unitx_obj)
 			self.visitStatement(ctx.statement())
 
 		self._scopes.del_scope()
@@ -360,26 +358,26 @@ class EvalVisitor(UnitXVisitor, Mediator):
 		if ctx.expression(i=0):
 			x = self.visitExpression(ctx.expression(i=0)) # x,y: UnitXObject
 
-			second_token = ctx.getChild(i=1).getSymbol().type
-			if ctx.start.type == UnitXLexer.INC: unitx_obj = self.calc.increment(x)
-			elif ctx.start.type == UnitXLexer.DEC: unitx_obj = self.calc.decrement(x)
-			elif second_token == UnitXLexer.LPAREN:
+			if ctx.start.type == UnitXLexer.INC: unitx_obj = x.increment()
+			elif ctx.start.type == UnitXLexer.DEC: unitx_obj = x.decrement()
+			elif ctx.getChild(i=1).getSymbol().type == UnitXLexer.LPAREN:
 				called_func_name, called_args = x.varname, []
 				if ctx.expressionList():
 					called_args = self.visitExpressionList(ctx.expressionList())
 				a_value = self._call_function(called_func_name, called_args)
 				unitx_obj = UnitXObject(value=a_value, varname=called_func_name, unit=Unit())
 			else:
+				second_token = ctx.getChild(i=1).getSymbol().type
 				y = self.visitExpression(ctx.expression(i=1))
-				if second_token == UnitXLexer.ADD: unitx_obj = self.calc.add(x,y)
-				elif second_token == UnitXLexer.SUB: unitx_obj = self.calc.subtract(x,y)
-				elif second_token == UnitXLexer.MUL: unitx_obj = self.calc.multiply(x,y)
-				elif second_token == UnitXLexer.DIV: unitx_obj = self.calc.divide(x,y)
-				elif second_token == UnitXLexer.ASSIGN: unitx_obj = self.calc.assign(x,y)
-				elif second_token == UnitXLexer.ADD_ASSIGN: unitx_obj = self.calc.add_assign(x,y)
-				elif second_token == UnitXLexer.SUB_ASSIGN: unitx_obj = self.calc.substract_assign(x,y)
-				elif second_token == UnitXLexer.MUL_ASSIGN: unitx_obj = self.calc.multiply(x,y)
-				elif second_token == UnitXLexer.DIV_ASSIGN: unitx_obj = self.calc.divide(x,y)
+				if second_token == UnitXLexer.ADD: unitx_obj = x.add(y)
+				elif second_token == UnitXLexer.SUB: unitx_obj = x.subtract(y)
+				elif second_token == UnitXLexer.MUL: unitx_obj = x.multiply(y)
+				elif second_token == UnitXLexer.DIV: unitx_obj = x.divide(y)
+				elif second_token == UnitXLexer.ASSIGN: unitx_obj = x.assign(y)
+				elif second_token == UnitXLexer.ADD_ASSIGN: unitx_obj = x.add_assign(y)
+				elif second_token == UnitXLexer.SUB_ASSIGN: unitx_obj = x.substract_assign(y)
+				elif second_token == UnitXLexer.MUL_ASSIGN: unitx_obj = x.multiply(y)
+				elif second_token == UnitXLexer.DIV_ASSIGN: unitx_obj = x.divide(y)
 				elif second_token == UnitXLexer.MOD_ASSIGN: unitx_obj = None
 				else:
 					unitx_obj = None
@@ -405,18 +403,21 @@ class EvalVisitor(UnitXVisitor, Mediator):
 		if ctx.start.type == UnitXLexer.AT: return Unit()
 		if ctx.unitOperator(i=1):
 			unit = Unit()
-			numers = self.visitUnitOperator(ctx.unitOperator(i=0))
-			denoms = self.visitUnitOperator(ctx.unitOperator(i=1))
-			if len(numers) == 2: unit.ex_numer, unit.numer = numers
-			else: unit.numer = numers[0]
-			if len(denoms) == 2: unit.ex_denom, unit.denom = denoms
-			else: unit.denom = denoms[0]
+			numer_tokens = self.visitUnitOperator(ctx.unitOperator(i=0))
+			denom_tokens = self.visitUnitOperator(ctx.unitOperator(i=1))
+
+			if len(numer_tokens) == 2: unit.ex_numer, unit.numer = numer_tokens[0].text, numer_tokens[1].text
+			else: unit.numer = numer_tokens[0].text
+			if len(denom_tokens) == 2: unit.ex_denom, unit.denom = denom_tokens[0].text, denom_tokens[1].text
+			else: unit.denom = denom_tokens[0].text
 			return unit
+
 		else:
 			unit = Unit()
-			numers = self.visitUnitOperator(ctx.unitOperator(i=0))
-			if len(numers) == 2: unit.ex_numer, unit.numer = numers
-			else: unit.numer = numers[0]
+			numer_tokens = self.visitUnitOperator(ctx.unitOperator(i=0))
+
+			if len(numer_tokens) == 2: unit.ex_numer, unit.numer = numer_tokens[0].text, numer_tokens[1].text
+			else: unit.numer = numer_tokens[0].text
 			return unit
 
 
@@ -424,9 +425,9 @@ class EvalVisitor(UnitXVisitor, Mediator):
 		"""
 		"""
 		if ctx.Identifier(i=1):
-			return [ctx.Identifier(i=0).getText(), ctx.Identifier(i=1).getText()]
+			return [ctx.Identifier(i=0).getSymbol(), ctx.Identifier(i=1).getSymbol()]
 		else:
-			return [ctx.Identifier(i=0).getText()]
+			return [ctx.Identifier(i=0).getSymbol()]
 
 
 	def visitPrimary(self, ctx):

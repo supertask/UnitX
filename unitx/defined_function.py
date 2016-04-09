@@ -5,13 +5,13 @@ import sys
 from collegue import Collegue
 
 class DefinedFunction(Collegue):
-	""" A Class for saving a info of defined function.
+	"""A Class for saving a infomation of defined function.
 	
 	Attributes:
 		name: A string indicating function name.
 		args: A list of string indicating function argument.
 		ctx: An instance of ParserRuleContext of functionDeclaration RULE.
-		current_scope: A instance of Scope saving an instance of this class.
+		_current_scope: A instance of Scope saving an instance of this class.
 	"""
 
 	def __init__(self, name, args, ctx, current_scope=None):
@@ -29,28 +29,34 @@ class DefinedFunction(Collegue):
 		return self._current_scope
 	
 	def __unicode__(self):
-		""" Outputs attributes bound by this class.
+		""" Returns a string of attributes.
+			Returns:
+				A string of infomations of attributes.
 		"""
 		res = "<%s: %s(%s) ctx=%s>" % (self.__class__.__name__, self.name, self.args, self.ctx)
 		return res
 
 	def __str__(self):
+		""" Returns an encoded string."""
 		return unicode(self).encode('utf-8')
 
 	def __repr__(self):
+		""" Returns a string of attributes."""
 		return self.__str__()
 
 	@classmethod
 	def set_mediator(self, mediator):
+		"""Sets a mediator for Mediator pattern."""
 		self.mediator = mediator
 
 def main():
-	""" A example code.
+	"""Run an example for Constants class.
 
-		A value of 'func_name' should get by using visitFormalParameters(ctx).
-		Also, a value of 'ctx' should get from argument of visitFunctionDeclaration(ctx).
+	Advice:
+		A value of 'ctx' should get from an argument of visitFunctionDeclaration(ctx).
 	"""
-	# Prepare part
+
+	# Prepare
 	from unitx_object import UnitXObject
 	from unit_manager import UnitManager
 	from scope_list import ScopeList
@@ -60,13 +66,15 @@ def main():
 	UnitXObject.scopes = scopes
 	scopes.new_scope()
 
+	# Define variables
 	current_scope = scopes.peek()
 	x, y = UnitXObject(None,None,None,is_none=True), UnitXObject(None,None,None,is_none=True)
 	current_scope['x'] = x
 	current_scope['y'] = y
 	current_scope['dfs'] = DefinedFunction('dfs', [['x', x], ['y', y], ['level', None]], ctx=None)
-	Util.dump(current_scope)
 
+	# Output
+	Util.dump(current_scope)
 	scopes.del_scope()
 
 	return 0

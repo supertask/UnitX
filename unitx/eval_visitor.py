@@ -131,7 +131,7 @@ class EvalVisitor(UnitXVisitor, Mediator):
 						if not default_value:
 							default_value = UnitXObject(value=None,varname=None,unit=None,is_none=True)
 						unitx_obj = default_value
-					UnitXObject(value=None,varname=varname,unit=None).assign(unitx_obj)
+					UnitXObject(value=None,varname=varname,unit=None).assign(unitx_obj, None)
 
 			# TODO(Tasuku): 現在は定義した関数のみ使用可能だが，組み込み関数はまだなので，それを後で追加
 			self.visitBlock(def_func.ctx.block())
@@ -252,7 +252,7 @@ class EvalVisitor(UnitXVisitor, Mediator):
 		self._scopes.new_scope()
 
 		for unitx_obj in repeat_list:
-			var_obj.assign(unitx_obj)
+			var_obj.assign(unitx_obj, None)
 			self.visitStatement(ctx.statement())
 
 		self._scopes.del_scope()
@@ -280,7 +280,10 @@ class EvalVisitor(UnitXVisitor, Mediator):
 		""" Just visiting child nodes of UnitX syntax."""
 		unitx_obj = self.visitExpression(ctx.expression())
 		if self.is_intaractive_run:
-			print "%s%s" % (unitx_obj.get_value(), unitx_obj.unit.formal_str())
+			if unitx_obj.is_none:
+				print 'NULL'
+			else:
+				print "%s%s" % (unitx_obj.get_value(), unitx_obj.unit.formal_str())
 		return
 
 
@@ -313,7 +316,7 @@ class EvalVisitor(UnitXVisitor, Mediator):
 		for an_expr in ctx.expression():
 			unitx_obj = self.visitExpression(an_expr)
 			if unitx_obj.is_none:
-				dump_line = 'None' #None
+				dump_line = 'NULL' #None
 			else: 
 				varname = unitx_obj.varname
 				if varname and mode == 'dump':
@@ -367,18 +370,18 @@ class EvalVisitor(UnitXVisitor, Mediator):
 				a_value = self._call_function(called_func_name, called_args)
 				unitx_obj = UnitXObject(value=a_value, varname=called_func_name, unit=Unit())
 			else:
-				second_token = ctx.getChild(i=1).getSymbol().type
+				second_token = ctx.getChild(i=1).getSymbol()
 				y = self.visitExpression(ctx.expression(i=1))
-				if second_token == UnitXLexer.ADD: unitx_obj = x.add(y)
-				elif second_token == UnitXLexer.SUB: unitx_obj = x.subtract(y)
-				elif second_token == UnitXLexer.MUL: unitx_obj = x.multiply(y)
-				elif second_token == UnitXLexer.DIV: unitx_obj = x.divide(y)
-				elif second_token == UnitXLexer.ASSIGN: unitx_obj = x.assign(y)
-				elif second_token == UnitXLexer.ADD_ASSIGN: unitx_obj = x.add_assign(y)
-				elif second_token == UnitXLexer.SUB_ASSIGN: unitx_obj = x.substract_assign(y)
-				elif second_token == UnitXLexer.MUL_ASSIGN: unitx_obj = x.multiply(y)
-				elif second_token == UnitXLexer.DIV_ASSIGN: unitx_obj = x.divide(y)
-				elif second_token == UnitXLexer.MOD_ASSIGN: unitx_obj = None
+				if second_token.type == UnitXLexer.ADD: unitx_obj = x.add(y, second_token)
+				elif second_token.type == UnitXLexer.SUB: unitx_obj = x.subtract(y, second_token)
+				elif second_token.type == UnitXLexer.MUL: unitx_obj = x.multiply(y, second_token)
+				elif second_token.type == UnitXLexer.DIV: unitx_obj = x.divide(y, second_token)
+				elif second_token.type == UnitXLexer.ASSIGN: unitx_obj = x.assign(y, second_token)
+				elif second_token.type == UnitXLexer.ADD_ASSIGN: unitx_obj = x.add_assign(y, second_token)
+				elif second_token.type == UnitXLexer.SUB_ASSIGN: unitx_obj = x.substract_assign(y, second_token)
+				elif second_token.type == UnitXLexer.MUL_ASSIGN: unitx_obj = x.multiply_assign(y, second_token)
+				elif second_token.type == UnitXLexer.DIV_ASSIGN: unitx_obj = x.divide_assign(y, second_token)
+				elif second_token.type == UnitXLexer.MOD_ASSIGN: unitx_obj = None
 				else:
 					unitx_obj = None
 		elif ctx.primary(): unitx_obj = self.visitPrimary(ctx.primary())
@@ -451,18 +454,17 @@ class EvalVisitor(UnitXVisitor, Mediator):
 					unitx_obj.unit = unit
 			else:
 				unitx_obj = UnitXObject(value=None, varname=varname, unit=unit)
+			unitx_obj.token = ctx.Identifier().getSymbol()
 
 		elif ctx.literal():
-			a_value = self.visitLiteral(ctx.literal())
-			if a_value is None:
-				unitx_obj = UnitXObject(value=None, varname=None, unit=unit, is_none=True)
-			else:
-				unitx_obj = UnitXObject(value=a_value, varname=None, unit=unit)
+			unitx_obj = self.visitLiteral(ctx.literal())
+			unitx_obj.unit = unit
 
 		elif ctx.start.type == UnitXLexer.LPAREN:
 			unitx_obj = self.visitExpression(ctx.expression(i=0))
 			if not unit.is_empty():
 				unitx_obj.unit = unit
+			unitx_obj.token = ctx.start
 
 		elif ctx.start.type == UnitXLexer.LBRACK:
 			unitx_objs = []
@@ -471,7 +473,9 @@ class EvalVisitor(UnitXVisitor, Mediator):
 				if not unit.is_empty():
 					an_obj.unit = unit
 				unitx_objs.append(an_obj)
-			unitx_obj = UnitXObject(value = unitx_objs, varname = None, unit=unit)
+
+			unitx_obj = UnitXObject(value = unitx_objs, varname = None, unit=unit, token=ctx.start)
+
 		else:
 			raise Exception("Syntax error. EvalVisitor#visitPrimary") # Never happen.
 
@@ -485,40 +489,67 @@ class EvalVisitor(UnitXVisitor, Mediator):
 		if ctx.number(): return self.visitNumber(ctx.number())
 		elif ctx.string(): return self.visitString(ctx.string())
 		elif ctx.boolean(): return self.visitBoolean(ctx.boolean())
-		elif ctx.none(): return None
+		elif ctx.none(): return self.visitNone(ctx.none())
 		else: raise Exception("Syntax error. EvalVisitor#visitLiteral") # Never happen.
 
 
 	def visitString(self, ctx):
 		""" 文字列から，両端にあるダブルクォーテーション(\")，シングルクォーテーション(\')，トリプルダブルクォーテーション(\"\"\")，トリプルシングルクォーテーション(\'\'\')を排除し，応答する．
 		"""
-		a_value = ctx.start.text.strip('"\'')
-		return a_value
+		value = ctx.start.text.strip('"\'')
+		if ctx.STRING_LITERAL(): token = ctx.STRING_LITERAL().getSymbol()
+		elif ctx.BYTES_LITERAL(): token = ctx.BYTES_LITERAL().getSymbol()
+
+		return UnitXObject(value=value, varname=None, unit=None, token=token)
 
 
 	def visitNumber(self, ctx):
 		""" 文字列から，int型,float型,複素数型へ変換し，応答する．
 		"""
-		if ctx.integer(): a_value = self.visitInteger(ctx.integer())
-		elif ctx.FLOAT_NUMBER(): a_value = float(ctx.FLOAT_NUMBER().getText())
-		elif ctx.IMAG_NUMBER(): a_value = complex(ctx.IMAG_NUMBER().getText())
-		return a_value
+		if ctx.integer(): return self.visitInteger(ctx.integer())
+		elif ctx.FLOAT_NUMBER():
+			value = float(ctx.FLOAT_NUMBER().getText())
+			token = ctx.FLOAT_NUMBER().getSymbol()
+
+		elif ctx.IMAG_NUMBER():
+			value = complex(ctx.IMAG_NUMBER().getText())
+			token = ctx.IMAG_NUMBER().getSymbol()
+
+		return UnitXObject(value=value, varname=None, unit=None, token=token)
 
 
 	def visitInteger(self, ctx):
 		""" 文字列からその文字列に属する進数へint変換し，応答する．
 			変換する進数は，2,8,10,16進数．
 		"""
-		if ctx.DECIMAL_INTEGER(): a_value = int(ctx.DECIMAL_INTEGER().getText(),10)
-		elif ctx.OCT_INTEGER(): a_value = int(ctx.OCT_INTEGER().getText(),8)
-		elif ctx.HEX_INTEGER(): a_value = int(ctx.HEX_INTEGER().getText(),16)
-		elif ctx.BIN_INTEGER(): a_value = int(ctx.BIN_INTEGER().getText(),2)
-		return a_value
+		if ctx.DECIMAL_INTEGER():
+			value = int(ctx.DECIMAL_INTEGER().getText(),10)
+			token = ctx.DECIMAL_INTEGER().getSymbol()
+
+		elif ctx.OCT_INTEGER():
+			value = int(ctx.OCT_INTEGER().getText(),8)
+			token = ctx.OCT_INTEGER().getSymbol()
+
+		elif ctx.HEX_INTEGER():
+			value = int(ctx.HEX_INTEGER().getText(),16)
+			token = ctx.HEX_INTEGER().getSymbol()
+
+		elif ctx.BIN_INTEGER():
+			value = int(ctx.BIN_INTEGER().getText(),2)
+			token = ctx.BIN_INTEGER().getSymbol()
+		
+		return UnitXObject(value=value, varname=None, unit=None, token=token)
 
 
 	def visitBoolean(self, ctx):
 		""" 文字列からbooleanへ変換し，応答する．
 		"""
-		a_value = True if ctx.start.text == 'true' else False
-		return a_value
+		value = True if ctx.start.text == 'true' else False
+		return UnitXObject(value=value, varname=None, unit=None)
+
+	
+	def visitNone(self, ctx):
+		""" 文字列からNoneへ変換し，応答する．
+		"""
+		return UnitXObject(value=None, varname=None, unit=None, is_none=True)
 

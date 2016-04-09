@@ -1,11 +1,8 @@
 TODO
+
 ・エラーハンドリングの適用
 	・エラーハンドリングが必要なクラス
-		・UnitxObject
 		・Unit
-	・UnitXObjectやUnitの演算の際に，raiseを吐くようにしておく．
-		ex. 'a' + 52
-		        ^
 ・英語でコメントをつける
 	eval_error.py        scope.py             unitx_object.py
 	eval_visitor.py      scope_list.py        unitx_object_calc.py

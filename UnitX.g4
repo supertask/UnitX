@@ -240,7 +240,7 @@ boolean
 
 // The Null Literal
 none
-	:   'None'
+	:   'NULL'
 	;
 
 /*

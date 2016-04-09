@@ -177,7 +177,7 @@ class UnitXParser ( Parser ):
 
     sharedContextCache = PredictionContextCache()
 
-    literalNames = [ u"<INVALID>", u"'else'", u"'true'", u"'false'", u"'None'", 
+    literalNames = [ u"<INVALID>", u"'else'", u"'true'", u"'false'", u"'NULL'", 
                      u"'def'", u"'rep'", u"'print'", u"'if'", u"'return'", 
                      u"'break'", u"'continue'", u"'('", u"')'", u"'{'", 
                      u"'}'", u"'['", u"']'", u"';'", u"','", u"'.'", u"'---'", 

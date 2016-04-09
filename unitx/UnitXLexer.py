@@ -140,7 +140,7 @@ def serializedATN():
         buf.write(u"\7g\2\2\u00da\6\3\2\2\2\u00db\u00dc\7h\2\2\u00dc\u00dd")
         buf.write(u"\7c\2\2\u00dd\u00de\7n\2\2\u00de\u00df\7u\2\2\u00df\u00e0")
         buf.write(u"\7g\2\2\u00e0\b\3\2\2\2\u00e1\u00e2\7P\2\2\u00e2\u00e3")
-        buf.write(u"\7q\2\2\u00e3\u00e4\7p\2\2\u00e4\u00e5\7g\2\2\u00e5\n")
+        buf.write(u"\7W\2\2\u00e3\u00e4\7N\2\2\u00e4\u00e5\7N\2\2\u00e5\n")
         buf.write(u"\3\2\2\2\u00e6\u00e7\7f\2\2\u00e7\u00e8\7g\2\2\u00e8")
         buf.write(u"\u00e9\7h\2\2\u00e9\f\3\2\2\2\u00ea\u00eb\7t\2\2\u00eb")
         buf.write(u"\u00ec\7g\2\2\u00ec\u00ed\7r\2\2\u00ed\16\3\2\2\2\u00ee")
@@ -436,7 +436,7 @@ class UnitXLexer(Lexer):
     modeNames = [ u"DEFAULT_MODE" ]
 
     literalNames = [ u"<INVALID>",
-            u"'else'", u"'true'", u"'false'", u"'None'", u"'def'", u"'rep'", 
+            u"'else'", u"'true'", u"'false'", u"'NULL'", u"'def'", u"'rep'", 
             u"'print'", u"'if'", u"'return'", u"'break'", u"'continue'", 
             u"'('", u"')'", u"'{'", u"'}'", u"'['", u"']'", u"';'", u"','", 
             u"'.'", u"'---'", u"'----'", u"'-----'", u"'------'", u"'-------'", 

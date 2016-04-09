@@ -150,8 +150,6 @@ class EvalErrorListener(ErrorListener):
 	def syntaxError(self, recognizer, offendingSymbol, row, column, msg, e):
 		# TODO(Tasuku): 対話型のときのエラー描画のバグ
 
-		print type(offendingSymbol)
-		print dir(offendingSymbol)
 		import linecache
 		from util import Util
 		target_line = ''

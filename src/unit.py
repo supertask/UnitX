@@ -39,39 +39,43 @@ class Unit(Collegue):
 	def is_empty(self):
 		return self.ex_numer == self.numer == self.ex_denom == self.denom == None
 
-	def add(self, unit):
-		if self.numer == unit.numer and self.denom == unit.denom: return self
-		elif not self.numer and not self.denom: return unit
-		elif not unit.numer and not unit.denom: return self
-		else:
-			sys.stderr.write('二つのUnitが一致しない\n')
-			sys.exit(1)
-	
-	def subtract(self, unit):
-		if self.numer == unit.numer and self.denom == unit.denom: return self
-		elif not self.numer and not self.denom: return unit
-		elif not unit.numer and not unit.denom: return self
-		else:
-			sys.stderr.write('二つのUnitが一致しない\n')
-			sys.exit(1)
 
-	def multiply(self, unit):
+	def notifyEasily(self, unit, opp_token):
+		msg = "TypeError: unsupported operand for %s: unit '%s' and unit '%s'" % (opp_token.text, self.formal_str(), unit.formal_str())
+		self.mediator.get_parser().notifyErrorListeners(msg, opp_token, Exception(msg))
+
+
+	def add(self, unit, opp_token):
+		"""
+		<self> <operator> <unit>
+		example:
+			???{x/y} + ???{x/y}
+		"""
+		if self.numer == unit.numer and self.denom == unit.denom: return self
+		elif not self.numer and not self.denom: return unit
+		elif not unit.numer and not unit.denom: return self
+		else:
+			self.notifyEasily(unit, opp_token)
+	
+	def subtract(self, unit, opp_token):
+		self.add(unit, opp_token)
+
+
+	def multiply(self, unit, opp_token):
 		if self.numer == unit.denom: return Unit(numer=unit.numer)
 		elif self.denom == unit.numer: return Unit(numer=self.numer)
 		elif not self.numer and not self.denom: return unit
 		elif not unit.numer and not unit.denom: return self
 		else:
-			sys.stderr.write('二つのUnitが一致しない\n')
-			sys.exit(1)
+			self.notifyEasily(unit, opp_token)
 
-	def divide(self, unit):
+	def divide(self, unit, opp_token):
 		if self.numer == unit.numer and self.denom == unit.denom: return Unit()
 		elif (not self.denom) and self.numer == unit.numer: return Unit(numer=unit.denom)
 		elif not self.numer and not self.denom: return unit
 		elif not unit.numer and not unit.denom: return self
 		else:
-			sys.stderr.write('二つのUnitが一致しない\n')
-			sys.exit(1)
+			self.notifyEasily(unit, opp_token)
 
 	def formal_str(self):
 		if self.numer and self.denom:

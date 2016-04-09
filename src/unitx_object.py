@@ -73,18 +73,16 @@ class UnitXObject(Collegue):
 			exec(manager.get_prepare_exec(), globals())
 			
 		trans_value = self._trans_by_original_unit(value)
+		if trans_value: return trans_value
+		if isinstance(value, unicode): return value
 
-		if not trans_value:
-			if self.unit.numer and self.unit.ex_numer:
-				value = value * (manager.get_criterion(self.unit.ex_numer) \
-					/ manager.get_criterion(self.unit.numer))
+		if self.unit.numer and self.unit.ex_numer:
+			value = value * (manager.get_criterion(self.unit.ex_numer) / manager.get_criterion(self.unit.numer))
+		if self.unit.denom and self.unit.ex_denom:
+			value = value * (manager.get_criterion(self.unit.denom) / manager.get_criterion(self.unit.ex_denom))
 
-			if self.unit.denom and self.unit.ex_denom:
-				value = value * (manager.get_criterion(self.unit.denom) \
-					/ manager.get_criterion(self.unit.ex_denom))
-
-			trans_value = float(value)
-			if trans_value.is_integer(): trans_value = int(trans_value)
+		trans_value = float(value)
+		if trans_value.is_integer(): trans_value = int(trans_value)
 
 		return trans_value
 
@@ -92,7 +90,7 @@ class UnitXObject(Collegue):
 	def _trans_by_original_unit(self, value):
 		"""
 		"""
-		unit = self.unit
+		unit = self.unit # For eval!
 		manager = self.mediator.get_unit_manager()
 		unit_id = manager.get_unit_id(self.unit.numer)
 		res = eval(manager._unit_evals[unit_id])
@@ -105,6 +103,10 @@ class UnitXObject(Collegue):
 
 	def _check_unit(self):
 		"""
+
+		example:
+		<ex_numer> -> <numer>
+		<ex_denom> -> <denom>
 		"""
 		manager = self.mediator.get_unit_manager()
 		if self.unit.numer and self.unit.ex_numer:
@@ -149,6 +151,7 @@ class UnitXObject(Collegue):
 		elif isinstance(value, float):
 			return 'float'
 
+
 	def check_unitx_objects(self, unitx_objs, opp_token):
 		"""
 		"""
@@ -156,7 +159,7 @@ class UnitXObject(Collegue):
 
 		if type(left_obj.get_value()) is not type(right_obj.get_value()) or \
 			left_obj.is_none or right_obj.is_none:
-			types = tuple(opp_token.text)
+			types = tuple()
 			for an_obj in unitx_objs:
 				if an_obj.is_none:
 					types += ('NULL',)
@@ -164,7 +167,7 @@ class UnitXObject(Collegue):
 					type_str = self.get_type_string(an_obj.get_value())
 					types += (type_str, )
 
-			msg = "TypeError: unsupported operand for %s: '%s' and '%s'" % types
+			msg = "TypeError: unsupported operand for %s: '%s' and '%s'" % ((opp_token.text,) + types)
 			self.mediator.get_parser().notifyErrorListeners(msg, opp_token, Exception(msg))
 
 
@@ -173,32 +176,40 @@ class UnitXObject(Collegue):
 		"""
 		self.check_unitx_objects([self, unitx_obj], opp_token)
 		a_value = (self.get_value() + unitx_obj.get_value())
-		a_unit = self.unit.add(unitx_obj.unit)
+		a_unit = self.unit.add(unitx_obj.unit, opp_token)
+
 		return UnitXObject(value = a_value, varname=None, unit=a_unit)
+
 
 	def subtract(self, unitx_obj, opp_token):
 		""" スコープの情報をx,yに注入し，x,yを引いて，結果を応答する．
 		"""
 		self.check_unitx_objects([self, unitx_obj], opp_token)
 		a_value = (self.get_value() - unitx_obj.get_value())
-		a_unit = self.unit.subtract(unitx_obj.unit)
+		a_unit = self.unit.subtract(unitx_obj.unit, opp_token)
+
 		return UnitXObject(value = a_value, varname=None, unit=a_unit)
+
 
 	def multiply(self, unitx_obj, opp_token):
 		""" スコープの情報をx,yに注入し，x,yを掛けて，結果を応答する．
 		"""
 		self.check_unitx_objects([self, unitx_obj], opp_token)
 		a_value = (self.get_value() * unitx_obj.get_value())
-		a_unit = self.unit.multiply(unitx_obj.unit)
+		a_unit = self.unit.multiply(unitx_obj.unit, opp_token)
+
 		return UnitXObject(value = a_value, varname=None, unit=a_unit)
 
-	def divide(self,x, unitx_obj, opp_token):
+
+	def divide(self, unitx_obj, opp_token):
 		""" スコープの情報をx,yに注入し，x,yを割って，結果を応答する．
 		"""
 		self.check_unitx_objects([self, unitx_obj], opp_token)
 		a_value = (self.get_value() / unitx_obj.get_value())
-		a_unit = self.unit.divide(unitx_obj.unit)
+		a_unit = self.unit.divide(unitx_obj.unit, opp_token)
+
 		return UnitXObject(value = a_value, varname=None, unit=a_unit)
+
 
 	def increment(self, opp_token):
 		""" スコープの情報をx,yに注入し，xをインクリメントして，結果を応答する．

@@ -1,6 +1,7 @@
 /*
  * Translate your money from USD(US dollar) to JPY(Japanese yen).
  */
->> trader_joes_meals = 22.19{USD}
->> target_meals = (17.19 + 47.68){USD}
->> total_meals = (trader_joes_meals + target_meals){USD->JPY}
+trader_joes_meals = 22.19{USD}
+target_meals = (17.19 + 47.68 + 15.67){USD}
+>> total_meals = (trader_joes_meals + target_meals){USD}
+>> total_meals{USD->JPY}

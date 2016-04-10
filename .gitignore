@@ -4,6 +4,7 @@ dist/
 UnitX.egg-info/
 .DS_Store
 *.swp
+*.bak
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

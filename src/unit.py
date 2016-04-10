@@ -19,6 +19,8 @@ class Unit(Collegue):
 		self.denom = denom
 
 	def replace_tokens(self):
+		"""
+		"""
 		tokens = [self.ex_numer, self.numer, self.ex_denom, self.denom]
 		scopes = self.mediator.get_scopes()
 		unit_manager = self.mediator.get_unit_manager()
@@ -52,8 +54,8 @@ class Unit(Collegue):
 			???{x/y} + ???{x/y}
 		"""
 		if self.numer == unit.numer and self.denom == unit.denom: return self
-		elif not self.numer and not self.denom: return unit
-		elif not unit.numer and not unit.denom: return self
+		elif self.is_empty(): return unit
+		elif unit.is_empty(): return self
 		else:
 			self.notifyEasily(unit, opp_token)
 	
@@ -64,16 +66,16 @@ class Unit(Collegue):
 	def multiply(self, unit, opp_token):
 		if self.numer == unit.denom: return Unit(numer=unit.numer)
 		elif self.denom == unit.numer: return Unit(numer=self.numer)
-		elif not self.numer and not self.denom: return unit
-		elif not unit.numer and not unit.denom: return self
+		elif self.is_empty(): return unit
+		elif unit.is_empty(): return self
 		else:
 			self.notifyEasily(unit, opp_token)
 
 	def divide(self, unit, opp_token):
 		if self.numer == unit.numer and self.denom == unit.denom: return Unit()
 		elif (not self.denom) and self.numer == unit.numer: return Unit(numer=unit.denom)
-		elif not self.numer and not self.denom: return unit
-		elif not unit.numer and not unit.denom: return self
+		elif self.is_empty(): return unit
+		elif unit.is_empty(): return self
 		else:
 			self.notifyEasily(unit, opp_token)
 

@@ -128,7 +128,7 @@ class EvalVisitor(UnitXVisitor, Mediator):
 				# 引数が足りないエラー
 				#
 				if len(called_args) < len(args_without_default):
-					msg = "TypeError: %s() takes exactly %s arguments (%s given)." \
+					msg = "TypeError: %s() takes exactly %s arguments (%s given)" \
 						% (called_func_name, len(args_without_default), len(called_args))
 					last_unitx_obj = called_args[-1]
 					self.get_parser().notifyErrorListeners(msg, last_unitx_obj.token, Exception(msg))
@@ -137,7 +137,7 @@ class EvalVisitor(UnitXVisitor, Mediator):
 				# 引数が多すぎるときのエラー
 				#
 				if len(called_args) > len(def_func.args):
-					msg = "TypeError: %s() takes exactly %s arguments (%s given)." \
+					msg = "TypeError: %s() takes exactly %s arguments (%s given)" \
 						% (called_func_name, len(def_func.args), len(called_args))
 					last_unitx_obj = called_args[-1]
 					self.get_parser().notifyErrorListeners(msg, last_unitx_obj.token, Exception(msg))

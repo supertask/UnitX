@@ -153,7 +153,7 @@ class UnitXObject(Collegue):
 
 
 	def check_unitx_objects(self, unitx_objs, opp_token):
-		"""
+		""" 左辺と右辺のチェックし，エラーハンドリングを行う．
 		"""
 		left_obj,right_obj = unitx_objs
 
@@ -172,7 +172,7 @@ class UnitXObject(Collegue):
 
 
 	def add(self, unitx_obj, opp_token):
-		""" スコープの情報をx,yに注入し，x,yを足して，結果を応答する．
+		""" 左辺と右辺を足した後，結果を応答する．
 		"""
 		self.check_unitx_objects([self, unitx_obj], opp_token)
 		a_value = (self.get_value() + unitx_obj.get_value())
@@ -182,7 +182,7 @@ class UnitXObject(Collegue):
 
 
 	def subtract(self, unitx_obj, opp_token):
-		""" スコープの情報をx,yに注入し，x,yを引いて，結果を応答する．
+		""" 左辺から右辺を引いた後，結果を応答する．
 		"""
 		self.check_unitx_objects([self, unitx_obj], opp_token)
 		a_value = (self.get_value() - unitx_obj.get_value())
@@ -192,7 +192,7 @@ class UnitXObject(Collegue):
 
 
 	def multiply(self, unitx_obj, opp_token):
-		""" スコープの情報をx,yに注入し，x,yを掛けて，結果を応答する．
+		""" 左辺と右辺を掛けた後，結果を応答する．
 		"""
 		self.check_unitx_objects([self, unitx_obj], opp_token)
 		a_value = (self.get_value() * unitx_obj.get_value())
@@ -202,7 +202,7 @@ class UnitXObject(Collegue):
 
 
 	def divide(self, unitx_obj, opp_token):
-		""" スコープの情報をx,yに注入し，x,yを割って，結果を応答する．
+		""" 左辺から右辺を割った後，結果を応答する．
 		"""
 		self.check_unitx_objects([self, unitx_obj], opp_token)
 		a_value = (self.get_value() / unitx_obj.get_value())
@@ -211,13 +211,23 @@ class UnitXObject(Collegue):
 		return UnitXObject(value = a_value, varname=None, unit=a_unit)
 
 
+	def modulo(self, unitx_obj, opp_token):
+		""" 左辺から右辺をモジュロ演算した後，結果を応答する．
+		"""
+		self.check_unitx_objects([self, unitx_obj], opp_token)
+		a_value = (self.get_value() % unitx_obj.get_value())
+		a_unit = self.unit.modulo(unitx_obj.unit, opp_token)
+
+		return UnitXObject(value = a_value, varname=None, unit=a_unit)
+
+
 	def increment(self, opp_token):
-		""" スコープの情報をx,yに注入し，xをインクリメントして，結果を応答する．
+		""" 自身の値をインクリメントして，結果を応答する．
 		"""
 		return self.add_assign(UnitXObject(value=1, varname=None, unit=Unit()), opp_token)
 
 	def decrement(self, opp_token):
-		""" スコープの情報をx,yに注入し，xをデクリメントして，結果を応答する．
+		""" 自身の値をデクリメントして，結果を応答する．
 		"""
 		return self.subtract_assign(UnitXObject(value=1, varname=None, unit=Unit()), opp_token)
 
@@ -236,24 +246,29 @@ class UnitXObject(Collegue):
 		return self
 
 	def add_assign(self, unitx_obj, opp_token):
-		""" スコープの情報をx,yに注入し，x,yを足してxに代入して，結果を応答する．
+		""" 左辺と右辺を足した後，左辺に代入して，結果を応答する．
 		"""
 		return self.assign(self.add(unitx_obj, opp_token), opp_token)
 
 	def subtract_assign(self, unitx_obj, opp_token):
-		""" スコープの情報をx,yに注入し，x,yを引いてxに代入して，結果を応答する．
+		""" 左辺から右辺を引いた後，左辺に代入して，結果を応答する．
 		"""
 		return self.assign(self.subtract(unitx_obj, opp_token), opp_token)
 		
 	def multiply_assign(self, unitx_obj, opp_token):
-		""" スコープの情報をx,yに注入し，x,yを掛けてxに代入して，結果を応答する．
+		""" 左辺と右辺を掛けた後，左辺に代入して，結果を応答する．
 		"""
 		return self.assign(self.multiply(unitx_obj, opp_token), opp_token)
 
 	def divide_assign(self, unitx_obj, opp_token):
-		""" スコープの情報をx,yに注入し，x,yを割ってxに代入して，結果を応答する．
+		""" 左辺から右辺を割った後，左辺に代入して，結果を応答する．
 		"""
 		return self.assign(self.divide(unitx_obj, opp_token), opp_token)
+
+	def modulo_assign(self, unitx_obj, opp_token):
+		""" 左辺から右辺をモジュロ演算した後，左辺に代入して，結果を応答する．
+		"""
+		return self.assign(self.modulo(unitx_obj, opp_token), opp_token)
 
 	@classmethod
 	def set_mediator(self, mediator):

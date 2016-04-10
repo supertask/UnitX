@@ -404,12 +404,13 @@ class EvalVisitor(UnitXVisitor, Mediator):
 				elif second_token.type == UnitXLexer.SUB: unitx_obj = x.subtract(y, second_token)
 				elif second_token.type == UnitXLexer.MUL: unitx_obj = x.multiply(y, second_token)
 				elif second_token.type == UnitXLexer.DIV: unitx_obj = x.divide(y, second_token)
+				elif second_token.type == UnitXLexer.MOD: unitx_obj = x.modulo(y, second_token)
 				elif second_token.type == UnitXLexer.ASSIGN: unitx_obj = x.assign(y, second_token)
 				elif second_token.type == UnitXLexer.ADD_ASSIGN: unitx_obj = x.add_assign(y, second_token)
 				elif second_token.type == UnitXLexer.SUB_ASSIGN: unitx_obj = x.substract_assign(y, second_token)
 				elif second_token.type == UnitXLexer.MUL_ASSIGN: unitx_obj = x.multiply_assign(y, second_token)
 				elif second_token.type == UnitXLexer.DIV_ASSIGN: unitx_obj = x.divide_assign(y, second_token)
-				elif second_token.type == UnitXLexer.MOD_ASSIGN: unitx_obj = None
+				elif second_token.type == UnitXLexer.MOD_ASSIGN: unitx_obj = x.modulo_assign(y, second_token)
 				else: unitx_obj = None
 
 		elif ctx.primary(): unitx_obj = self.visitPrimary(ctx.primary())

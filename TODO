@@ -1,9 +1,11 @@
 TODO
+・expressionの字句を増やす: ==など
+・テストハンドリングの追加
+・print関数のフォーマット(ex. print "{i}額")
+・組み込み関数の実装: rangeなど
+
 ・英語でコメントをつける
 	eval_error.py        scope.py             unitx_object.py
 	eval_visitor.py      scope_list.py        unitx_object_calc.py
 	example.py           unit.py              util.py
 	unit_manager.py      unitlib.py
-・print関数のフォーマット(ex. print "{i}額")
-・組み込み関数の実装: rangeなど
-・expressionの字句を増やす: %など

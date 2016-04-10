@@ -143,11 +143,11 @@ endRep
 expression
 	: primary
 	| expression '(' expressionList? ')'
-	| expression ('*'|'/'|'%') expression //Almost
+	| expression ('*'|'/'|'%') expression
 	| expression ('+'|'-') expression
 	| expression ('<='|'>='|'>'|'<') expression // Still
 	| expression ('=='|'!='|'is') expression // Still
-    | expression // Almost
+    | expression
 		( '='
 		| '+='
 		| '-='

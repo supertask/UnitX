@@ -77,6 +77,9 @@ class Unit(Collegue):
 		else:
 			self.notifyEasily(unit, opp_token)
 
+	def modulo(self, unit, opp_token):
+		return self.divide(unit, opp_token)
+
 	def formal_str(self):
 		if self.numer and self.denom:
 			return '{%s/%s}' % (self.numer, self.denom)

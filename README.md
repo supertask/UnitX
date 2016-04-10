@@ -55,7 +55,7 @@ The result become like bellow.
 
 Regulation
 -----
-If you're going to use UnitX, you must tune to UTF-8 on your command-line shell and editor.
+If you're going to use UnitX, you must tune to **UTF-8** on your command-line shell and editor.
 
 Coding style
 -----

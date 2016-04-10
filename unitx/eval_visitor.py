@@ -96,12 +96,16 @@ class EvalVisitor(UnitXVisitor, Mediator):
 		"""
 		if self._is_ignored_block(ctx.block()): return
 
-		func_name, func_args = ctx.Identifier().getText(), self.visitFormalParameters(ctx.formalParameters())
-		current_scope = self._scopes.peek()
-		def_func = DefinedFunction(func_name, func_args, ctx, current_scope)
+		func_token = ctx.Identifier().getSymbol()
+		func_name = func_token.text
+		func_args = self.visitFormalParameters(ctx.formalParameters())
 
-		unitx_obj = UnitXObject(value=def_func, varname=func_name, unit=None)
-		self._scopes.regist_unitx_obj(func_name, unitx_obj)
+		current_scope = self._scopes.peek()
+		var_unitx_obj = UnitXObject(value=None, varname=func_name, unit=Unit(), token=func_token)
+		def_func = DefinedFunction(var_unitx_obj, func_args, ctx, current_scope)
+
+		unitx_obj = UnitXObject(value=def_func, varname=func_name, unit=Unit(), token=func_token)
+		var_unitx_obj.assign(unitx_obj, None)
 		return
 
 
@@ -111,27 +115,43 @@ class EvalVisitor(UnitXVisitor, Mediator):
 		found_scope = self._scopes.peek().find_scope_of(called_func_name)
 		if found_scope:
 			def_func = found_scope[called_func_name].get_value()
-
 			self._scopes.new_scope()
+			
 			if called_args:
-				args_without_default = [[var, unitx_obj] for var, unitx_obj in def_func.args if not unitx_obj]
-				#print len(args_without_default), len(called_args)
+				# variable, default_value: UnitXObject
+				args_without_default = []
+				for variable, default_value in def_func.args:
+					if not default_value:
+						args_without_default.append([variable, default_value])
+
+				#
+				# 引数が足りないエラー
+				#
 				if len(called_args) < len(args_without_default):
-					sys.stderr.write('引数足りないError') #引数足りないerror
-					sys.exit(1)
+					msg = "TypeError: %s() takes exactly %s arguments (%s given)." \
+						% (called_func_name, len(args_without_default), len(called_args))
+					last_unitx_obj = called_args[-1]
+					self.get_parser().notifyErrorListeners(msg, last_unitx_obj.token, Exception(msg))
+
+				#
+				# 引数が多すぎるときのエラー
+				#
 				if len(called_args) > len(def_func.args):
-					sys.stderr.write('引数多すぎError') #引数多すぎerror
-					sys.exit(1)
-				#Util.dump(def_func.args)
+					msg = "TypeError: %s() takes exactly %s arguments (%s given)." \
+						% (called_func_name, len(def_func.args), len(called_args))
+					last_unitx_obj = called_args[-1]
+					self.get_parser().notifyErrorListeners(msg, last_unitx_obj.token, Exception(msg))
+
 				for i in range(len(def_func.args)):
-					varname, default_value = def_func.args[i]
+					variable, default_value = def_func.args[i]
 					if i < len(called_args):
 						unitx_obj = called_args[i]
 					else:
-						if not default_value:
-							default_value = UnitXObject(value=None,varname=None,unit=None,is_none=True)
-						unitx_obj = default_value
-					UnitXObject(value=None,varname=varname,unit=None).assign(unitx_obj, None)
+						if default_value:
+							unitx_obj = default_value
+						else:
+							unitx_obj = UnitXObject(value=None, varname=None, unit=Unit(), token=None, is_none=True)
+					variable.assign(unitx_obj, None)
 
 			# TODO(Tasuku): 現在は定義した関数のみ使用可能だが，組み込み関数はまだなので，それを後で追加
 			self.visitBlock(def_func.ctx.block())
@@ -159,19 +179,19 @@ class EvalVisitor(UnitXVisitor, Mediator):
 		"""
 			 varname -- A key registing in a scope
 		"""
-		varname = ctx.Identifier().getText()
-		if ctx.expression():
-			default_value = self.visitExpression(ctx.expression())
-		else:
-			default_value = None
+		var_token = ctx.Identifier().getSymbol()
+		variable = UnitXObject(value = None, varname = var_token.text, unit=Unit(), token=var_token)
 
-		return [varname, default_value]
+		if ctx.expression(): default_value = self.visitExpression(ctx.expression())
+		else: default_value = None
+
+		return [variable, default_value]
 
 
 	def _is_ignored_block(self, ctx):
 		""" Returns whether ignored block exists for intaractive programing.
 			Ignored block is like bellow.
-			Example:
+			example:
 				$ unitx
 				unitx> rep(i,5) {
 				...... }
@@ -361,14 +381,22 @@ class EvalVisitor(UnitXVisitor, Mediator):
 		if ctx.expression(i=0):
 			x = self.visitExpression(ctx.expression(i=0)) # x,y: UnitXObject
 
-			if ctx.start.type == UnitXLexer.INC: unitx_obj = x.increment()
-			elif ctx.start.type == UnitXLexer.DEC: unitx_obj = x.decrement()
+			if ctx.start.type == UnitXLexer.INC:
+				unitx_obj = x.increment()
+
+			elif ctx.start.type == UnitXLexer.DEC:
+				unitx_obj = x.decrement()
+
 			elif ctx.getChild(i=1).getSymbol().type == UnitXLexer.LPAREN:
-				called_func_name, called_args = x.varname, []
+				called_func_name = x.varname
+				called_args = []
 				if ctx.expressionList():
 					called_args = self.visitExpressionList(ctx.expressionList())
-				a_value = self._call_function(called_func_name, called_args)
-				unitx_obj = UnitXObject(value=a_value, varname=called_func_name, unit=Unit())
+
+				value = self._call_function(called_func_name, called_args)
+				unitx_obj = UnitXObject(value=value, varname=called_func_name, unit=Unit())
+				unitx_obj.token = x.token
+
 			else:
 				second_token = ctx.getChild(i=1).getSymbol()
 				y = self.visitExpression(ctx.expression(i=1))
@@ -382,8 +410,8 @@ class EvalVisitor(UnitXVisitor, Mediator):
 				elif second_token.type == UnitXLexer.MUL_ASSIGN: unitx_obj = x.multiply_assign(y, second_token)
 				elif second_token.type == UnitXLexer.DIV_ASSIGN: unitx_obj = x.divide_assign(y, second_token)
 				elif second_token.type == UnitXLexer.MOD_ASSIGN: unitx_obj = None
-				else:
-					unitx_obj = None
+				else: unitx_obj = None
+
 		elif ctx.primary(): unitx_obj = self.visitPrimary(ctx.primary())
 		else:
 			raise Exception("Syntax error. EvalVisitor#visitExpression") # Never happen.
@@ -397,6 +425,7 @@ class EvalVisitor(UnitXVisitor, Mediator):
 		""" Just visiting child nodes of UnitX syntax."""
 		unit = self.visitUnitSingleOrPairOperator(ctx.unitSingleOrPairOperator())
 		unit.replace_tokens()
+		unit.token = ctx.start
 		return unit
 
 

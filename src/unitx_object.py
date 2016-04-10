@@ -77,9 +77,9 @@ class UnitXObject(Collegue):
 		if isinstance(value, unicode): return value
 
 		if self.unit.numer and self.unit.ex_numer:
-			value = value * (manager.get_criterion(self.unit.ex_numer) / manager.get_criterion(self.unit.numer))
+			value = value * (manager.get_criterion(self.unit.ex_numer, self.unit) / manager.get_criterion(self.unit.numer, self.unit))
 		if self.unit.denom and self.unit.ex_denom:
-			value = value * (manager.get_criterion(self.unit.denom) / manager.get_criterion(self.unit.ex_denom))
+			value = value * (manager.get_criterion(self.unit.denom, self.unit) / manager.get_criterion(self.unit.ex_denom, self.unit))
 
 		trans_value = float(value)
 		if trans_value.is_integer(): trans_value = int(trans_value)
@@ -92,7 +92,7 @@ class UnitXObject(Collegue):
 		"""
 		unit = self.unit # For eval!
 		manager = self.mediator.get_unit_manager()
-		unit_id = manager.get_unit_id(self.unit.numer)
+		unit_id = manager.get_unit_id(self.unit.numer, self.unit)
 		res = eval(manager._unit_evals[unit_id])
 		if not isinstance(res, dict):
 			return res
@@ -110,14 +110,14 @@ class UnitXObject(Collegue):
 		"""
 		manager = self.mediator.get_unit_manager()
 		if self.unit.numer and self.unit.ex_numer:
-			if manager.get_unit_id(self.unit.numer) != manager.get_unit_id(self.unit.ex_numer):
-				sys.stderr.write('Unitが合わない\n')
-				sys.exit(1)
+			if manager.get_unit_id(self.unit.numer, self.unit) != manager.get_unit_id(self.unit.ex_numer, self.unit):
+				msg = "TypeError: cannot translate from '%s' to '%s'" % (self.unit.ex_numer, self.unit.numer)
+				self.mediator.get_parser().notifyErrorListeners(msg, self.unit.token, Exception(msg))
 
 		if self.unit.denom and self.unit.ex_denom:
-			if manager.get_unit_id(self.unit.denom) != manager.get_unit_id(self.unit.ex_denom):
-				sys.stderr.write('Unitが合わない\n')
-				sys.exit(1)
+			if manager.get_unit_id(self.unit.denom, self.unit) != manager.get_unit_id(self.unit.ex_denom, self.unit):
+				msg = "TypeError: cannot translate from '%s' to '%s'" % (self.unit.ex_denom, self.unit.denom)
+				self.mediator.get_parser().notifyErrorListeners(msg, self.unit.token, Exception(msg))
 
 
 	def set_value(self, value):
@@ -221,10 +221,12 @@ class UnitXObject(Collegue):
 		"""
 		return self.subtract_assign(UnitXObject(value=1, varname=None, unit=Unit()), opp_token)
 
-
+	
+	#TODO(Tasuku): opp_tokenを消す
 	def assign(self, unitx_obj, opp_token):
 		""" スコープの情報をx,yに注入し，変数xに値yを代入して，結果を応答する．
 			スコープに値を入れる唯一の関数．
+			ただし，tokenは代入しない．
 		"""
 		self.set_value(unitx_obj.get_value())
 		self.unit = unitx_obj.unit

@@ -156,8 +156,6 @@ class EvalErrorListener(ErrorListener):
 		filename = ''
 		if self.is_intaractive_run:
 			filename = '<stdin>'
-			#print row, column
-			#print 'Here', self.codelines
 			target_line = self.codelines[row-1]
 		else:
 			filename = self.codepath
@@ -165,13 +163,10 @@ class EvalErrorListener(ErrorListener):
 		target_line = target_line.rstrip()
 		whites = list(Util.filter_to_white(target_line))
 
-		#print '-'*10
-		#print column
-		#print '-'*10
 		whites[column] = '^'
 		mark_line = ''.join(whites)
 		error_line = ""
-		error_line += '%s: row %s: %s\n' % (filename, row, msg)
+		error_line += '%s: line %s: %s\n' % (filename, row, msg)
 		error_line += target_line + '\n' + mark_line + '\n'
 		sys.stderr.write(error_line)
 

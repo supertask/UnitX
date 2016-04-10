@@ -73,10 +73,10 @@ class UnitManager(Collegue):
 		return self.prepare_exec
 
 
-	def _update_dict(self, unit_str):
+	def _update_dict(self, unit_str, unit):
 		"""
 		"""
-		unit_id = self.get_unit_id(unit_str)
+		unit_id = self.get_unit_id(unit_str, unit)
 		if self._is_updated[unit_id]:
 			return
 		adding_dict = eval(self._unit_evals[unit_id])
@@ -86,21 +86,21 @@ class UnitManager(Collegue):
 		return
 		
 
-	def get_criterion(self, unit_str):
+	def get_criterion(self, unit_str, unit):
 		"""
 		"""
-		self._update_dict(unit_str)
+		self._update_dict(unit_str, unit)
 		return self.unit_dict[unit_str]
 
 
-	def get_unit_id(self, unit_str):
+	def get_unit_id(self, unit_str, unit):
 		"""
 		"""
 		if unit_str in self._unit_id_dict:
 			return self._unit_id_dict[unit_str]
 		else:
-			sys.stderr.write("Unit '%s' は登録されていません．\n" % unit_str)
-			sys.exit(1)
+			msg = "NameError: is not defined '%s' in this lang" % unit_str
+			self.mediator.get_parser().notifyErrorListeners(msg, unit.token, Exception(msg))
 
 	def set_mediator(self, mediator):
 		self.mediator = mediator

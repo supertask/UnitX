@@ -67,7 +67,7 @@ demo1: all
 	$(TARGET) demo/demo_1.unit
 	@date
 
-demox:
+demox: all
 	$(TARGET) demo/demo_x.unit
 	@date
 	

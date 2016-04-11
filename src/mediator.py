@@ -2,8 +2,13 @@
 # -*- coding:utf-8 -*-
 
 class Mediator(object):
-	""" Mediator interface for Mediator pattern.
+	"""Mediator interface for Mediator pattern.
+
+	For Mediator pattern:
+		Erich Gamma, John Vlissides, Ralph Johnson, and Richard Helm, "Design Patterns: Elements of Reusable Object-Oriented Software", Addison-Wesley, 1994
+		Online book, https://books.google.com/books/about/Design_Patterns.html?id=6oHuKQe3TjQC&printsec=frontcover&source=kp_read_button#v=onepage&q&f=false
 	"""
+
 	def get_parser(self):
 		"""Gets a parser for error handling and knowing token infomations."""
 		pass

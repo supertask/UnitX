@@ -3,37 +3,54 @@
 
 import sys
 import prettyprint
+from constants import Constants
 
 class Util(object):
-	""" 汎用的なユーティリティ関数をまとめたクラス．
+	"""A class compiled versatile utility functions.
 	"""
 
 	@classmethod
-	def dump(self, an_object):
-		""" listやdictの中のutf-8文字の文字列に対して，文字化けなくデバッグ出力して応答する（Pythonの標準ではサポートされていないため）．
+	def dump(self, an_obj):
+		"""Prints a debug value without misconversion.
+		
+		Prints a debug value without misconversion for UTF-8 strings 
+		in a list or a dict class, because it's not supported by Python.
+
+		Args:
+			an_obj: An instance of a list or a dict class.
 		"""
-		sys.stderr.write(prettyprint.pp_str(an_object) + '\n')
+		sys.stderr.write(prettyprint.pp_str(an_obj) + '\n')
+
 
 	@classmethod
-	def filter_to_white(self, a_str):
+	def filter_to_white(self, string):
+		"""Filters a string line to whitespace.
+		
+		Args:
+			string: 
+		"""
 		spaces = u''
-		for a_char in a_str:
-			a_char
-			if a_char == u'\t':
+		for char in string:
+			if char == u'\t':
 				spaces += u'\t'
-			elif Util.is_ascii(a_char):
+			elif Util.is_ascii(char):
 				spaces += u' '
 			else:
 				spaces += u'　'
 		return spaces
 
+
 	@classmethod
 	def is_ascii(self, string):
-		""" Returns true if non ascii characters are detected in the given string.
+		"""Returns true if non ascii characters are detected in the given string.
+		
+		Args:
+			string: A string of unicode
 		"""
 		if string:
 			return max([ord(char) for char in string]) < 128
 		return True
+
 
 def main():
 	Util.dump(['あ', 'い', 'う'])
@@ -42,11 +59,12 @@ def main():
 	print Util.is_ascii(u"""abc m(__)m""")
 	print Util.is_ascii(u'あいうえお')
 
-	code = u'面積 = 距離 * 高さ'
+	code = u'面積\t= 距離 * 高さ'
 	print "|%s|" % code
 	print "|%s|" % Util.filter_to_white(code)
 
-	return 0
+	return Constants.EXIT_SUCCESS
+
 
 if __name__ == '__main__':
 	sys.exit(main())

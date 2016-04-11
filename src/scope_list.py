@@ -3,50 +3,54 @@
 
 from scope import Scope
 from collegue import Collegue
+from constants import Constants
 
-""" 変数またはインスタンスのスコープたちを管理するクラス．
-"""
 class ScopeList(list, Collegue):
+	"""変数またはインスタンスのスコープたちを管理するクラス．
+
+	"""
 
 	def __init__(self):
 		""" スコープのルートを初期化して，応答する．
 		"""
 		self.append(Scope(parent=None))
-		self._current_scope = self.peek()
+
 
 	def new_scope(self):
 		""" 現在のスコープ内のメモリを確保して，応答する．
 		"""
 		self.append(Scope(self.peek()))
-		self.set_current_scope()
 		return
+
 
 	def del_scope(self):
 		""" 現在のスコープ内のメモリを解放して，応答する．
 		"""
 		self.pop()
-		self.set_current_scope()
 		return
+
 
 	def peek(self):
 		""" スタックの先頭にあるオブジェクトを取り出し応答する．ただし，このときオブジェクトはスタックから削除されない．
-			pythonのリストにはpeekメソッドがないため定義．
 
-			Looks at the object at the top of this stack without removing it from the list(stack).
-			I defined because a list of python don't have peek method.
+			Looks at the object at the top of this stack without removing it 
+			from the list(stack).
+
+			I defined this function because a list of Python doesn't 
+			have peek() method. I think a list of Python should have 
+			the pretty much function.
+
+			Returns:
+				
 		"""
 		return self[-1]
-	
-	def set_current_scope(self, current_scope=None):
-		"""
-		"""
-		if current_scope is None: current_scope = self.peek()
-		self._current_scope = current_scope
 
+	
 	def get_current_scope(self):
 		"""
 		"""
-		return self._current_scope
+		return self.peek()
+
 
 	def regist_unitx_obj(self, varname, unitx_obj):
 		""" スコープに，変数名とその値（UnitXObject）を登録して，応答する．
@@ -60,11 +64,18 @@ class ScopeList(list, Collegue):
 		else: current_scope[varname] = unitx_obj #Create variable in the scope.
 		return
 
+
 	def set_mediator(self, mediator):
+		"""Sets a mediator for Mediator pattern of GoF.
+		
+		Args:
+			mediator: An instance of a EvalVisitor class inherited Mediator class.
+		"""
 		self.mediator = mediator
 
+
 def main():
-	return 0
+	return Constants.EXIT_SUCCESS
 
 if __name__ == '__main__':
 	sys.exit(main())

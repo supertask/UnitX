@@ -3,6 +3,7 @@
 
 import sys
 from collegue import Collegue
+from constants import Constants
 
 class DefinedFunction(Collegue):
 	"""A Class for saving a infomation of defined function.
@@ -15,11 +16,12 @@ class DefinedFunction(Collegue):
 	"""
 
 	def __init__(self, name, args, ctx, current_scope=None):
-		""" Inits DefinedFunction. """
+		""" Inits attributes of a DefinedFunction class. """
 		self.name = name
 		self.args = args
 		self.ctx = ctx
 		self._current_scope = current_scope
+
 
 	def get_current_scope(self):
 		""" Returns a current scope saving this class.
@@ -28,6 +30,7 @@ class DefinedFunction(Collegue):
 		"""
 		return self._current_scope
 	
+
 	def __unicode__(self):
 		""" Returns a string of attributes.
 			Returns:
@@ -36,21 +39,28 @@ class DefinedFunction(Collegue):
 		res = "<%s: %s(%s) ctx=%s>" % (self.__class__.__name__, self.name, self.args, self.ctx)
 		return res
 
+
 	def __str__(self):
-		""" Returns an encoded string."""
+		""" Returns an encoded string of attributes."""
 		return unicode(self).encode('utf-8')
+
 
 	def __repr__(self):
 		""" Returns a string of attributes."""
 		return self.__str__()
 
+
 	@classmethod
 	def set_mediator(self, mediator):
-		"""Sets a mediator for Mediator pattern."""
+		"""Sets a mediator for Mediator pattern of GoF.
+		
+		Args:
+			mediator: An instance of a EvalVisitor class inherited Mediator class.
+		"""
 		self.mediator = mediator
 
 def main():
-	"""Run an example for Constants class.
+	"""Run an example for a DefinedFunction class.
 
 	Advice:
 		A value of 'ctx' should get from an argument of visitFunctionDeclaration(ctx).
@@ -77,8 +87,7 @@ def main():
 	Util.dump(current_scope)
 	scopes.del_scope()
 
-	return 0
-
+	return Constants.EXIT_SUCCESS
 
 if __name__ == '__main__':
 	sys.exit(main())

@@ -7,7 +7,7 @@ TODO
 	・組み込み関数の実装: rangeなど
 
 ・英語でコメントをつける
-	eval_error.py        scope.py
+	eval_error.py
 	eval_visitor.py      scope_list.py
 	example.py           unit.py
 	unit_manager.py      unitlib.py

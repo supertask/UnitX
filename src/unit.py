@@ -98,6 +98,11 @@ class Unit(Collegue):
 		"""
 		"""
 		return self.divide(unit, opp_token)
+	
+	def equals(self, unit):
+		""" 
+		"""
+		return self.numer == unit.numer and self.denom == unit.denom
 
 	def formal_str(self):
 		"""

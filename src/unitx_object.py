@@ -24,7 +24,7 @@ class UnitXObject(Collegue):
 		self.varname = varname
 		self.is_none = is_none
 		self.unit = unit
-
+	
 	def get_value(self, error=True):
 		""" UnitXObjectに束縛する数値，文字列，または変数の値を応答する．
 			もし，値がなければ変数をスコープから辿り，その値を返す．
@@ -125,7 +125,7 @@ class UnitXObject(Collegue):
 
 	def get_unit(self):
 		return self.unit
-
+	
 	def __unicode__(self):
 		""" 値と変数を詳細に表示する．
 		"""
@@ -275,6 +275,19 @@ class UnitXObject(Collegue):
 		"""
 		return self.assign(self.modulo(unitx_obj, opp_token), opp_token)
 
+	def equals(self, unitx_obj):
+		"""
+		"""
+		value_equals = self.get_value() == unitx_obj.get_value()
+		return UnitXObject(value = value_equals, varname=None, unit=Unit())
+
+	def exactlly_equals(self, unitx_obj):
+		"""
+		"""
+		unit_equals = self.unit.equals(unitx_obj.unit)
+		value_equals = self.get_value() == unitx_obj.get_value()
+		return UnitXObject(value = (unit_equals and value_equals), varname=None, unit=Unit())
+
 	@classmethod
 	def set_mediator(self, mediator):
 		self.mediator = mediator
@@ -302,6 +315,10 @@ def main():
 	Util.dump(scopes)
 	#print found_scope['x']
 	#print found_scope['y']
+
+	# Checking equals()
+	tmp_obj = UnitXObject(value=1.5, varname='x', is_none=False, unit=Unit(ex_numer=None, numer=u'cm', ex_denom=None, denom=None))
+	print current_scope['x'].equals(tmp_obj)
 
 	# Clear part
 	scopes.del_scope()

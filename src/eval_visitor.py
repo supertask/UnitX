@@ -428,6 +428,11 @@ class EvalVisitor(UnitXVisitor, Mediator):
 				elif second_token.type == UnitXLexer.MUL_ASSIGN: unitx_obj = x.multiply_assign(y, second_token)
 				elif second_token.type == UnitXLexer.DIV_ASSIGN: unitx_obj = x.divide_assign(y, second_token)
 				elif second_token.type == UnitXLexer.MOD_ASSIGN: unitx_obj = x.modulo_assign(y, second_token)
+				elif second_token.type == UnitXLexer.EQUAL: unitx_obj = x.equals(y)
+				elif second_token.type == UnitXLexer.EQUAL_X: unitx_obj = x.equals(y)
+				elif second_token.type == UnitXLexer.NOTEQUAL:
+					unitx_obj = x.equals(y)
+					unitx_obj.set_value(not unitx_obj.get_value())
 				else: unitx_obj = None
 
 		elif ctx.primary(): unitx_obj = self.visitPrimary(ctx.primary())

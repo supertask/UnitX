@@ -17,7 +17,7 @@ def dfs(a) {
 
 def main() {
 	#dfs(6)
-	xjapan(5,2, 'NOW', 52)
+	xjapan(5,2, 'NOW')
 
 	>> 飛行機代 = 10{万} * 2{@往復}
 	>> 保険料 = 20{万}

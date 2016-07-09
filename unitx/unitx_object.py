@@ -156,6 +156,11 @@ class UnitXObject(Collegue):
 		""" 左辺と右辺のチェックし，エラーハンドリングを行う．
 		"""
 		left_obj,right_obj = unitx_objs
+		lvalue, rvalue = left_obj.get_value(), right_obj.get_value()
+		if isinstance(lvalue, int) and isinstance(rvalue, int): return
+		if isinstance(lvalue, int) and isinstance(rvalue, float): return
+		if isinstance(lvalue, float) and isinstance(rvalue, int): return
+		if isinstance(lvalue, float) and isinstance(rvalue, float): return
 
 		if type(left_obj.get_value()) is not type(right_obj.get_value()) or \
 			left_obj.is_none or right_obj.is_none:

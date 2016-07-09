@@ -1,13 +1,28 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+import sys
 import unittest
-from unitx_object_test import UnitXObjectTest
-from each_syntax_test import EachSyntaxTest
+from unitx.example import Example
+
+def intaractive_test():
+	cmd = Example()
+	cmd.talk("aa = 5 + 2{USD}")
+	cmd.talk("3 * 1{万}")
+
+def code_test():
+	pass
 
 def test():
-	test_suite = unittest.TestSuite()
-	test_suite.addTests(unittest.makeSuite(UnitXObjectTest))
-	test_suite.addTests(unittest.makeSuite(EachSyntaxTest))
+	print 'Start test.'
+	intaractive_test()
+	code_test()
+	print 'End test.'
 
-	return test_suite
+
+def main(argv):
+	test()
+	return 0
+
+if __name__ == '__main__':
+	sys.exit(main(sys.argv))

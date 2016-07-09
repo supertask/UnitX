@@ -130,6 +130,15 @@ class UnitXListener(ParseTreeListener):
         pass
 
 
+    # Enter a parse tree produced by UnitXParser#assertStatement.
+    def enterAssertStatement(self, ctx):
+        pass
+
+    # Exit a parse tree produced by UnitXParser#assertStatement.
+    def exitAssertStatement(self, ctx):
+        pass
+
+
     # Enter a parse tree produced by UnitXParser#dumpStatement.
     def enterDumpStatement(self, ctx):
         pass

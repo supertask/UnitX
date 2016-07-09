@@ -6,8 +6,7 @@ import prettyprint
 from constants import Constants
 
 class Util(object):
-	"""A class compiled versatile utility functions.
-	"""
+	"""A class compiled versatile utility functions."""
 
 	@classmethod
 	def dump(self, an_obj):

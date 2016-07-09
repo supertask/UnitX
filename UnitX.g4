@@ -83,6 +83,7 @@ statement
 	| 'break' SEMICOLON?
 	| 'continue' SEMICOLON?
 	| printStatement SEMICOLON?
+	| assertStatement SEMICOLON?
 	| dumpStatement SEMICOLON?
 	| borderStatement SEMICOLON?
 	;
@@ -105,7 +106,12 @@ returnStatement
 	;
 
 printStatement
-	:'print' expression? (',' expression)*
+	: 'print' expression? (',' expression)*
+	| 'print' '('? expression? (',' expression)* ')'? 
+	;
+
+assertStatement
+	: 'assert' expression?
 	;
 
 dumpStatement

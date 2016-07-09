@@ -1,0 +1,11 @@
+def main() {
+	a = 31
+	{ a = 64 }
+	assert(31, a)
+
+	rep i,5 {
+		a = 64
+		assert(64, a)
+	}
+	assert(64, a)
+}

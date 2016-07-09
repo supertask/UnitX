@@ -241,6 +241,7 @@ class EvalVisitor(UnitXVisitor, Mediator):
 		elif ctx.start.type == UnitXLexer.CONTINUE: pass #still
 		elif ctx.printStatement(): self.visitPrintStatement(ctx.printStatement())
 		elif ctx.dumpStatement(): self.visitDumpStatement(ctx.dumpStatement()) #still
+		elif ctx.assertStatement(): self.visitAssertStatement(ctx.assertStatement())
 		elif ctx.borderStatement(): self.visitBorderStatement(ctx.borderStatement())
 		else:
 			raise Exception("Syntax error. EvalVisitor#visitStatement") # Never happen.
@@ -312,6 +313,7 @@ class EvalVisitor(UnitXVisitor, Mediator):
 		return self.visitChildren(ctx)
 
 
+
 	def visitPrintStatement(self, ctx):
 		""" 与えられたexpressionのUnitXObjectたちを出力して，応答する．
 			printモードでself._print_variablesを起動する．
@@ -347,15 +349,30 @@ class EvalVisitor(UnitXVisitor, Mediator):
 		sys.stdout.write(' '.join(unitx_strs) + '\n')
 		return
 
+	def visitAssertStatement(self, ctx):
+		""" 与えられたexpressionの
+			if False or None
+		"""
+		if not ctx.expression(): return
+		unitx_obj = self.visitExpression(ctx.expression())
+		if not unitx_obj.get_value():
+			msg = 'AssertionError'
+			self.get_parser().notifyErrorListeners(msg, unitx_obj.token, Exception(msg))
+		return
+
 	def visitExpressionList(self, ctx):
 		""" Just visiting child nodes of UnitX syntax."""
 		return [self.visitExpression(an_expr) for an_expr in ctx.expression()]
-
-
+	
 	def visitParExpression(self, ctx):
 		""" LPARENとRPARENは無視して，expressionのみを辿って，結果を応答する．
 		"""
 		return self.visitExpression(ctx.expression())
+
+	def visitParExpressionList(self, ctx):
+		""" LPARENとRPARENは無視して，expressionListのみを辿って，結果を応答する．
+		"""
+		return self.visitExpressionList(ctx.expressionList())
 
 	def visitRepControl(self, ctx):
 		""" Visit a parse tree produced by UnitXParser#repControl.
@@ -575,11 +592,11 @@ class EvalVisitor(UnitXVisitor, Mediator):
 		""" 文字列からbooleanへ変換し，応答する．
 		"""
 		value = True if ctx.start.text == 'true' else False
-		return UnitXObject(value=value, varname=None, unit=None)
+		return UnitXObject(value=value, varname=None, unit=None, token=ctx.start)
 
 	
 	def visitNone(self, ctx):
 		""" 文字列からNoneへ変換し，応答する．
 		"""
-		return UnitXObject(value=None, varname=None, unit=None, is_none=True)
+		return UnitXObject(value=None, varname=None, unit=None, token=ctx.start, is_none=True)
 

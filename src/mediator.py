@@ -2,7 +2,7 @@
 # -*- coding:utf-8 -*-
 
 class Mediator(object):
-	"""Mediator interface for Mediator pattern.
+	"""A mediator interface for Mediator pattern.
 
 	For Mediator pattern:
 		Erich Gamma, John Vlissides, Ralph Johnson, and Richard Helm, "Design Patterns: Elements of Reusable Object-Oriented Software", Addison-Wesley, 1994

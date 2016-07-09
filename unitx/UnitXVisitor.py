@@ -75,6 +75,11 @@ class UnitXVisitor(ParseTreeVisitor):
         return self.visitChildren(ctx)
 
 
+    # Visit a parse tree produced by UnitXParser#assertStatement.
+    def visitAssertStatement(self, ctx):
+        return self.visitChildren(ctx)
+
+
     # Visit a parse tree produced by UnitXParser#dumpStatement.
     def visitDumpStatement(self, ctx):
         return self.visitChildren(ctx)

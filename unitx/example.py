@@ -18,17 +18,21 @@ import rlcompleter
 
 class Example(Cmd):
 	"""A class running a parser on each some mode.
-	
 
 	"""
 
 	Cmd.prompt = 'unitx> '
 
-	def __init__(self, is_intaractive_run):
+	def __init__(self, codes=[]):
 		Cmd.__init__(self)
-		self.is_intaractive_run = is_intaractive_run
+		self.codes = codes
+		if codes:
+			self.is_intaractive_run = False
+		else:
+			self.is_intaractive_run = True
+
 		self.stock_line = ""
-		self.errhandler = EvalErrorStrategy(is_intaractive_run)
+		self.errhandler = EvalErrorStrategy(self.is_intaractive_run)
 		self.visitor = EvalVisitor(self.is_intaractive_run, self.errhandler)
 		self.parser = UnitXParser(None)
 		self.parser._errHandler = self.errhandler
@@ -112,20 +116,29 @@ class Example(Cmd):
 		"""
 		"""
 		return parse(InputStream(input_str))
+	
+	def run(self):
+		"""
+		"""
+		if self.is_intaractive_run:
+			import intro_line
+			print intro_line.get_line()
+			self.cmdloop()
+		else:
+			self.eat_code(self.codes[0])
 
 
 def main(argv):
 	""" 
 	"""
 	if len(argv) > 1:
-		cmd = Example(is_intaractive_run=False)
-		cmd.eat_code(argv[1])
+		cmd = Example(argv[1:])
 	else:
-		import intro_line
-		print intro_line.get_line()
-		cmd = Example(is_intaractive_run=True)
-		cmd.cmdloop()
+		cmd = Example()
+	cmd.run()
+
 	return 0
+
 
 if __name__ == '__main__':
 	sys.exit(main(sys.argv))

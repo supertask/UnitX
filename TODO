@@ -1,14 +1,16 @@
 TODO
 ・expressionの字句を増やす: ==など
-・テストハンドリングの追加
-
-・拡張機能
-	・print関数のフォーマット(ex. print "{i}額")
-	・組み込み関数の実装: rangeなど
+・デバッグハンドリングを取り付け，エラーハンドルをオフにする．
+・expect()関数を追加 or デバッグ時にもassertをオンにする
+・テストハンドリングをガツガツ書く
 
 ・英語でコメントをつける
 	eval_error.py
 	eval_visitor.py      scope_list.py
 	example.py           unit.py
 	unit_manager.py      unitlib.py
-	unitx_object.py      util.py
+	unitx_object.py
+
+・拡張機能(branchを分ける)
+	・print関数のフォーマット(ex. print "{i}額")
+	・組み込み関数の実装: rangeなど

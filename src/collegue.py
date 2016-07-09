@@ -2,7 +2,7 @@
 # -*- coding:utf-8 -*-
 
 class Collegue(object):
-	"""Collegue interface for Mediator pattern.
+	"""A collegue interface for Mediator pattern.
 	
 	For Mediator pattern:
 		Erich Gamma, John Vlissides, Ralph Johnson, and Richard Helm, "Design Patterns: Elements of Reusable Object-Oriented Software", Addison-Wesley, 1994

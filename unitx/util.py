@@ -6,8 +6,7 @@ import prettyprint
 from constants import Constants
 
 class Util(object):
-	"""A class compiled versatile utility functions.
-	"""
+	"""A class compiled versatile utility functions."""
 
 	@classmethod
 	def dump(self, an_obj):
@@ -27,7 +26,10 @@ class Util(object):
 		"""Filters a string line to whitespace.
 		
 		Args:
-			string: 
+			string: A string of a code line.
+
+		Returns:
+			spaces: A string of whitespaces.
 		"""
 		spaces = u''
 		for char in string:
@@ -45,7 +47,7 @@ class Util(object):
 		"""Returns true if non ascii characters are detected in the given string.
 		
 		Args:
-			string: A string of unicode
+			string: A string of unicode.
 		"""
 		if string:
 			return max([ord(char) for char in string]) < 128
@@ -53,6 +55,8 @@ class Util(object):
 
 
 def main():
+	"""Run an example for a Util class."""
+
 	Util.dump(['あ', 'い', 'う'])
 	Util.dump({'title':'ねじまき鳥', 'author':'村上春樹'})
 

@@ -10,7 +10,7 @@ TARGET = os.path.join('bin','unitx')
 sys.path.append('./test')
 
 with open('./README.md','r') as rf:
-	readme = rf.read()
+	README = rf.read()
 
 setup(
 	name='UnitX',
@@ -19,7 +19,7 @@ setup(
 	package_data={'unitx': ['data/*.dat']},
 	version=unitx.__version__,
 	description='UnitX is a script launguage.',
-	long_description=readme,
+	long_description=README,
 	url='http://github.com/0ED/unitx',
 	author='Tasuku Takahashi',
 	author_email='lightfox.task@gmail.com',

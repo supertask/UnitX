@@ -16,7 +16,7 @@ class DefinedFunction(Collegue):
 	"""
 
 	def __init__(self, name, args, ctx, current_scope=None):
-		""" Inits attributes of a DefinedFunction class. """
+		"""Inits attributes of a DefinedFunction class. """
 		self.name = name
 		self.args = args
 		self.ctx = ctx
@@ -24,29 +24,31 @@ class DefinedFunction(Collegue):
 
 
 	def get_current_scope(self):
-		""" Returns a current scope saving this class.
-			Returns:
-				A instance of Scope saving an instance of this class.
+		"""Returns a current scope saving this class.
+
+		Returns:
+			A instance of Scope saving an instance of this class.
 		"""
 		return self._current_scope
 	
 
 	def __unicode__(self):
-		""" Returns a string of attributes.
-			Returns:
-				A string of infomations of attributes.
+		"""Returns a string of attributes.
+
+		Returns:
+			A string of infomations of attributes.
 		"""
 		res = "<%s: %s(%s) ctx=%s>" % (self.__class__.__name__, self.name, self.args, self.ctx)
 		return res
 
 
 	def __str__(self):
-		""" Returns an encoded string of attributes."""
+		"""Returns an encoded string of attributes."""
 		return unicode(self).encode('utf-8')
 
 
 	def __repr__(self):
-		""" Returns a string of attributes."""
+		"""Returns a string of attributes."""
 		return self.__str__()
 
 

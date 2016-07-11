@@ -1,9 +1,7 @@
 TODO
-・組み込み関数の実装: rangeなど
-・デバッグハンドリングを取り付け，エラーハンドルをオフにする．
-・expect()関数を追加 or デバッグ時にもassertをオンにする
-・テストハンドリングをガツガツ書く
 ・インタラクティブ中に，エラーを吐いても終了せずに，なにも処理しないようにする
+・デバッグハンドリングを取り付け，エラーハンドルをオフにする．
+・テストハンドリングをガツガツ書く
 
 ・英語でコメントをつける
 	eval_error.py
@@ -11,6 +9,8 @@ TODO
 	example.py           unit.py
 	unit_manager.py      unitlib.py
 	unitx_object.py
+
+・コードを整理する（特にexample.py, unitx_object.py）
 
 ・拡張機能(branchを分ける)
 	・print関数のフォーマット(ex. print "{i}額")

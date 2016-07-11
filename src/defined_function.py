@@ -15,12 +15,75 @@ class DefinedFunction(Collegue):
 		_current_scope: A instance of Scope saving an instance of this class.
 	"""
 
-	def __init__(self, name, args, ctx, current_scope=None):
+	def __init__(self, name, defined_args, ctx=None, func_p=None, current_scope=None):
 		"""Inits attributes of a DefinedFunction class. """
 		self.name = name
-		self.args = args
+		self.defined_args = defined_args
 		self.ctx = ctx
+		self.func_p = func_p
 		self._current_scope = current_scope
+
+
+	def call(self, called_args):
+		"""Call a defined function with called arguments.
+
+		Args:
+			A list of a argument appointed/called by user.
+		Returns:
+			A instance of UnitXObject calculated by this function.
+		"""
+
+		# variable, default_value: UnitXObject
+		args_without_default = []
+		for variable, default_value in self.defined_args:
+			if not default_value:
+				args_without_default.append([variable, None])
+
+		#
+		# 引数が足りないエラー
+		#
+		if len(called_args) < len(args_without_default):
+			msg = "TypeError: %s() takes exactly %s arguments (%s given)" \
+				% (self.name, len(args_without_default), len(called_args))
+			if called_args: 
+				last_unitx_obj = called_args[-1]
+				self.mediator.get_parser().notifyErrorListeners(msg, last_unitx_obj.token, Exception(msg))
+			else: 
+				self.mediator.get_parser().notifyErrorListeners(msg, self.ctx.start, Exception(msg))
+
+		#
+		# 引数が多すぎるときのエラー
+		#
+		if len(called_args) > len(self.defined_args):
+			msg = "TypeError: %s() takes exactly %s arguments (%s given)" \
+				% (self.name, len(self.defined_args), len(called_args))
+			last_unitx_obj = called_args[-1]
+			self.mediator.get_parser().notifyErrorListeners(msg, last_unitx_obj.token, Exception(msg))
+
+
+		# TODO(Tasuku): 現在は定義した関数のみ使用可能だが，組み込み関数はまだなので，それを後で追加
+		if self.ctx:
+			self.define_arguments(called_args)
+			self.mediator.visitBlock(self.ctx.block())
+		else:
+			#リフレクションで関数を呼び出す
+			#func_p()
+			pass
+		return None
+
+
+	def define_arguments(self, called_args):
+		"""関数の引数の変数たちを定義し，呼び出し時の値たちをそれぞれ代入する"""
+		for i in range(len(self.defined_args)):
+			variable, default_value = self.defined_args[i]
+			if i < len(called_args):
+				unitx_obj = called_args[i]
+			else:
+				if default_value:
+					unitx_obj = default_value
+				else:
+					unitx_obj = UnitXObject(value=None, varname=None, unit=Unit(), token=None, is_none=True)
+			variable.assign(unitx_obj, None) #スコープに代入される
 
 
 	def get_current_scope(self):
@@ -38,7 +101,7 @@ class DefinedFunction(Collegue):
 		Returns:
 			A string of infomations of attributes.
 		"""
-		res = "<%s: %s(%s) ctx=%s>" % (self.__class__.__name__, self.name, self.args, self.ctx)
+		res = "<%s: %s(%s) ctx=%s func_p=%s>" % (self.__class__.__name__, self.name, self.defined_args, self.ctx, self.func_p)
 		return res
 
 

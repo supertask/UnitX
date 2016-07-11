@@ -1,0 +1,7 @@
+def t1(x=2,z=11) { }
+def t2(x=2,z=2) { print x,y }
+
+def main() {
+	t1()
+	t2()
+}

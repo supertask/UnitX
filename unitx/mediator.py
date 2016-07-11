@@ -24,3 +24,7 @@ class Mediator(object):
 	def get_is_intaractive_run(self):
 		"""Gets whether intaractive mode."""
 		pass
+	
+	def get_errlistener(self):
+		"""Gets an error listener."""
+		pass

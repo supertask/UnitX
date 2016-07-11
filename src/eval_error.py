@@ -140,15 +140,31 @@ from antlr4.error.ErrorListener import ErrorListener
 class EvalErrorListener(ErrorListener):
 	def __init__(self, is_intaractive_run):
 		self.is_intaractive_run = is_intaractive_run
+		self.set_forced_errobj(None)
 	
 	def set_codelines(self, lines):
 		self.codelines = lines
 
 	def set_codepath(self, a_path):
 		self.codepath = a_path
+	
+	def set_forced_errobj(self, unitx_obj):
+		"""エラーを起こしたシンボルを別のシンボルへと強制的に変更する．
+		
+		インタラクティブモードで関数が呼ばれる際，エラーをトレースするのが大変なので，
+		妥協策として，エラーした場所を強制書き換えする．
+		"""
+		self.forced_errobj = unitx_obj
+
 
 	def syntaxError(self, recognizer, offendingSymbol, row, column, msg, e):
 		# TODO(Tasuku): 対話型のときのエラー描画のバグ
+		#print row, column, offendingSymbol.text
+		if self.forced_errobj:
+			row = self.forced_errobj.token.line
+			column = self.forced_errobj.token.column
+			#print self.codelines
+			#print row, column, offendingSymbol.text
 
 		import linecache
 		from util import Util

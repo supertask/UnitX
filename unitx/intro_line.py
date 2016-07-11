@@ -22,8 +22,8 @@ def get_line():
 \____//_/ /_//_/ \__//_/|_|
 """
 	unitx_info = """\
-UnitX 0.7.0 (%s)
-Type "help" or "demo <number(0-2)>" for UnitX life.""" % (now_time)
+UnitX 0.7.0 (%s)""" % (now_time)
+#Type "help" or "demo <number(0-2)>" for UnitX life.
 	console_info = ascii_art + unitx_info
 
 	return console_info

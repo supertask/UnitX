@@ -43,6 +43,7 @@ class UnitXObject(Collegue):
 			else:
 				if error:
 					msg = "NameError: name '%s' is not defined." % self.varname
+					#print self.token.line, self.token.text
 					self.mediator.get_parser().notifyErrorListeners(msg, self.token, Exception(msg))
 				else: return None
 		else:
@@ -130,7 +131,7 @@ class UnitXObject(Collegue):
 		""" 値と変数を詳細に表示する．
 		"""
 		return u"<%s: value=%s, varname=%s, is_none=%s unit=%s>" \
-			% (self.__class__.__name__, self.get_value(), self.varname, self.is_none, self.unit)
+				% (self.__class__.__name__, self.get_value(), self.varname, self.is_none, self.unit)
 
 	def __str__(self):
 		return unicode(self).encode('utf-8')

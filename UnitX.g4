@@ -107,7 +107,6 @@ returnStatement
 
 printStatement
 	: 'print' expression? (',' expression)*
-	| 'print' '('? expression? (',' expression)* ')'? 
 	;
 
 assertStatement
@@ -151,8 +150,8 @@ expression
 	| expression '(' expressionList? ')'
 	| expression ('*'|'/'|'%') expression
 	| expression ('+'|'-') expression
-	| expression ('<='|'>='|'>'|'<') expression // Still
-	| expression ('=='|'!='|'is') expression // Still
+	| expression ('<='|'>='|'>'|'<') expression // Not yet
+	| expression ('=='|'!='|'is') expression
     | expression
 		( '='
 		| '+='
@@ -161,15 +160,15 @@ expression
 		| '/='
 		| '%='
 		) expression
-	| expression // Still
+	| expression // Not yet
 		( '&&'
 		| '||'
 		| 'and'
 		| 'or'
 		) expression
 	| ('++'|'--') expression
-	| ('!'|'not') expression //Still
-	| 'not' expression
+	| ('!'|'not') expression //Not yet
+	| 'not' expression //Not yet
 	;
 
 /*

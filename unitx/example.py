@@ -82,6 +82,7 @@ class Example(Cmd):
 		a_listener = EvalErrorListener(self.is_intaractive_run)
 		a_listener.set_codepath(a_path)
 		self.parser._listeners = [a_listener]
+		self.visitor.set_errlistener(a_listener)
 		a_stream = FileStream(a_path, encoding='utf-8')
 		self.parse(a_stream)
 
@@ -100,7 +101,9 @@ class Example(Cmd):
 		lines = codeline.split('\n')
 		a_listener.set_codelines(lines)
 		self.parser._listeners = [a_listener]
+		self.visitor.set_errlistener(a_listener)
 		a_stream = InputStream(codeline)
+
 		self.parse(a_stream)
 
 		if self.errhandler.is_ignored_block:

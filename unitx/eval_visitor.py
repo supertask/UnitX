@@ -52,6 +52,7 @@ class EvalVisitor(UnitXVisitor, Mediator):
 		UnitXObject.set_mediator(self)
 		Unit.set_mediator(self)
 		Scope.set_mediator(self)
+		DefinedFunction.set_mediator(self)
 
 
 	#
@@ -75,6 +76,12 @@ class EvalVisitor(UnitXVisitor, Mediator):
 	
 	def get_unit_manager(self):
 		return self.unit_manager
+	
+	def set_errlistener(self, errlistener):
+		self._listener = errlistener
+
+	def get_errlistener(self):
+		return self._listener
 
 	#
 	# Implementations of UnitXVisitor are below.
@@ -100,73 +107,19 @@ class EvalVisitor(UnitXVisitor, Mediator):
 		func_name = func_token.text
 		func_args = self.visitFormalParameters(ctx.formalParameters())
 
-		current_scope = self._scopes.peek()
-		var_unitx_obj = UnitXObject(value=None, varname=func_name, unit=Unit(), token=func_token)
-		def_func = DefinedFunction(var_unitx_obj, func_args, ctx, current_scope)
+		def_func = DefinedFunction(func_name, func_args, ctx=ctx, current_scope=self._scopes.peek())
 
+		var_unitx_obj = UnitXObject(value=None, varname=func_name, unit=Unit(), token=func_token)
 		unitx_obj = UnitXObject(value=def_func, varname=func_name, unit=Unit(), token=func_token)
 		var_unitx_obj.assign(unitx_obj, None)
 		return
-
-
-	def _call_function(self, called_func_name, called_args):
-		""" expressionから呼ばれる．
-		"""
-		found_scope = self._scopes.peek().find_scope_of(called_func_name)
-		if found_scope:
-			def_func = found_scope[called_func_name].get_value()
-			self._scopes.new_scope()
-			
-			if called_args:
-				# variable, default_value: UnitXObject
-				args_without_default = []
-				for variable, default_value in def_func.args:
-					if not default_value:
-						args_without_default.append([variable, default_value])
-
-				#
-				# 引数が足りないエラー
-				#
-				if len(called_args) < len(args_without_default):
-					msg = "TypeError: %s() takes exactly %s arguments (%s given)" \
-						% (called_func_name, len(args_without_default), len(called_args))
-					last_unitx_obj = called_args[-1]
-					self.get_parser().notifyErrorListeners(msg, last_unitx_obj.token, Exception(msg))
-
-				#
-				# 引数が多すぎるときのエラー
-				#
-				if len(called_args) > len(def_func.args):
-					msg = "TypeError: %s() takes exactly %s arguments (%s given)" \
-						% (called_func_name, len(def_func.args), len(called_args))
-					last_unitx_obj = called_args[-1]
-					self.get_parser().notifyErrorListeners(msg, last_unitx_obj.token, Exception(msg))
-
-				for i in range(len(def_func.args)):
-					variable, default_value = def_func.args[i]
-					if i < len(called_args):
-						unitx_obj = called_args[i]
-					else:
-						if default_value:
-							unitx_obj = default_value
-						else:
-							unitx_obj = UnitXObject(value=None, varname=None, unit=Unit(), token=None, is_none=True)
-					variable.assign(unitx_obj, None)
-
-			# TODO(Tasuku): 現在は定義した関数のみ使用可能だが，組み込み関数はまだなので，それを後で追加
-			self.visitBlock(def_func.ctx.block())
-			self._scopes.del_scope()
-		else:
-			pass # error
-		
-		return None # res of func
 
 
 	def visitFormalParameters(self, ctx):
 		"""
 		"""
 		if ctx.formalParameterList(): return self.visitFormalParameterList(ctx.formalParameterList())
-		return None
+		return []
 
 
 	def visitFormalParameterList(self, ctx):
@@ -212,7 +165,7 @@ class EvalVisitor(UnitXVisitor, Mediator):
 		#
 		# If the block is "rep", "if", and "fucntion" statements,
 		# don't create a scope in this visitBlock function because of initializing it in another function.
-		# Also, the block is a "block" statement which is like a '{' .... '}', must create a scope.
+		# Also, the block is that a "block" statement such as '{' .... '}' must create a scope.
 		#
 		if is_special_block:
 			self.visitChildren(ctx)
@@ -220,6 +173,7 @@ class EvalVisitor(UnitXVisitor, Mediator):
 			self._scopes.new_scope()
 			self.visitChildren(ctx)
 			self._scopes.del_scope()
+
 		return 
 
 
@@ -235,7 +189,8 @@ class EvalVisitor(UnitXVisitor, Mediator):
 		if ctx.block(): self.visitBlock(ctx.block())
 		elif ctx.repStatement(): self.visitRepStatement(ctx.repStatement())
 		elif ctx.ifStatement(): self.visitIfStatement(ctx.ifStatement())
-		elif ctx.expressionStatement(): self.visitExpressionStatement(ctx.expressionStatement())
+		elif ctx.expressionStatement():
+			self.visitExpressionStatement(ctx.expressionStatement())
 		elif ctx.returnStatement(): self.visitReturnStatement(ctx.returnStatement()) #still
 		elif ctx.start.type == UnitXLexer.BREAK: pass #still
 		elif ctx.start.type == UnitXLexer.CONTINUE: pass #still
@@ -260,7 +215,7 @@ class EvalVisitor(UnitXVisitor, Mediator):
 	def visitRepStatement(self, ctx):
 		""" 与えられた回数の繰り返し処理を実行し，応答する．
 			また，繰り返し処理の前にスコープのメモリ領域を確保し，繰り返し処理の後にそのスコープのメモリ領域を解放する．すなわち，スコープを管理する．
-			ex: rep(i,5){...}, rep(i,[1,2,3]){...}, rep(i,[{B},{KB},{MB}])
+			ex: rep(i,5){...}, rep(i,[1,2,3]){...}, rep(i,['B','KB','MB'])
 		"""
 		if self._is_ignored_block(ctx.statement()): return
 
@@ -300,11 +255,16 @@ class EvalVisitor(UnitXVisitor, Mediator):
 	def visitExpressionStatement(self, ctx):
 		""" Just visiting child nodes of UnitX syntax."""
 		unitx_obj = self.visitExpression(ctx.expression())
+
 		if self.is_intaractive_run:
 			if unitx_obj.is_none:
 				print 'NULL'
 			else:
-				print "%s%s" % (unitx_obj.get_value(), unitx_obj.unit.formal_str())
+				# 関数以外はデバッグ出力
+				from defined_function import DefinedFunction
+				a_value = unitx_obj.get_value()
+				if not isinstance(a_value, DefinedFunction):
+					print "%s%s" % (a_value, unitx_obj.unit.formal_str())
 		return
 
 
@@ -405,14 +365,29 @@ class EvalVisitor(UnitXVisitor, Mediator):
 				unitx_obj = x.decrement()
 
 			elif ctx.getChild(i=1).getSymbol().type == UnitXLexer.LPAREN:
+				#
+				# Calls a function.
+				# x: A UnitXObject of called function.
+				#
 				called_func_name = x.varname
 				called_args = []
 				if ctx.expressionList():
 					called_args = self.visitExpressionList(ctx.expressionList())
 
-				value = self._call_function(called_func_name, called_args)
-				unitx_obj = UnitXObject(value=value, varname=called_func_name, unit=Unit())
-				unitx_obj.token = x.token
+				found_scope = self.get_scopes().peek().find_scope_of(called_func_name)
+				if found_scope:
+					def_func = found_scope[called_func_name].get_value()
+					self.get_scopes().new_scope()
+
+					self.get_errlistener().set_forced_errobj(x)
+					res = def_func.call(called_args)
+					self.get_errlistener().set_forced_errobj(None)
+
+					self.get_scopes().del_scope()
+					unitx_obj = UnitXObject(value=res, varname=called_func_name, unit=Unit(), token=x.token)
+				else:
+					msg = "NameError: name '%s' is not defined." % called_func_name
+					self.get_parser().notifyErrorListeners(msg, x.token, Exception(msg))
 
 			else:
 				second_token = ctx.getChild(i=1).getSymbol()

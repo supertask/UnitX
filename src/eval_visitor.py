@@ -18,6 +18,7 @@ from unit import Unit
 from unit_manager import UnitManager
 from mediator import Mediator
 from scope import Scope
+from stdlib import Stdlib
 
 class EvalVisitor(UnitXVisitor, Mediator):
 	""" UnitXの構文木をたどり，その振る舞いを行うクラス．
@@ -40,6 +41,7 @@ class EvalVisitor(UnitXVisitor, Mediator):
 		this_dir, _ = os.path.split(__file__)
 		data_path = os.path.join(this_dir, "data/unit_table.dat")
 		self.unit_manager = UnitManager(data_path) # Sets a database(data/unit_table.dat) for calculating units.
+		self.stdlib = Stdlib()
 		
 		#
 		# Sets a mediator to each classes for a management,
@@ -49,11 +51,24 @@ class EvalVisitor(UnitXVisitor, Mediator):
 		#
 		self._scopes.set_mediator(self)
 		self.unit_manager.set_mediator(self)
+		self.stdlib.set_mediator(self)
 		UnitXObject.set_mediator(self)
 		Unit.set_mediator(self)
 		Scope.set_mediator(self)
 		DefinedFunction.set_mediator(self)
 
+		#
+		# Sets a standard library
+		#
+		self.build_stdlib()
+
+	def build_stdlib(self):
+		"""
+		"""
+		for func in self.stdlib.funcs:
+			var_unitx_obj = UnitXObject(value=None, varname=func.name, unit=Unit())
+			unitx_obj = UnitXObject(value=func, varname=func.name, unit=Unit())
+			var_unitx_obj.assign(unitx_obj, None)
 
 	#
 	# Implementations of Mediator are below.
@@ -83,6 +98,7 @@ class EvalVisitor(UnitXVisitor, Mediator):
 	def get_errlistener(self):
 		return self._listener
 
+
 	#
 	# Implementations of UnitXVisitor are below.
 	# =======================================
@@ -107,7 +123,7 @@ class EvalVisitor(UnitXVisitor, Mediator):
 		func_name = func_token.text
 		func_args = self.visitFormalParameters(ctx.formalParameters())
 
-		def_func = DefinedFunction(func_name, func_args, ctx=ctx, current_scope=self._scopes.peek())
+		def_func = DefinedFunction(func_name, func_args, ctx=ctx)
 
 		var_unitx_obj = UnitXObject(value=None, varname=func_name, unit=Unit(), token=func_token)
 		unitx_obj = UnitXObject(value=def_func, varname=func_name, unit=Unit(), token=func_token)
@@ -257,14 +273,11 @@ class EvalVisitor(UnitXVisitor, Mediator):
 		unitx_obj = self.visitExpression(ctx.expression())
 
 		if self.is_intaractive_run:
-			if unitx_obj.is_none:
-				print 'NULL'
-			else:
+			if not unitx_obj.is_none:
 				# 関数以外はデバッグ出力
 				from defined_function import DefinedFunction
-				a_value = unitx_obj.get_value()
-				if not isinstance(a_value, DefinedFunction):
-					print "%s%s" % (a_value, unitx_obj.unit.formal_str())
+				if not isinstance(unitx_obj.get_value(), DefinedFunction):
+					print unitx_obj.get_unit_value()
 		return
 
 
@@ -302,9 +315,9 @@ class EvalVisitor(UnitXVisitor, Mediator):
 			else: 
 				varname = unitx_obj.varname
 				if varname and mode == 'dump':
-					dump_line = "%s: %s%s" % (varname, unitx_obj.get_value(), unitx_obj.unit.formal_str())
+					dump_line = "%s: %s" % (varname, unitx_obj.get_unit_value())
 				else:
-					dump_line = "%s%s" % (unitx_obj.get_value(), unitx_obj.unit.formal_str())
+					dump_line = unitx_obj.get_unit_value()
 			unitx_strs.append(dump_line)
 		sys.stdout.write(' '.join(unitx_strs) + '\n')
 		return
@@ -380,11 +393,10 @@ class EvalVisitor(UnitXVisitor, Mediator):
 					self.get_scopes().new_scope()
 
 					self.get_errlistener().set_forced_errobj(x)
-					res = def_func.call(called_args)
+					unitx_obj = def_func.call(called_args, x)
 					self.get_errlistener().set_forced_errobj(None)
 
 					self.get_scopes().del_scope()
-					unitx_obj = UnitXObject(value=res, varname=called_func_name, unit=Unit(), token=x.token)
 				else:
 					msg = "NameError: name '%s' is not defined." % called_func_name
 					self.get_parser().notifyErrorListeners(msg, x.token, Exception(msg))
@@ -472,7 +484,7 @@ class EvalVisitor(UnitXVisitor, Mediator):
 		if ctx.unit(): unit = self.visitUnit(ctx.unit())
 
 		if ctx.Identifier():
-			# Here: ここで変数がスコープにあるかを判定し，見つかったオブジェクトを格納する．
+			# ここで変数がスコープにあるかを判定し，見つかったオブジェクトを格納する．
 			varname = ctx.Identifier().getText()
 			found_scope = self._scopes.peek().find_scope_of(varname)
 			if found_scope:

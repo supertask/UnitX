@@ -4,6 +4,8 @@
 import sys
 from collegue import Collegue
 from constants import Constants
+from unitx_object import UnitXObject
+from unit import Unit
 
 class DefinedFunction(Collegue):
 	"""A Class for saving a infomation of defined function.
@@ -15,16 +17,16 @@ class DefinedFunction(Collegue):
 		_current_scope: A instance of Scope saving an instance of this class.
 	"""
 
-	def __init__(self, name, defined_args, ctx=None, func_p=None, current_scope=None):
+	def __init__(self, name, defined_args, ctx=None, func_p=None):
 		"""Inits attributes of a DefinedFunction class. """
 		self.name = name
 		self.defined_args = defined_args
 		self.ctx = ctx
 		self.func_p = func_p
-		self._current_scope = current_scope
+		#self._current_scope = current_scope
 
 
-	def call(self, called_args):
+	def call(self, called_args, called_funcobj):
 		"""Call a defined function with called arguments.
 
 		Args:
@@ -65,11 +67,18 @@ class DefinedFunction(Collegue):
 		if self.ctx:
 			self.define_arguments(called_args)
 			self.mediator.visitBlock(self.ctx.block())
+			return None
 		else:
-			#リフレクションで関数を呼び出す
-			#func_p()
-			pass
-		return None
+			# リフレクションで関数を呼び出す
+			# Here!!!!
+			# called_args: A list of UnitXObject
+			#called_args = map(lambda x: x.get_value(), called_args)
+			#print 'Debug: ', called_args
+			a_value = self.func_p(called_args, called_funcobj)
+			if a_value:
+				return UnitXObject(value=a_value, varname=None, is_none=False, unit=Unit(), token=called_funcobj.token)
+			else:
+				return UnitXObject(value=None, varname=None, is_none=True, unit=Unit(), token=called_funcobj.token)
 
 
 	def define_arguments(self, called_args):
@@ -86,13 +95,13 @@ class DefinedFunction(Collegue):
 			variable.assign(unitx_obj, None) #スコープに代入される
 
 
-	def get_current_scope(self):
 		"""Returns a current scope saving this class.
+	def get_current_scope(self):
 
 		Returns:
 			A instance of Scope saving an instance of this class.
-		"""
 		return self._current_scope
+		"""
 	
 
 	def __unicode__(self):

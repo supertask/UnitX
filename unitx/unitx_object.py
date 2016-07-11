@@ -49,6 +49,9 @@ class UnitXObject(Collegue):
 		else:
 			return self._trans_all_unit(self._value)
 
+	def get_unit_value(self):
+		return "%s%s" % (self.get_value(), self.unit.formal_str())
+
 
 	def _trans_all_unit(self, value):
 		if isinstance(value, list):

@@ -141,12 +141,19 @@ class EvalErrorListener(ErrorListener):
 	def __init__(self, is_intaractive_run):
 		self.is_intaractive_run = is_intaractive_run
 		self.set_forced_errobj(None)
+		self._is_exit = False
 	
 	def set_codelines(self, lines):
 		self.codelines = lines
 
 	def set_codepath(self, a_path):
 		self.codepath = a_path
+	
+	def reset_exit(self):
+		self._is_exit = False
+
+	def is_exit(self):
+		return self._is_exit
 	
 	def set_forced_errobj(self, unitx_obj):
 		"""エラーを起こしたシンボルを別のシンボルへと強制的に変更する．
@@ -159,12 +166,11 @@ class EvalErrorListener(ErrorListener):
 
 	def syntaxError(self, recognizer, offendingSymbol, row, column, msg, e):
 		# TODO(Tasuku): 対話型のときのエラー描画のバグ
-		#print row, column, offendingSymbol.text
+		if self.is_exit(): return
+
 		if self.forced_errobj:
 			row = self.forced_errobj.token.line
 			column = self.forced_errobj.token.column
-			#print self.codelines
-			#print row, column, offendingSymbol.text
 
 		import linecache
 		from util import Util
@@ -187,6 +193,9 @@ class EvalErrorListener(ErrorListener):
 		sys.stderr.write(error_line)
 
 		linecache.clearcache() 
-		sys.exit(1)
+		self._is_exit = True
+		if not self.is_intaractive_run:
+			sys.exit(1)
 
+		return
 

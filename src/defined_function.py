@@ -67,13 +67,8 @@ class DefinedFunction(Collegue):
 		if self.ctx:
 			self.define_arguments(called_args)
 			self.mediator.visitBlock(self.ctx.block())
-			return None
+			return UnitXObject(value=None, varname=None, unit=None, token=called_funcobj.token, is_none=True)
 		else:
-			# リフレクションで関数を呼び出す
-			# Here!!!!
-			# called_args: A list of UnitXObject
-			#called_args = map(lambda x: x.get_value(), called_args)
-			#print 'Debug: ', called_args
 			a_value = self.func_p(called_args, called_funcobj)
 			if a_value:
 				return UnitXObject(value=a_value, varname=None, is_none=False, unit=Unit(), token=called_funcobj.token)

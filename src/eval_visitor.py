@@ -107,6 +107,7 @@ class EvalVisitor(UnitXVisitor, Mediator):
 		""" Just visiting child nodes of UnitX syntax.
 			ALSO, THIS <program> RULE IS A STARTING POINT OF UNITX PARSER.
 		"""
+		self.get_errlistener().reset_exit()
 		return self.visitChildren(ctx)
 
 	def visitTypeDeclaration(self, ctx):
@@ -164,7 +165,7 @@ class EvalVisitor(UnitXVisitor, Mediator):
 				$ unitx
 				unitx> rep(i,5) {
 				...... }
-			In intaractive programing, we have to ignore runtime errors in a block statement.
+			In an intaractive programing, we have to ignore runtime errors in a block statement.
 			So, we control it by turning on a variable "is_ignored_block" in EvalError.
 			And the controled result is turned off by a user input an empty string.
 		"""
@@ -201,7 +202,9 @@ class EvalVisitor(UnitXVisitor, Mediator):
 	def visitStatement(self, ctx):
 		""" それぞれの文を辿って，応答する．
 		"""
-		#Util.dump(self._scopes)
+		if self.is_intaractive_run:
+			if self.get_errlistener().is_exit(): return #Here
+
 		if ctx.block(): self.visitBlock(ctx.block())
 		elif ctx.repStatement(): self.visitRepStatement(ctx.repStatement())
 		elif ctx.ifStatement(): self.visitIfStatement(ctx.ifStatement())
@@ -215,7 +218,8 @@ class EvalVisitor(UnitXVisitor, Mediator):
 		elif ctx.assertStatement(): self.visitAssertStatement(ctx.assertStatement())
 		elif ctx.borderStatement(): self.visitBorderStatement(ctx.borderStatement())
 		else:
-			raise Exception("Syntax error. EvalVisitor#visitStatement") # Never happen.
+			if not self.is_intaractive_run:
+				raise Exception("Syntax error. EvalVisitor#visitStatement") # Never happen.
 
 		return
 
@@ -400,6 +404,7 @@ class EvalVisitor(UnitXVisitor, Mediator):
 				else:
 					msg = "NameError: name '%s' is not defined." % called_func_name
 					self.get_parser().notifyErrorListeners(msg, x.token, Exception(msg))
+					unitx_obj = UnitXObject(value=None, varname=None, unit=None, token=x, is_none=True)
 
 			else:
 				second_token = ctx.getChild(i=1).getSymbol()
@@ -424,7 +429,8 @@ class EvalVisitor(UnitXVisitor, Mediator):
 
 		elif ctx.primary(): unitx_obj = self.visitPrimary(ctx.primary())
 		else:
-			raise Exception("Syntax error. EvalVisitor#visitExpression") # Never happen.
+			if not self.is_intaractive_run:
+				raise Exception("Syntax error. EvalVisitor#visitExpression") # Never happen.
 
 		assert(isinstance(unitx_obj, UnitXObject))
 
@@ -516,7 +522,8 @@ class EvalVisitor(UnitXVisitor, Mediator):
 			unitx_obj = UnitXObject(value = unitx_objs, varname = None, unit=unit, token=ctx.start)
 
 		else:
-			raise Exception("Syntax error. EvalVisitor#visitPrimary") # Never happen.
+			if not self.is_intaractive_run:
+				raise Exception("Syntax error. EvalVisitor#visitPrimary") # Never happen.
 
 		assert(isinstance(unitx_obj, UnitXObject))
 		return unitx_obj
@@ -529,7 +536,9 @@ class EvalVisitor(UnitXVisitor, Mediator):
 		elif ctx.string(): return self.visitString(ctx.string())
 		elif ctx.boolean(): return self.visitBoolean(ctx.boolean())
 		elif ctx.none(): return self.visitNone(ctx.none())
-		else: raise Exception("Syntax error. EvalVisitor#visitLiteral") # Never happen.
+		else:
+			if not self.is_intaractive_run:
+				raise Exception("Syntax error. EvalVisitor#visitLiteral") # Never happen.
 
 
 	def visitString(self, ctx):

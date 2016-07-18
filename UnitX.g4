@@ -23,22 +23,23 @@
  */
 
 /*
- * 【UnitX's grammar】
+ * 【A grammar of UnitX】
  * This grammar can be a parser of UnitX by using ANTLR4.
- * And, ANTLR4 is a parser generator by Java.
- * So, you need the Java lang. And also, you can use it like below.
+ * ANTLR4 is a parser generator made using Java by Prof. Terence Parr and the reasearch team.
+ * So you absolutely need the Java language. Follow an example such as below.
  * 
  *     java -jar antlr-4.5.1-complete.jar UnitX.g4 
  * 
- * Anyway, see "http://www.antlr.org/" for the details! if you wanna change this grammar.
+ * See "http://www.antlr.org/" on detail! if you'd like to know about the generator. 
+ * Enjoy!!!!
  */
 grammar UnitX;
 
 /*
- * Parser from Here.
+ * A grammar will start from here.
  *
  * A starting point of Parser RULE is 'program'.
- * memo: If someone or future's I could add RULES of import statement or name space, Add the RULES to a 'typeDeclaration' RULE.
+ * Memo (to my future self): if someone or I could add RULES of import statement or name space, Add the RULES to a 'typeDeclaration' RULE.
  */
 program
 	: typeDeclaration* EOF 

@@ -29,6 +29,7 @@ class Stdlib(Collegue):
 		if not is_match:
 			msg = "Debug: '%s' didn't coincide with '%s'." % (l.get_unit_value(), r.get_unit_value())
 			self.mediator.get_parser().notifyErrorListeners(msg, func_obj.token, Exception(msg))
+		return None
 
 	def r(self, args, func_obj):
 		"""

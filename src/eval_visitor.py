@@ -37,6 +37,9 @@ class EvalVisitor(UnitXVisitor, Mediator):
 		self.is_intaractive_run = is_intaractive_run
 		self.errhandler = an_errhandler
 		self._scopes = ScopeList()
+		self.is_break = False
+		self.is_return = False
+		self.return_value = None
 
 		this_dir, _ = os.path.split(__file__)
 		data_path = os.path.join(this_dir, "data/unit_table.dat")
@@ -203,18 +206,24 @@ class EvalVisitor(UnitXVisitor, Mediator):
 		""" それぞれの文を辿って，応答する．
 		"""
 		if self.is_intaractive_run:
-			if self.get_errlistener().is_exit(): return #Here
+			if self.get_errlistener().is_exit(): return
+		if self.is_break or self.is_return: return
 
 		if ctx.block(): self.visitBlock(ctx.block())
 		elif ctx.repStatement(): self.visitRepStatement(ctx.repStatement())
 		elif ctx.ifStatement(): self.visitIfStatement(ctx.ifStatement())
-		elif ctx.expressionStatement():
-			self.visitExpressionStatement(ctx.expressionStatement())
-		elif ctx.returnStatement(): self.visitReturnStatement(ctx.returnStatement()) #still
-		elif ctx.start.type == UnitXLexer.BREAK: pass #still
-		elif ctx.start.type == UnitXLexer.CONTINUE: pass #still
+		elif ctx.expressionStatement(): self.visitExpressionStatement(ctx.expressionStatement())
+
+		elif ctx.start.type == UnitXLexer.RETURN:
+			self.is_return = True
+			self.return_value = self.visitExpression(ctx.expression())
+
+		elif ctx.start.type == UnitXLexer.BREAK:
+			self.is_break = True
+
+		elif ctx.start.type == UnitXLexer.CONTINUE: pass #not yet
 		elif ctx.printStatement(): self.visitPrintStatement(ctx.printStatement())
-		elif ctx.dumpStatement(): self.visitDumpStatement(ctx.dumpStatement()) #still
+		elif ctx.dumpStatement(): self.visitDumpStatement(ctx.dumpStatement())
 		elif ctx.assertStatement(): self.visitAssertStatement(ctx.assertStatement())
 		elif ctx.borderStatement(): self.visitBorderStatement(ctx.borderStatement())
 		else:
@@ -237,7 +246,7 @@ class EvalVisitor(UnitXVisitor, Mediator):
 			また，繰り返し処理の前にスコープのメモリ領域を確保し，繰り返し処理の後にそのスコープのメモリ領域を解放する．すなわち，スコープを管理する．
 			ex: rep(i,5){...}, rep(i,[1,2,3]){...}, rep(i,['B','KB','MB'])
 		"""
-		if self._is_ignored_block(ctx.statement()): return
+		if self._is_ignored_block(ctx.statement()): return #Clean!
 
 		var_obj, end_control = self.visitRepControl(ctx.repControl())
 		end_value = end_control.get_value()
@@ -252,6 +261,8 @@ class EvalVisitor(UnitXVisitor, Mediator):
 			self.visitStatement(ctx.statement())
 
 		self._scopes.del_scope()
+		self.is_break = False
+	
 		return
 
 
@@ -283,11 +294,6 @@ class EvalVisitor(UnitXVisitor, Mediator):
 				if not isinstance(unitx_obj.get_value(), DefinedFunction):
 					print unitx_obj.get_unit_value()
 		return
-
-
-	def visitReturnStatement(self, ctx):
-		""" Just visiting child nodes of UnitX syntax."""
-		return self.visitChildren(ctx)
 
 
 
@@ -405,6 +411,8 @@ class EvalVisitor(UnitXVisitor, Mediator):
 					msg = "NameError: name '%s' is not defined." % called_func_name
 					self.get_parser().notifyErrorListeners(msg, x.token, Exception(msg))
 					unitx_obj = UnitXObject(value=None, varname=None, unit=None, token=x, is_none=True)
+
+				self.is_return = False
 
 			else:
 				second_token = ctx.getChild(i=1).getSymbol()

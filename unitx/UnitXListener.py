@@ -112,15 +112,6 @@ class UnitXListener(ParseTreeListener):
         pass
 
 
-    # Enter a parse tree produced by UnitXParser#returnStatement.
-    def enterReturnStatement(self, ctx):
-        pass
-
-    # Exit a parse tree produced by UnitXParser#returnStatement.
-    def exitReturnStatement(self, ctx):
-        pass
-
-
     # Enter a parse tree produced by UnitXParser#printStatement.
     def enterPrintStatement(self, ctx):
         pass

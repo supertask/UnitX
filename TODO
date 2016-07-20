@@ -1,8 +1,8 @@
 TODO
+・return, break文を実装
 ・デバッグハンドリングを取り付け，エラーハンドルをオフにする．
 ・テストハンドリングをガツガツ書く
 ・range関数を実装
-・return, break文を実装
 
 ・英語でコメントをつける
 	eval_error.py

@@ -67,7 +67,8 @@ class DefinedFunction(Collegue):
 		if self.ctx:
 			self.define_arguments(called_args)
 			self.mediator.visitBlock(self.ctx.block())
-			return UnitXObject(value=None, varname=None, unit=None, token=called_funcobj.token, is_none=True)
+			return self.mediator.return_value
+			#return UnitXObject(value=None, varname=None, unit=None, token=called_funcobj.token, is_none=True)
 		else:
 			a_value = self.func_p(called_args, called_funcobj)
 			if a_value:

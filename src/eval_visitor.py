@@ -39,7 +39,7 @@ class EvalVisitor(UnitXVisitor, Mediator):
 		self._scopes = ScopeList()
 		self.is_break = False
 		self.is_return = False
-		self.return_value = None
+		self.return_value = UnitXObject(value=None, varname=None, unit=None, token=None, is_none=True)
 
 		this_dir, _ = os.path.split(__file__)
 		data_path = os.path.join(this_dir, "data/unit_table.dat")
@@ -100,6 +100,20 @@ class EvalVisitor(UnitXVisitor, Mediator):
 
 	def get_errlistener(self):
 		return self._listener
+
+	def is_context_in_ancestor(self, crr_ctx, seeking_ctx):
+		"""
+		Args:
+			
+		Return:
+		"""
+		if crr_ctx.parentCtx:
+			if isinstance(crr_ctx.parentCtx, seeking_ctx):
+				return True
+			return self.is_context_in_ancestor(crr_ctx.parentCtx, seeking_ctx)
+		return False
+
+
 
 
 	#
@@ -215,11 +229,20 @@ class EvalVisitor(UnitXVisitor, Mediator):
 		elif ctx.expressionStatement(): self.visitExpressionStatement(ctx.expressionStatement())
 
 		elif ctx.start.type == UnitXLexer.RETURN:
-			self.is_return = True
-			self.return_value = self.visitExpression(ctx.expression())
+			if self.is_context_in_ancestor(ctx, UnitXParser.FunctionDeclarationContext):
+				self.is_return = True
+				if ctx.expression():
+					self.return_value = self.visitExpression(ctx.expression())
+			else:
+				msg = "SyntaxError: 'return' outside function"
+				self.get_parser().notifyErrorListeners(msg, ctx.start, Exception(msg))
 
 		elif ctx.start.type == UnitXLexer.BREAK:
-			self.is_break = True
+			if self.is_context_in_ancestor(ctx, UnitXParser.RepStatementContext):
+				self.is_break = True
+			else:
+				msg = "SyntaxError: 'break' outside loop"
+				self.get_parser().notifyErrorListeners(msg, ctx.start, Exception(msg))
 
 		elif ctx.start.type == UnitXLexer.CONTINUE: pass #not yet
 		elif ctx.printStatement(): self.visitPrintStatement(ctx.printStatement())

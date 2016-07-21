@@ -80,7 +80,7 @@ statement
 	| repStatement
 	| ifStatement
 	| expressionStatement SEMICOLON?
-	| 'return' expression SEMICOLON?
+	| 'return' expression? SEMICOLON?
 	| 'break' SEMICOLON?
 	| 'continue' SEMICOLON?
 	| printStatement SEMICOLON?

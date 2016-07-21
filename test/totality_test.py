@@ -5,6 +5,10 @@ import sys
 import unittest
 from unitx.example import Example
 
+#
+# return_code = subprocess.check_call(["unitx"])
+#
+
 def intaractive_test():
 	cmd = Example()
 	cmd.talk("aa = 5 + 2{USD}")

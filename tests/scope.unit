@@ -1,0 +1,19 @@
+def t1() {
+	a = 31
+	{ a = 64 }
+	except(31, a)
+
+	rep i,5 {
+		a = 64
+		except(64, a)
+	}
+	except(64, a)
+}
+
+def t2() {
+}
+
+def main() {
+	t1()
+	t2()
+}

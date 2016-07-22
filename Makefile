@@ -51,7 +51,7 @@ uninstall:
 	@echo "It's like a 'pip uninstall {module name}'.\n"
 	@date
 
-utest:
+test:
 	$(PYTHON) setup.py test
 	@date
 
@@ -85,3 +85,6 @@ clean:
 zip: clean
 	cd ..; zip -r ${CURDIR}.zip ${CURDIR}
 	@date
+
+wc:
+	wc -l UnitX.g4 src/*.py tests/*.py 

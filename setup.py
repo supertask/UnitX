@@ -7,7 +7,7 @@ import unitx
 from setuptools import setup
 
 TARGET = os.path.join('bin','unitx')
-sys.path.append('./test')
+sys.path.append('./tests')
 
 with open('./README.md','r') as rf:
 	README = rf.read()
@@ -25,9 +25,8 @@ setup(
 	author_email='lightfox.task@gmail.com',
 	license='MIT',
 	scripts=[TARGET],
-	test_suite = "totality_test.test",
 	install_requires=[
-		'antlr4-python2-runtime',
-		'prettyprint'
-	]
+		'antlr4-python2-runtime'
+	],
+	test_suite = "tester.Tester"
 )

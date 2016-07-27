@@ -23,14 +23,9 @@ class Example(Cmd):
 
 	Cmd.prompt = 'unitx> '
 
-	def __init__(self, codes=[]):
+	def __init__(self, is_intaractive_run):
 		Cmd.__init__(self)
-		self.codes = codes
-		if codes:
-			self.is_intaractive_run = False
-		else:
-			self.is_intaractive_run = True
-
+		self.is_intaractive_run = is_intaractive_run
 		self.stock_line = ""
 		self.errhandler = EvalErrorStrategy(self.is_intaractive_run)
 		self.visitor = EvalVisitor(self.is_intaractive_run, self.errhandler)
@@ -58,11 +53,11 @@ class Example(Cmd):
 	def default(self, a_line):
 		self.talk(a_line + '\n')
 
-	def cmdloop(self):
+	def talk_loop(self):
 		try: Cmd.cmdloop(self)
 		except KeyboardInterrupt as e:
 			print 'KeyboardInterrupt!'
-			self.cmdloop()
+			self.talk_loop()
 		
 
 	def get_stream(self, a_line):
@@ -120,25 +115,18 @@ class Example(Cmd):
 		"""
 		return parse(InputStream(input_str))
 	
-	def run(self):
-		"""
-		"""
-		if self.is_intaractive_run:
-			import intro_line
-			print intro_line.get_line()
-			self.cmdloop()
-		else:
-			self.eat_code(self.codes[0])
-
 
 def main(argv):
 	""" 
 	"""
 	if len(argv) > 1:
-		cmd = Example(argv[1:])
+		cmd = Example(is_intaractive_run=False)
+		cmd.eat_code(argv[1])
 	else:
-		cmd = Example()
-	cmd.run()
+		cmd = Example(is_intaractive_run=True)
+		import intro_line
+		print intro_line.get_line()
+		cmd.talk_loop()
 
 	return 0
 

@@ -11,6 +11,11 @@ class Tester(unittest.TestCase):
 	"""
 	"""
 
+	"""
+	def __print(self, content):
+		pass
+	"""
+
 	def __check_an_error(self, cmd, stdin, ans_code):
 		p = subprocess.Popen(cmd, stdin=stdin, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 		_, stderr_data = p.communicate()
@@ -39,7 +44,6 @@ class Tester(unittest.TestCase):
 			self.cmd = Example(is_intaractive_run=False)
 			self.cmd.eat_code(a_code)
 	
-
 	def setUp(self):
 		print
 		self.test_codes = []

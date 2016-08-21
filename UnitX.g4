@@ -204,12 +204,19 @@ literal
     | string
     | boolean
     | none
+	| comment
     ;
 
 
 string
 	: STRING_LITERAL
 	| BYTES_LITERAL
+	| halfString
+	;
+
+halfString
+	: '"""' ~('\r'|'\n')*
+	| '\'\'\'' ~('\r'|'\n')*
 	;
 
 number
@@ -218,13 +225,6 @@ number
 	| IMAG_NUMBER
 	;
 
-
-/*
-newlines
-	: newlines NEWLINE
-	| NEWLINE
-	;
-*/
 
 /// integer        ::=  decimalinteger | octinteger | hexinteger | bininteger
 integer
@@ -326,12 +326,14 @@ STRING_LITERAL
 	;
 // without [uU]? [rR]? now
 
+
 /// bytesliteral   ::=  bytesprefix(shortbytes | longbytes)
 /// bytesprefix    ::=  "b" | "B" | "br" | "Br" | "bR" | "BR"
 BYTES_LITERAL
 	: ( SHORT_BYTES | LONG_BYTES )
 	;
 // without [bB] [rR]? now
+
 
 /// decimalinteger ::=  nonzerodigit digit* | "0"+
 DECIMAL_INTEGER
@@ -375,6 +377,7 @@ SHORT_STRING
 	: '\'' ( STRING_ESCAPE_SEQ | ~[\\\r\n'] )* '\''
 	| '"' ( STRING_ESCAPE_SEQ | ~[\\\r\n"] )* '"'
 	;
+
 fragment
 LONG_STRING
 	: '\'\'\'' LONG_STRING_ITEM*? '\'\'\''
@@ -529,10 +532,11 @@ NEWLINE
 WS  : [ \t\r\u000C]+ -> skip
     ;
 
-COMMENT
+//COMMENT
+comment
     :   '/*'
-		('\n'|.)*? 
-		'*/' -> skip
+		('\n'|.)*?
+		'*/'
     ;
 
 LINE_COMMENT

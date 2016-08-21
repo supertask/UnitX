@@ -247,6 +247,15 @@ class UnitXListener(ParseTreeListener):
         pass
 
 
+    # Enter a parse tree produced by UnitXParser#halfString.
+    def enterHalfString(self, ctx):
+        pass
+
+    # Exit a parse tree produced by UnitXParser#halfString.
+    def exitHalfString(self, ctx):
+        pass
+
+
     # Enter a parse tree produced by UnitXParser#number.
     def enterNumber(self, ctx):
         pass
@@ -280,6 +289,15 @@ class UnitXListener(ParseTreeListener):
 
     # Exit a parse tree produced by UnitXParser#none.
     def exitNone(self, ctx):
+        pass
+
+
+    # Enter a parse tree produced by UnitXParser#comment.
+    def enterComment(self, ctx):
+        pass
+
+    # Exit a parse tree produced by UnitXParser#comment.
+    def exitComment(self, ctx):
         pass
 
 

@@ -17,3 +17,5 @@ def main() {
 	t1()
 	t2()
 }
+
+main()

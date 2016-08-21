@@ -135,7 +135,7 @@ class EvalVisitor(UnitXVisitor, Mediator):
 	def visitFunctionDeclaration(self, ctx):
 		""" 関数宣言をする．
 		"""
-		if self._is_ignored_block(ctx.block()): return
+		if self._is_passing_block(): return
 
 		func_token = ctx.Identifier().getSymbol()
 		func_name = func_token.text
@@ -175,7 +175,7 @@ class EvalVisitor(UnitXVisitor, Mediator):
 		return [variable, default_value]
 
 
-	def _is_ignored_block(self, ctx):
+	def _is_passing_block(self):
 		""" Returns whether ignored block exists for intaractive programing.
 			Ignored block is like bellow.
 			example:
@@ -269,7 +269,7 @@ class EvalVisitor(UnitXVisitor, Mediator):
 			また，繰り返し処理の前にスコープのメモリ領域を確保し，繰り返し処理の後にそのスコープのメモリ領域を解放する．すなわち，スコープを管理する．
 			ex: rep(i,5){...}, rep(i,[1,2,3]){...}, rep(i,['B','KB','MB'])
 		"""
-		if self._is_ignored_block(ctx.statement()): return #Clean!
+		if self._is_passing_block(): return #Clean!
 
 		var_obj, end_control = self.visitRepControl(ctx.repControl())
 		end_value = end_control.get_value()
@@ -296,11 +296,11 @@ class EvalVisitor(UnitXVisitor, Mediator):
 		unitx_obj = self.visitParExpression(ctx.parExpression())
 		is_run_ifStatement = unitx_obj.get_value()
 		if is_run_ifStatement:
-			if self._is_ignored_block(ctx.statement(i=0)): return
+			if self._is_passing_block(): return
 			self.visitStatement(ctx.statement(i=0))
 		else:
 			if ctx.getChildCount() > 3:
-				if self._is_ignored_block(ctx.statement(i=1)): return
+				if self._is_passing_block(): return
 				self.visitStatement(ctx.statement(i=1))
 			else: pass # do nothing
 		return		
@@ -309,13 +309,15 @@ class EvalVisitor(UnitXVisitor, Mediator):
 	def visitExpressionStatement(self, ctx):
 		""" Just visiting child nodes of UnitX syntax."""
 		unitx_obj = self.visitExpression(ctx.expression())
+		if self.get_errhandler().is_ignored_block: return
 
 		if self.is_intaractive_run:
-			if not unitx_obj.is_none:
-				# 関数以外はデバッグ出力
-				from defined_function import DefinedFunction
-				if not isinstance(unitx_obj.get_value(), DefinedFunction):
-					print unitx_obj.get_unit_value()
+			if unitx_obj.is_none or not unitx_obj.get_value(): return
+
+			# 関数以外はデバッグ出力
+			from defined_function import DefinedFunction
+			if not isinstance(unitx_obj.get_value(), DefinedFunction):
+				Util.printf(self.visitExpressionStatement, unitx_obj.get_unit_value())
 		return
 
 
@@ -578,8 +580,18 @@ class EvalVisitor(UnitXVisitor, Mediator):
 		value = ctx.start.text.strip('"\'')
 		if ctx.STRING_LITERAL(): token = ctx.STRING_LITERAL().getSymbol()
 		elif ctx.BYTES_LITERAL(): token = ctx.BYTES_LITERAL().getSymbol()
+		elif ctx.halfString():
+			token = None
+			if self.is_intaractive_run:
+				self.visitHalfString(ctx.halfString())
 
-		return UnitXObject(value=value, varname=None, unit=None, token=token)
+		return UnitXObject(value=value, varname=None, unit=Unit(), token=token)
+
+
+	def visitHalfString(self, ctx):
+		"""
+		"""
+		self.get_errhandler().is_ignored_block = True
 
 
 	def visitNumber(self, ctx):
@@ -594,7 +606,7 @@ class EvalVisitor(UnitXVisitor, Mediator):
 			value = complex(ctx.IMAG_NUMBER().getText())
 			token = ctx.IMAG_NUMBER().getSymbol()
 
-		return UnitXObject(value=value, varname=None, unit=None, token=token)
+		return UnitXObject(value=value, varname=None, unit=Unit(), token=token)
 
 
 	def visitInteger(self, ctx):
@@ -631,4 +643,11 @@ class EvalVisitor(UnitXVisitor, Mediator):
 		""" 文字列からNoneへ変換し，応答する．
 		"""
 		return UnitXObject(value=None, varname=None, unit=None, token=ctx.start, is_none=True)
+
+
+	def visitComment(self, ctx):
+		""" 
+		"""
+		return UnitXObject(value=None, varname=None, unit=None, token=ctx.start, is_none=True)
+
 

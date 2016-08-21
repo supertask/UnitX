@@ -128,10 +128,12 @@ class EvalErrorStrategy(DefaultErrorStrategy):
 		recognizer.notifyErrorListeners(msg, t, None)
 
 	def is_block(self, recognizer):
-		if isinstance(recognizer._ctx, UnitXParser.BlockContext) and self.is_intaractive_run: # ignore block
+		if (isinstance(recognizer._ctx, UnitXParser.BlockContext) or
+			isinstance(recognizer._ctx, UnitXParser.StringContext) or
+			isinstance(recognizer._ctx, UnitXParser.CommentContext)) and self.is_intaractive_run: # ignore block
+
 			self.is_ignored_block = self.errorRecoveryMode = True
-			return True
-		return False
+		return self.is_ignored_block
 
 
 
@@ -185,6 +187,7 @@ class EvalErrorListener(ErrorListener):
 		target_line = target_line.rstrip()
 		whites = list(Util.filter_to_white(target_line))
 
+		print self.codelines
 		whites[column] = '^'
 		mark_line = ''.join(whites)
 		error_line = ""
@@ -198,4 +201,5 @@ class EvalErrorListener(ErrorListener):
 			sys.exit(1)
 
 		return
+
 

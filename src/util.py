@@ -22,6 +22,12 @@ class Util(object):
 
 
 	@classmethod
+	def printf(self, checking_func, content):
+		is_DEBUG = True
+		if is_DEBUG: print "A method of UnitX:", type(checking_func)
+		print content
+
+	@classmethod
 	def filter_to_white(self, string):
 		"""Filters a string line to whitespace.
 		

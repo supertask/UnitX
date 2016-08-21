@@ -21,9 +21,10 @@ def t4() {
 }
 
 def main() {
-	print 'four ope.'
 	t1()
 	t2()
 	t3()
 	t4()
 }
+
+main()

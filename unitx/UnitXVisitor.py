@@ -140,6 +140,11 @@ class UnitXVisitor(ParseTreeVisitor):
         return self.visitChildren(ctx)
 
 
+    # Visit a parse tree produced by UnitXParser#halfString.
+    def visitHalfString(self, ctx):
+        return self.visitChildren(ctx)
+
+
     # Visit a parse tree produced by UnitXParser#number.
     def visitNumber(self, ctx):
         return self.visitChildren(ctx)
@@ -157,6 +162,11 @@ class UnitXVisitor(ParseTreeVisitor):
 
     # Visit a parse tree produced by UnitXParser#none.
     def visitNone(self, ctx):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by UnitXParser#comment.
+    def visitComment(self, ctx):
         return self.visitChildren(ctx)
 
 

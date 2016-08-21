@@ -1,7 +1,15 @@
-def t1(x=2,z=11) { }
-def t2(x=2,z=2) { print x,y }
+def t1() { }
+def t2() { return }
+def t3(x) { return x }
+def t4(x,y,z) { return [x,y,z]{USD} }
+def t5(x,y,z=2) { return [x,y,z]{JPY} }
 
 def main() {
 	t1()
 	t2()
+	expect(t3("Hello, World"), "Hello, World")
+	expect(t4(52, 62.0, 11.), [52, 62.0, 11.]{USD})
+	#print t4(52, 62.0, 11.)
 }
+
+main()

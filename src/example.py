@@ -33,6 +33,11 @@ class Example(Cmd):
 		self.parser._errHandler = self.errhandler
 		self.visitor.set_parser(self.parser)
 
+		a_listener = EvalErrorListener(self.is_intaractive_run)
+		self.parser._listeners = [a_listener]
+		self.visitor.set_errlistener(a_listener)
+
+
 	def do_demo(self, arg_line):
 		if arg_line.isdigit(): print "Xdemo", int(arg_line)
 		else: pass #error
@@ -69,15 +74,13 @@ class Example(Cmd):
 		a_lexer = UnitXLexer(a_stream)
 		token_stream = CommonTokenStream(a_lexer)
 		self.parser.setTokenStream(token_stream)
-		a_tree = self.parser.program()
+
+		a_tree = self.parser.program() #Bug
 		self.visitor.visit(a_tree)
 		return
 
 	def eat_code(self, a_path):
-		a_listener = EvalErrorListener(self.is_intaractive_run)
-		a_listener.set_codepath(a_path)
-		self.parser._listeners = [a_listener]
-		self.visitor.set_errlistener(a_listener)
+		self.visitor.get_errlistener().set_codepath(a_path)
 		a_stream = FileStream(a_path, encoding='utf-8')
 		self.parse(a_stream)
 
@@ -92,13 +95,9 @@ class Example(Cmd):
 			codeline = a_line
 
 		codeline = codeline.decode('utf-8')
-		a_listener = EvalErrorListener(self.is_intaractive_run)
 		lines = codeline.split('\n')
-		a_listener.set_codelines(lines)
-		self.parser._listeners = [a_listener]
-		self.visitor.set_errlistener(a_listener)
+		self.visitor.get_errlistener().set_codelines(lines)
 		a_stream = InputStream(codeline)
-
 		self.parse(a_stream)
 
 		if self.errhandler.is_ignored_block:

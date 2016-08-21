@@ -70,6 +70,10 @@ demo1: all
 demox: all
 	$(TARGET) demo/demo_x.unit
 	@date
+
+tmp: all
+	$(TARGET) tests/tmp.unit
+	@date
 	
 
 inline: all

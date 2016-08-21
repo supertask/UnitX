@@ -39,7 +39,7 @@ class Scope(dict, Collegue):
 		"""
 		if varname in self: return self
 		else:
-			if not self.parent: return None # For finishing
+			if self.parent == None: return None # For finishing
 			return self.parent.find_scope_of(varname) # Search recursively
 
 
@@ -59,14 +59,27 @@ def main():
 	from unitx_object import UnitXObject
 	from unit import Unit
 
-	parent = Scope(None)
-	parent['x'] = UnitXObject(value=2, varname=None, unit=Unit())
+	grandparent = Scope(None)
+	grandparent['x'] = UnitXObject(value=2, varname=None, unit=Unit())
+	grandparent['z'] = UnitXObject(value=4, varname=None, unit=Unit())
+
+	parent = Scope(grandparent)
+	parent['y'] = UnitXObject(value=3, varname=None, unit=Unit())
+
 	child = Scope(parent)
 
+	print 'A grandparent scope instance: ', grandparent
 	print 'A parent scope instance: ', parent
 	print 'A child scope instance: ', child
+
 	found_scope = child.find_scope_of('x')
-	print 'A value of a found scope: ', found_scope['x']
+	print 'A value of a "x": ', found_scope['x']
+	found_scope = child.find_scope_of('y')
+	print 'A value of a "y": ', found_scope['y']
+	found_scope = child.find_scope_of('z')
+	print 'A value of a "z": ', found_scope['z']
+
+	print child.parent.parent
 
 	return Constants.EXIT_SUCCESS
 

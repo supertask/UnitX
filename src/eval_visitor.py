@@ -423,6 +423,14 @@ class EvalVisitor(UnitXVisitor, Mediator):
 					called_args = self.visitExpressionList(ctx.expressionList())
 
 				found_scope = self.get_scopes().peek().find_scope_of(called_func_name)
+				"""
+				if not found_scope:
+					print called_func_name
+					
+					#print called_func_name in self.get_scopes().peek().parent.parent
+					#print Util.dump(self.get_scopes().peek().parent.parent.find_scope_of(called_func_name))
+				"""
+
 				if found_scope:
 					def_func = found_scope[called_func_name].get_value()
 					self.get_scopes().new_scope()

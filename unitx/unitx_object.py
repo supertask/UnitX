@@ -31,8 +31,10 @@ class UnitXObject(Collegue):
 			また，呼び出した際にエラー出力したくない場合はerrorをオフにする必要がある．
 		"""
 		if self._value is None:
+
 			if not self.varname:
 				return None
+
 			found_scope = self.mediator.get_scopes().peek().find_scope_of(self.varname)
 			if found_scope:
 				unitx_obj = found_scope[self.varname]

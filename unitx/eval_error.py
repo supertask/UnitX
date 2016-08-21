@@ -187,7 +187,6 @@ class EvalErrorListener(ErrorListener):
 		target_line = target_line.rstrip()
 		whites = list(Util.filter_to_white(target_line))
 
-		print self.codelines
 		whites[column] = '^'
 		mark_line = ''.join(whites)
 		error_line = ""

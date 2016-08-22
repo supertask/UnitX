@@ -71,7 +71,7 @@ class Unit(Collegue):
 	def subtract(self, unit, opp_token):
 		"""
 		"""
-		self.add(unit, opp_token)
+		return self.add(unit, opp_token)
 
 
 	def multiply(self, unit, opp_token):

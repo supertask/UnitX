@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import sys
+from constants import Constants
 from collegue import Collegue
 from defined_function import DefinedFunction
 
@@ -24,12 +25,13 @@ class Stdlib(Collegue):
 		"""
 		
 		l, r = args
-		is_match = l.get_value() == r.get_value() and l.unit.equals(r.unit)
+		#リスト用の評価を書く
+		is_match = l.exactlly_equals(r).get_value()
 		if not is_match:
 			msg = "Debug: '%s' didn't coincide with '%s'." % (l.get_unit_value(), r.get_unit_value())
 			self.mediator.get_parser().notifyErrorListeners(msg, func_obj.token, Exception(msg))
 			sys.exit(1)
-		return None
+		return self.mediator.NULL_UNITX_OBJ
 
 	def r(self, args, func_obj):
 		"""

@@ -22,10 +22,10 @@ class Util(object):
 
 
 	@classmethod
-	def printf(self, checking_func, content):
-		is_DEBUG = True
-		if is_DEBUG: print "A method of UnitX:", type(checking_func)
-		print content
+	def printf(self, is_test, called_func, content):
+		is_DEBUG = False
+		if is_DEBUG: print "A method of UnitX:", type(called_func)
+		if not is_test: print content
 
 	@classmethod
 	def filter_to_white(self, string):

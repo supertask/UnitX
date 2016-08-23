@@ -1,3 +1,5 @@
+#!/usr/bin/env unitx
+
 def t1() {
 	a = 31
 	{ a = 64 }

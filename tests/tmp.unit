@@ -1,3 +1,5 @@
+#!/usr/bin/env unitx
+
 def a(x) {
 	if (x == 12) { return x }
 	print x

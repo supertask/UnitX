@@ -180,6 +180,7 @@ class EvalErrorListener(ErrorListener):
 		filename = ''
 		if self.is_intaractive_run:
 			filename = '<stdin>'
+			#print '@@@@@' * 10
 			target_line = self.codelines[row-1]
 		else:
 			filename = self.codepath

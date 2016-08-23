@@ -282,16 +282,20 @@ class UnitXObject(Collegue):
 		return self.assign(self.modulo(unitx_obj, opp_token), opp_token)
 
 	def equals(self, unitx_obj):
-		"""
-		"""
-		value_equals = self.get_value() == unitx_obj.get_value()
-		return UnitXObject(value = value_equals, varname=None, unit=Unit())
+		return self == unitx_obj
 
+	def __eq__(self, other):
+		"""
+		"""
+		left_v = self.get_value()
+		right_v = other.get_value()
+		return UnitXObject(value = (left_v == right_v), varname=None, unit=Unit())
+	
 	def exactlly_equals(self, unitx_obj):
 		"""
 		"""
 		unit_equals = self.unit.equals(unitx_obj.unit)
-		value_equals = self.get_value() == unitx_obj.get_value()
+		value_equals = self.equals(unitx_obj)
 		return UnitXObject(value = (unit_equals and value_equals), varname=None, unit=Unit())
 
 	@classmethod

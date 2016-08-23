@@ -77,6 +77,7 @@ class Unit(Collegue):
 	def multiply(self, unit, opp_token):
 		"""
 		"""
+		# Here is a bug.
 		if self.numer == unit.denom: return Unit(numer=unit.numer)
 		elif self.denom == unit.numer: return Unit(numer=self.numer)
 		elif self.is_empty(): return unit

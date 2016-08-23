@@ -51,7 +51,7 @@ uninstall:
 	@echo "It's like a 'pip uninstall {module name}'.\n"
 	@date
 
-test:
+test: all
 	$(PYTHON) setup.py test
 	@date
 

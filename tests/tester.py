@@ -36,12 +36,14 @@ class Tester(unittest.TestCase):
 		for a_code in self.test_codes:
 			print 'Checking "%s" on intaractive mode' % a_code
 			self.cmd = Example(is_intaractive_run=True)
+			self.cmd.visitor.is_test = True
 			with open(a_code, 'r') as rf:
 				for line in rf:
 					self.cmd.talk(line)
 
 			print 'Checking "%s" on IO mode' % a_code
 			self.cmd = Example(is_intaractive_run=False)
+			self.cmd.visitor.is_test = True
 			self.cmd.eat_code(a_code)
 	
 	def setUp(self):

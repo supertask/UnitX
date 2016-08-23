@@ -34,6 +34,7 @@ class EvalVisitor(UnitXVisitor, Mediator):
 	def __init__(self, is_intaractive_run, an_errhandler):
 		""" EvalVisitorを初期化して応答する．
 		"""
+		self.is_test = False
 		self.is_intaractive_run = is_intaractive_run
 		self.errhandler = an_errhandler
 		self._scopes = ScopeList()
@@ -45,6 +46,7 @@ class EvalVisitor(UnitXVisitor, Mediator):
 		data_path = os.path.join(this_dir, "data/unit_table.dat")
 		self.unit_manager = UnitManager(data_path) # Sets a database(data/unit_table.dat) for calculating units.
 		self.stdlib = Stdlib()
+		self.NULL_UNITX_OBJ = UnitXObject(value=None, varname=None, is_none=True, unit=Unit(), token=None)
 		
 		#
 		# Sets a mediator to each classes for a management,
@@ -314,10 +316,7 @@ class EvalVisitor(UnitXVisitor, Mediator):
 		if self.is_intaractive_run:
 			if unitx_obj.is_none or not unitx_obj.get_value(): return
 
-			# 関数以外はデバッグ出力
-			from defined_function import DefinedFunction
-			if not isinstance(unitx_obj.get_value(), DefinedFunction):
-				Util.printf(self.visitExpressionStatement, unitx_obj.get_unit_value())
+			Util.printf(self.is_test, self.visitExpressionStatement, unitx_obj.get_unit_value())
 		return
 
 
@@ -423,13 +422,6 @@ class EvalVisitor(UnitXVisitor, Mediator):
 					called_args = self.visitExpressionList(ctx.expressionList())
 
 				found_scope = self.get_scopes().peek().find_scope_of(called_func_name)
-				"""
-				if not found_scope:
-					print called_func_name
-					
-					#print called_func_name in self.get_scopes().peek().parent.parent
-					#print Util.dump(self.get_scopes().peek().parent.parent.find_scope_of(called_func_name))
-				"""
 
 				if found_scope:
 					def_func = found_scope[called_func_name].get_value()

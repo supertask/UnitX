@@ -1,8 +1,13 @@
 #!/usr/bin/env unitx
 
-def a(x) {
-	if (x == 12) { return x }
+# A bug on Inline mode.
+def t3() {
 	print x
-	a(x+1)
 }
->> a(0)
+
+def t2() {
+t3() }
+
+def t1() { t2() }
+
+t1()

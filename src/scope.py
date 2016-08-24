@@ -40,7 +40,8 @@ class Scope(dict, Collegue):
 		if varname in self: return self
 		else:
 			if self.parent == None: return None # For finishing
-			return self.parent.find_scope_of(varname) # Search recursively
+			tmp = self.parent.find_scope_of(varname)
+			return tmp  # Search recursively
 
 
 	@classmethod

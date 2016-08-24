@@ -23,10 +23,11 @@ class DefinedFunction(Collegue):
 		self.defined_args = defined_args
 		self.ctx = ctx
 		self.func_p = func_p
+		self.called_func = None
 		#self._current_scope = current_scope
 
 
-	def call(self, called_args, called_funcobj):
+	def call(self, args, funcobj, called_func):
 		"""Call a defined function with called arguments.
 
 		Args:
@@ -34,6 +35,7 @@ class DefinedFunction(Collegue):
 		Returns:
 			A instance of UnitXObject calculated by this function.
 		"""
+		self.called_func = called_func
 
 		# variable, default_value: UnitXObject
 		args_without_default = []
@@ -44,11 +46,11 @@ class DefinedFunction(Collegue):
 		#
 		# 引数が足りないエラー
 		#
-		if len(called_args) < len(args_without_default):
+		if len(args) < len(args_without_default):
 			msg = "TypeError: %s() takes exactly %s arguments (%s given)" \
-				% (self.name, len(args_without_default), len(called_args))
-			if called_args: 
-				last_unitx_obj = called_args[-1]
+				% (self.name, len(args_without_default), len(args))
+			if args: 
+				last_unitx_obj = args[-1]
 				self.mediator.get_parser().notifyErrorListeners(msg, last_unitx_obj.token, Exception(msg))
 			else: 
 				self.mediator.get_parser().notifyErrorListeners(msg, self.ctx.start, Exception(msg))
@@ -56,33 +58,32 @@ class DefinedFunction(Collegue):
 		#
 		# 引数が多すぎるときのエラー
 		#
-		if len(called_args) > len(self.defined_args):
+		if len(args) > len(self.defined_args):
 			msg = "TypeError: %s() takes exactly %s arguments (%s given)" \
-				% (self.name, len(self.defined_args), len(called_args))
-			last_unitx_obj = called_args[-1]
+				% (self.name, len(self.defined_args), len(args))
+			last_unitx_obj = args[-1]
 			self.mediator.get_parser().notifyErrorListeners(msg, last_unitx_obj.token, Exception(msg))
 
 
-		# TODO(Tasuku): 現在は定義した関数のみ使用可能だが，組み込み関数はまだなので，それを後で追加
 		if self.ctx:
-			self.define_arguments(called_args)
+			self.define_arguments(args)
 			self.mediator.visitBlock(self.ctx.block())
 			return self.mediator.return_value
-			#return UnitXObject(value=None, varname=None, unit=None, token=called_funcobj.token, is_none=True)
+			#return UnitXObject(value=None, varname=None, unit=None, token=funcobj.token, is_none=True)
 		else:
-			a_value = self.func_p(called_args, called_funcobj)
+			a_value = self.func_p(args, funcobj)
 			if a_value:
-				return UnitXObject(value=a_value, varname=None, is_none=False, unit=Unit(), token=called_funcobj.token)
+				return UnitXObject(value=a_value, varname=None, is_none=False, unit=Unit(), token=funcobj.token)
 			else:
-				return UnitXObject(value=None, varname=None, is_none=True, unit=Unit(), token=called_funcobj.token)
+				return UnitXObject(value=None, varname=None, is_none=True, unit=Unit(), token=funcobj.token)
 
 
-	def define_arguments(self, called_args):
+	def define_arguments(self, args):
 		"""関数の引数の変数たちを定義し，呼び出し時の値たちをそれぞれ代入する"""
 		for i in range(len(self.defined_args)):
 			variable, default_value = self.defined_args[i]
-			if i < len(called_args):
-				unitx_obj = called_args[i]
+			if i < len(args):
+				unitx_obj = args[i]
 			else:
 				if default_value:
 					unitx_obj = default_value

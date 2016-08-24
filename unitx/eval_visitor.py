@@ -398,6 +398,15 @@ class EvalVisitor(UnitXVisitor, Mediator):
 		return an_expr
 
 
+	def __find_called_func(self, ctx):
+		if ctx == None: return None
+		if isinstance(ctx, UnitXParser.FunctionDeclarationContext):
+			func_name = ctx.Identifier().getSymbol().text
+			found_scope = self.get_scopes().peek().find_scope_of(func_name)
+			called_func = found_scope[func_name].get_value()
+			return called_func
+		return self.__find_called_func(ctx.parentCtx)
+
 	def visitExpression(self, ctx):
 		""" UnitXObject同士を計算した結果を返す．
 			return: UnitXObject
@@ -427,8 +436,10 @@ class EvalVisitor(UnitXVisitor, Mediator):
 					def_func = found_scope[called_func_name].get_value()
 					self.get_scopes().new_scope()
 
+					called_func = self.__find_called_func(ctx)
+					#print called_func
 					self.get_errlistener().set_forced_errobj(x)
-					unitx_obj = def_func.call(called_args, x)
+					unitx_obj = def_func.call(called_args, x, called_func)
 					self.get_errlistener().set_forced_errobj(None)
 
 					self.get_scopes().del_scope()

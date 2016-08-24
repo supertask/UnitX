@@ -138,12 +138,17 @@ class EvalErrorStrategy(DefaultErrorStrategy):
 
 
 from antlr4.error.ErrorListener import ErrorListener
+from collegue import Collegue
+from util import Util
 
-class EvalErrorListener(ErrorListener):
-	def __init__(self, is_intaractive_run):
-		self.is_intaractive_run = is_intaractive_run
+class EvalErrorListener(ErrorListener, Collegue):
+	def __init__(self, visitor):
+		self.set_mediator(visitor)
 		self.set_forced_errobj(None)
 		self._is_exit = False
+	
+	def set_mediator(self, mediator):
+		self.mediator = mediator
 	
 	def set_codelines(self, lines):
 		self.codelines = lines
@@ -166,21 +171,40 @@ class EvalErrorListener(ErrorListener):
 		self.forced_errobj = unitx_obj
 
 
+
+	def trace_func_tokens(self, func, func_tokens):
+		if func:
+			func_tokens.append(func.ctx.Identifier().getSymbol()) #token?
+			return self.trace_func_tokens(func.called_func, func_tokens)
+		else:
+			return func_tokens
+
 	def syntaxError(self, recognizer, offendingSymbol, row, column, msg, e):
 		# TODO(Tasuku): 対話型のときのエラー描画のバグ
 		if self.is_exit(): return
+
+		#print self.codelines
+		#print row, column
+		err_func = self.forced_errobj.get_value()
+		Util.dump(self.mediator.get_scopes())
+		tokens = self.trace_func_tokens(err_func, [])
+		print offendingSymbol.text, row, column
+		for a_token in tokens:
+			print a_token.text, a_token.line, a_token.column
+		"""
+		if err_func.ctx:
+			tokens = self.trace_func_tokens(err_func.ctx, [])
+		"""
 
 		if self.forced_errobj:
 			row = self.forced_errobj.token.line
 			column = self.forced_errobj.token.column
 
 		import linecache
-		from util import Util
 		target_line = ''
 		filename = ''
-		if self.is_intaractive_run:
+		if self.mediator.is_intaractive_run:
 			filename = '<stdin>'
-			#print '@@@@@' * 10
 			target_line = self.codelines[row-1]
 		else:
 			filename = self.codepath
@@ -197,7 +221,7 @@ class EvalErrorListener(ErrorListener):
 
 		linecache.clearcache() 
 		self._is_exit = True
-		if not self.is_intaractive_run:
+		if not self.mediator.is_intaractive_run:
 			sys.exit(1)
 
 		return

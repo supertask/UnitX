@@ -284,19 +284,19 @@ class UnitXObject(Collegue):
 	def equals(self, unitx_obj):
 		return self == unitx_obj
 
-	def __eq__(self, other):
+	def __eq__(self, unitx_obj):
 		"""
 		"""
-		left_v = self.get_value()
-		right_v = other.get_value()
-		return UnitXObject(value = (left_v == right_v), varname=None, unit=Unit())
+		value_eq = (self.get_value() == unitx_obj.get_value())
+		unit_eq = self.unit.equals(unitx_obj.unit)
+		return UnitXObject(value = (value_eq and unit_eq), varname=None, unit=Unit())
 	
+	"""
 	def exactlly_equals(self, unitx_obj):
-		"""
-		"""
 		unit_equals = self.unit.equals(unitx_obj.unit)
-		value_equals = self.equals(unitx_obj)
+		value_equals = self == unitx_obj
 		return UnitXObject(value = (unit_equals and value_equals), varname=None, unit=Unit())
+	"""
 
 	@classmethod
 	def set_mediator(self, mediator):
@@ -328,7 +328,7 @@ def main():
 
 	# Checking equals()
 	tmp_obj = UnitXObject(value=1.5, varname='x', is_none=False, unit=Unit(ex_numer=None, numer=u'cm', ex_denom=None, denom=None))
-	print current_scope['x'].equals(tmp_obj)
+	print current_scope['x'] == tmp_obj
 
 	# Clear part
 	scopes.del_scope()

@@ -33,7 +33,7 @@ class Example(Cmd):
 		self.parser._errHandler = self.errhandler
 		self.visitor.set_parser(self.parser)
 
-		a_listener = EvalErrorListener(self.is_intaractive_run)
+		a_listener = EvalErrorListener(self.visitor)
 		self.parser._listeners = [a_listener]
 		self.visitor.set_errlistener(a_listener)
 

@@ -149,7 +149,11 @@ class EvalErrorListener(ErrorListener, Collegue):
 	
 	def set_mediator(self, mediator):
 		self.mediator = mediator
-	
+
+	def get_code(self):
+		if self.mediator.is_intaractive_run: return self.codelines
+		else: return self.codepath
+
 	def set_codelines(self, lines):
 		self.codelines = lines
 
@@ -171,13 +175,16 @@ class EvalErrorListener(ErrorListener, Collegue):
 		self.forced_errobj = unitx_obj
 
 
-
-	def trace_func_tokens(self, func, func_tokens):
+	def trace_tokens(self, func, tracing_tokens):
 		if func:
-			func_tokens.append(func.ctx.Identifier().getSymbol()) #token?
-			return self.trace_func_tokens(func.called_func, func_tokens)
+			token_info = []
+			token_info.append(func.ctx.Identifier().getSymbol())
+			token_info.append(func.func_obj.token)
+			token_info.append(func.code)
+			tracing_tokens.append(token_info) #token?
+			return self.trace_tokens(func.called_func, tracing_tokens)
 		else:
-			return func_tokens
+			return tracing_tokens
 
 	def syntaxError(self, recognizer, offendingSymbol, row, column, msg, e):
 		# TODO(Tasuku): 対話型のときのエラー描画のバグ
@@ -186,15 +193,14 @@ class EvalErrorListener(ErrorListener, Collegue):
 		#print self.codelines
 		#print row, column
 		err_func = self.forced_errobj.get_value()
-		Util.dump(self.mediator.get_scopes())
-		tokens = self.trace_func_tokens(err_func, [])
+		#Util.dump(self.mediator.get_scopes())
+		traced_tokens = self.trace_tokens(err_func, [])
 		print offendingSymbol.text, row, column
-		for a_token in tokens:
-			print a_token.text, a_token.line, a_token.column
-		"""
-		if err_func.ctx:
-			tokens = self.trace_func_tokens(err_func.ctx, [])
-		"""
+		for token_info in traced_tokens:
+			print token_info[0].text, token_info[0].line, token_info[0].column
+			print token_info[1].text, token_info[1].line, token_info[1].column
+			print token_info[2]
+		print self.codelines
 
 		if self.forced_errobj:
 			row = self.forced_errobj.token.line

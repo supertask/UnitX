@@ -17,17 +17,20 @@ class DefinedFunction(Collegue):
 		_current_scope: A instance of Scope saving an instance of this class.
 	"""
 
-	def __init__(self, name, defined_args, ctx=None, func_p=None):
+	def __init__(self, name, defined_args, code, ctx=None, func_p=None):
 		"""Inits attributes of a DefinedFunction class. """
 		self.name = name
 		self.defined_args = defined_args
 		self.ctx = ctx
 		self.func_p = func_p
+		self.func_obj = None
 		self.called_func = None
+		self.code = code
+		#self.code = self.mediator
 		#self._current_scope = current_scope
 
 
-	def call(self, args, funcobj, called_func):
+	def call(self, args, func_obj, called_func):
 		"""Call a defined function with called arguments.
 
 		Args:
@@ -35,6 +38,7 @@ class DefinedFunction(Collegue):
 		Returns:
 			A instance of UnitXObject calculated by this function.
 		"""
+		self.func_obj = func_obj
 		self.called_func = called_func
 
 		# variable, default_value: UnitXObject
@@ -69,13 +73,13 @@ class DefinedFunction(Collegue):
 			self.define_arguments(args)
 			self.mediator.visitBlock(self.ctx.block())
 			return self.mediator.return_value
-			#return UnitXObject(value=None, varname=None, unit=None, token=funcobj.token, is_none=True)
+			#return UnitXObject(value=None, varname=None, unit=None, token=func_obj.token, is_none=True)
 		else:
-			a_value = self.func_p(args, funcobj)
+			a_value = self.func_p(args, func_obj)
 			if a_value:
-				return UnitXObject(value=a_value, varname=None, is_none=False, unit=Unit(), token=funcobj.token)
+				return UnitXObject(value=a_value, varname=None, is_none=False, unit=Unit(), token=func_obj.token)
 			else:
-				return UnitXObject(value=None, varname=None, is_none=True, unit=Unit(), token=funcobj.token)
+				return UnitXObject(value=None, varname=None, is_none=True, unit=Unit(), token=func_obj.token)
 
 
 	def define_arguments(self, args):

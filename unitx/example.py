@@ -97,6 +97,7 @@ class Example(Cmd):
 		codeline = codeline.decode('utf-8')
 		lines = codeline.split('\n')
 		self.visitor.get_errlistener().set_codelines(lines)
+
 		a_stream = InputStream(codeline)
 		self.parse(a_stream)
 
@@ -109,11 +110,6 @@ class Example(Cmd):
 		return
 
 
-	def test_run(self, input_str):
-		"""
-		"""
-		return parse(InputStream(input_str))
-	
 
 def main(argv):
 	""" 

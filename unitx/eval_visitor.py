@@ -62,18 +62,6 @@ class EvalVisitor(UnitXVisitor, Mediator):
 		Scope.set_mediator(self)
 		DefinedFunction.set_mediator(self)
 
-		#
-		# Sets a standard library
-		#
-		self.build_stdlib()
-
-	def build_stdlib(self):
-		"""
-		"""
-		for func in self.stdlib.funcs:
-			var_unitx_obj = UnitXObject(value=None, varname=func.name, unit=Unit())
-			unitx_obj = UnitXObject(value=func, varname=func.name, unit=Unit())
-			var_unitx_obj.assign(unitx_obj, None)
 
 	#
 	# Implementations of Mediator are below.
@@ -116,6 +104,21 @@ class EvalVisitor(UnitXVisitor, Mediator):
 		return False
 
 
+	def build_stdlib(self):
+		"""
+		"""
+		for func in self.stdlib.funcs:
+			func.code = self.get_errlistener().get_code()
+			var_unitx_obj = UnitXObject(value=None, varname=func.name, unit=Unit())
+			unitx_obj = UnitXObject(value=func, varname=func.name, unit=Unit())
+			var_unitx_obj.assign(unitx_obj, None)
+
+	def visit(self, tree):
+		"""
+		"""
+		self.build_stdlib() # Sets a standard library
+		super(EvalVisitor, self).visit(tree)
+
 
 
 	#
@@ -142,8 +145,9 @@ class EvalVisitor(UnitXVisitor, Mediator):
 		func_token = ctx.Identifier().getSymbol()
 		func_name = func_token.text
 		func_args = self.visitFormalParameters(ctx.formalParameters())
+		code = self.get_errlistener().get_code()
 
-		def_func = DefinedFunction(func_name, func_args, ctx=ctx)
+		def_func = DefinedFunction(func_name, func_args, code, ctx=ctx)
 
 		var_unitx_obj = UnitXObject(value=None, varname=func_name, unit=Unit(), token=func_token)
 		unitx_obj = UnitXObject(value=def_func, varname=func_name, unit=Unit(), token=func_token)
@@ -437,7 +441,6 @@ class EvalVisitor(UnitXVisitor, Mediator):
 					self.get_scopes().new_scope()
 
 					called_func = self.__find_called_func(ctx)
-					#print called_func
 					self.get_errlistener().set_forced_errobj(x)
 					unitx_obj = def_func.call(called_args, x, called_func)
 					self.get_errlistener().set_forced_errobj(None)

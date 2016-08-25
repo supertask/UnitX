@@ -17,7 +17,7 @@ class DefinedFunction(Collegue):
 		_current_scope: A instance of Scope saving an instance of this class.
 	"""
 
-	def __init__(self, name, defined_args, code, ctx=None, func_p=None):
+	def __init__(self, name, defined_args, ctx=None, func_p=None, code=None):
 		"""Inits attributes of a DefinedFunction class. """
 		self.name = name
 		self.defined_args = defined_args

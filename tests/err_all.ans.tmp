@@ -1,6 +1,33 @@
-<stdin>: line 1: SyntaxError: missing <INVALID> at '('
-def () {}
-    ^    
-<stdin>: line 1: NameError: name 'a' is not defined.
-a
-^
+Traceback (most recent call last):
+  File "unitx/example.py", line 130, in <module>
+    sys.exit(main(sys.argv))
+  File "unitx/example.py", line 124, in main
+    cmd.talk_loop()
+  File "unitx/example.py", line 62, in talk_loop
+    try: Cmd.cmdloop(self)
+  File "/System/Library/Frameworks/Python.framework/Versions/2.7/lib/python2.7/cmd.py", line 142, in cmdloop
+    stop = self.onecmd(line)
+  File "/System/Library/Frameworks/Python.framework/Versions/2.7/lib/python2.7/cmd.py", line 220, in onecmd
+    return self.default(line)
+  File "unitx/example.py", line 59, in default
+    self.talk(a_line + '\n')
+  File "unitx/example.py", line 102, in talk
+    self.parse(a_stream)
+  File "unitx/example.py", line 78, in parse
+    a_tree = self.parser.program() #Bug
+  File "/Users/tasuku/Project/UnitX/unitx/UnitXParser.py", line 428, in program
+    self.typeDeclaration()
+  File "/Users/tasuku/Project/UnitX/unitx/UnitXParser.py", line 492, in typeDeclaration
+    self.functionDeclaration()
+  File "/Users/tasuku/Project/UnitX/unitx/UnitXParser.py", line 551, in functionDeclaration
+    self.match(UnitXParser.Identifier)
+  File "/Library/Python/2.7/site-packages/antlr4_python2_runtime-4.5.2.1-py2.7.egg/antlr4/Parser.py", line 133, in match
+  File "/Library/Python/2.7/site-packages/antlr4_python2_runtime-4.5.2.1-py2.7.egg/antlr4/error/ErrorStrategy.py", line 415, in recoverInline
+  File "/Library/Python/2.7/site-packages/antlr4_python2_runtime-4.5.2.1-py2.7.egg/antlr4/error/ErrorStrategy.py", line 448, in singleTokenInsertion
+  File "/Users/tasuku/Project/UnitX/unitx/eval_error.py", line 128, in reportMissingToken
+    recognizer.notifyErrorListeners(msg, t, None)
+  File "/Library/Python/2.7/site-packages/antlr4_python2_runtime-4.5.2.1-py2.7.egg/antlr4/Parser.py", line 321, in notifyErrorListeners
+  File "/Library/Python/2.7/site-packages/antlr4_python2_runtime-4.5.2.1-py2.7.egg/antlr4/error/ErrorListener.py", line 85, in syntaxError
+  File "/Users/tasuku/Project/UnitX/unitx/eval_error.py", line 196, in syntaxError
+    err_func = self.forced_errobj.get_value()
+AttributeError: 'NoneType' object has no attribute 'get_value'

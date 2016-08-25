@@ -137,6 +137,7 @@ class EvalErrorStrategy(DefaultErrorStrategy):
 
 
 
+
 from antlr4.error.ErrorListener import ErrorListener
 from collegue import Collegue
 from util import Util
@@ -176,42 +177,37 @@ class EvalErrorListener(ErrorListener, Collegue):
 
 
 	def trace_tokens(self, func, tracing_tokens):
+		"""
+		"""
 		if func:
-			token_info = []
-			token_info.append(func.ctx.Identifier().getSymbol())
-			token_info.append(func.func_obj.token)
-			token_info.append(func.code)
-			tracing_tokens.append(token_info) #token?
+			if func.ctx:
+				token_info = {'name': func.name, 'line': func.func_obj.token.line, 'code': func.code}
+				tracing_tokens.insert(0,token_info) #token?
 			return self.trace_tokens(func.called_func, tracing_tokens)
 		else:
 			return tracing_tokens
 
+
 	def syntaxError(self, recognizer, offendingSymbol, row, column, msg, e):
 		# TODO(Tasuku): 対話型のときのエラー描画のバグ
 		if self.is_exit(): return
-
-		#print self.codelines
-		#print row, column
-		err_func = self.forced_errobj.get_value()
-		#Util.dump(self.mediator.get_scopes())
-		traced_tokens = self.trace_tokens(err_func, [])
-		print offendingSymbol.text, row, column
-		for token_info in traced_tokens:
-			print token_info[0].text, token_info[0].line, token_info[0].column
-			print token_info[1].text, token_info[1].line, token_info[1].column
-			print token_info[2]
-		print self.codelines
-
-		if self.forced_errobj:
-			row = self.forced_errobj.token.line
-			column = self.forced_errobj.token.column
 
 		import linecache
 		target_line = ''
 		filename = ''
 		if self.mediator.is_intaractive_run:
 			filename = '<stdin>'
-			target_line = self.codelines[row-1]
+			err_func = self.forced_errobj.get_value()
+			traced_tokens = self.trace_tokens(err_func, [])
+			traced_tokens.insert(0, {'name': '<unitx>', 'line': None, 'code': self.codelines})
+			traced_tokens.append({'name': None, 'line': row, 'code':self.codelines})
+
+			for i in range(len(traced_tokens)-1):
+				print 'line %s in %s' % (traced_tokens[i+1]['line'], traced_tokens[i]['name'])
+
+			traced_tokens.pop()
+			print traced_tokens[-1]['code']
+			target_line = traced_tokens[-1]['code'][row-1]
 		else:
 			filename = self.codepath
 			target_line = linecache.getline(self.codepath, row)

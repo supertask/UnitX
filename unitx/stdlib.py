@@ -15,8 +15,9 @@ class Stdlib(Collegue):
 		"""Inits ."""
 		self.func_names = {'expect': [[],[]]}
 		self.funcs = [
-			DefinedFunction(name='expect', defined_args=[['l',None],['r',None]], code=None, func_p=self.expect)
+			DefinedFunction(name='expect', defined_args=[['l',None],['r',None]], func_p=self.expect)
 		]
+
 
 	def expect(self, args, func_obj):
 		"""
@@ -32,6 +33,7 @@ class Stdlib(Collegue):
 			self.mediator.get_parser().notifyErrorListeners(msg, func_obj.token, Exception(msg)) #Bug
 			sys.exit(1)
 		return self.mediator.NULL_UNITX_OBJ
+
 
 	def r(self, args, func_obj):
 		"""

@@ -2,11 +2,11 @@
 
 # A bug on Inline mode.
 def t3() {
-	expect(2,1)
+    expect(2,1)
 }
 
 def t2() {
-	t3()
+    t3()
 }
 
 def t1() { t2() }

@@ -108,7 +108,7 @@ class EvalVisitor(UnitXVisitor, Mediator):
 		"""
 		"""
 		for func in self.stdlib.funcs:
-			func.code = self.get_errlistener().get_code()
+			#func.code = self.get_errlistener().get_code()
 			var_unitx_obj = UnitXObject(value=None, varname=func.name, unit=Unit())
 			unitx_obj = UnitXObject(value=func, varname=func.name, unit=Unit())
 			var_unitx_obj.assign(unitx_obj, None)
@@ -147,7 +147,7 @@ class EvalVisitor(UnitXVisitor, Mediator):
 		func_args = self.visitFormalParameters(ctx.formalParameters())
 		code = self.get_errlistener().get_code()
 
-		def_func = DefinedFunction(func_name, func_args, code, ctx=ctx)
+		def_func = DefinedFunction(func_name, func_args, ctx=ctx, code=code)
 
 		var_unitx_obj = UnitXObject(value=None, varname=func_name, unit=Unit(), token=func_token)
 		unitx_obj = UnitXObject(value=def_func, varname=func_name, unit=Unit(), token=func_token)

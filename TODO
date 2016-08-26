@@ -1,5 +1,7 @@
 TODO
 ・テストハンドリングをガツガツ書く
+	・エラーハンドリングのフォーマットを整える
+・DefinedFunctionとEvalErrorListenerを整理する
 ・range関数を実装
 
 ・英語でコメントをつける

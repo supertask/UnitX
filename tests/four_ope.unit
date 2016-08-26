@@ -20,7 +20,6 @@ def t3() {
 def t4() {
 	expect(25{月} * 2{億/月}, 50{億})
 	expect(24{億} / 2{億/ヶ月}, 12{ヶ月})
-	expect(1,2) #Bug
 }
 
 def main() {

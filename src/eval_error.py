@@ -195,31 +195,29 @@ class EvalErrorListener(ErrorListener, Collegue):
 		import linecache
 		target_line = ''
 		filename = ''
+
 		if self.mediator.is_intaractive_run:
 			filename = '<stdin>'
-			err_func = self.forced_errobj.get_value()
-			traced_tokens = self.trace_tokens(err_func, [])
-			traced_tokens.insert(0, {'name': '<unitx>', 'line': None, 'code': self.codelines})
-			traced_tokens.append({'name': None, 'line': row, 'code':self.codelines})
-
-			for i in range(len(traced_tokens)-1):
-				print 'line %s in %s' % (traced_tokens[i+1]['line'], traced_tokens[i]['name'])
-
-			traced_tokens.pop()
-			print traced_tokens[-1]['code']
-			target_line = traced_tokens[-1]['code'][row-1]
 		else:
 			filename = self.codepath
+
+		err_func = self.forced_errobj.get_value()
+		traced_tokens = self.trace_tokens(err_func, [])
+		traced_tokens.insert(0, {'name': '<unitx>', 'line': None, 'code': self.get_code()})
+		traced_tokens.append({'name': None, 'line': row, 'code': self.get_code()})
+		for i in range(len(traced_tokens)-1):
+			sys.stderr.write('%s: line %s in %s\n' % (filename, traced_tokens[i+1]['line'], traced_tokens[i]['name']))
+		traced_tokens.pop()
+
+		if self.mediator.is_intaractive_run:
+			target_line = traced_tokens[-1]['code'][row-1]
+		else:
 			target_line = linecache.getline(self.codepath, row)
 		target_line = target_line.rstrip()
 		whites = list(Util.filter_to_white(target_line))
-
 		whites[column] = '^'
 		mark_line = ''.join(whites)
-		error_line = ""
-		error_line += '%s: line %s: %s\n' % (filename, row, msg)
-		error_line += target_line + '\n' + mark_line + '\n'
-		sys.stderr.write(error_line)
+		sys.stderr.write(msg + '\n' + target_line + '\n' + mark_line + '\n')
 
 		linecache.clearcache() 
 		self._is_exit = True

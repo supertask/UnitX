@@ -1,3 +1,0 @@
-Interactive and IO mode 
-def a(x) {  if (x == 52) { return x } a(x+1) }
-a(0)

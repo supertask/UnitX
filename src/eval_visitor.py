@@ -441,9 +441,9 @@ class EvalVisitor(UnitXVisitor, Mediator):
 					self.get_scopes().new_scope()
 
 					called_func = self.__find_called_func(ctx)
-					self.get_errlistener().set_forced_errobj(x)
+					self.get_errlistener().set_last_called_funcobj(x)
 					unitx_obj = def_func.call(called_args, x, called_func)
-					self.get_errlistener().set_forced_errobj(None)
+					self.get_errlistener().set_last_called_funcobj(None)
 
 					self.get_scopes().del_scope()
 				else:

@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # -*- coding:utf-8 -*-
 
+import sys
 from antlr4.error.ErrorListener import ErrorListener
 from collegue import Collegue
 from util import Util

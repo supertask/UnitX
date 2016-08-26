@@ -13,7 +13,7 @@ from UnitXLexer import UnitXLexer
 from unitx_object import UnitXObject
 from scope_list import ScopeList
 from util import Util
-from defined_function import DefinedFunction
+from function import DefinedFunction
 from unit import Unit
 from unit_manager import UnitManager
 from mediator import Mediator
@@ -147,8 +147,7 @@ class EvalVisitor(UnitXVisitor, Mediator):
 		func_args = self.visitFormalParameters(ctx.formalParameters())
 		code = self.get_errlistener().get_code()
 
-		def_func = DefinedFunction(func_name, func_args, ctx=ctx, code=code)
-
+		def_func = DefinedFunction(func_name, func_args, ctx, code)
 		var_unitx_obj = UnitXObject(value=None, varname=func_name, unit=Unit(), token=func_token)
 		unitx_obj = UnitXObject(value=def_func, varname=func_name, unit=Unit(), token=func_token)
 		var_unitx_obj.assign(unitx_obj, None)

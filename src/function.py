@@ -7,7 +7,7 @@ from constants import Constants
 from unitx_object import UnitXObject
 from unit import Unit
 
-class DefinedFunction(Collegue):
+class Function(Collegue):
 	"""A Class for saving a infomation of defined function.
 	
 	Attributes:
@@ -18,7 +18,7 @@ class DefinedFunction(Collegue):
 	"""
 
 	def __init__(self, name, defined_args, ctx=None, func_p=None, code=None):
-		"""Inits attributes of a DefinedFunction class. """
+		"""Inits attributes of a Function class. """
 		self.name = name
 		self.defined_args = defined_args
 		self.ctx = ctx
@@ -26,8 +26,6 @@ class DefinedFunction(Collegue):
 		self.func_obj = None
 		self.called_func = None
 		self.code = code
-		#self.code = self.mediator
-		#self._current_scope = current_scope
 
 
 	def call(self, args, func_obj, called_func):
@@ -37,6 +35,13 @@ class DefinedFunction(Collegue):
 			A list of a argument appointed/called by user.
 		Returns:
 			A instance of UnitXObject calculated by this function.
+		"""
+		self.check_arguments(args, func_obj, called_func)
+		return None
+
+
+	def check_arguments(self, args, func_obj, called_func):
+		"""
 		"""
 		self.func_obj = func_obj
 		self.called_func = called_func
@@ -67,43 +72,8 @@ class DefinedFunction(Collegue):
 				% (self.name, len(self.defined_args), len(args))
 			last_unitx_obj = args[-1]
 			self.mediator.get_parser().notifyErrorListeners(msg, last_unitx_obj.token, Exception(msg))
+		return
 
-
-		if self.ctx:
-			self.define_arguments(args)
-			self.mediator.visitBlock(self.ctx.block())
-			return self.mediator.return_value
-			#return UnitXObject(value=None, varname=None, unit=None, token=func_obj.token, is_none=True)
-		else:
-			a_value = self.func_p(args, func_obj)
-			if a_value:
-				return UnitXObject(value=a_value, varname=None, is_none=False, unit=Unit(), token=func_obj.token)
-			else:
-				return UnitXObject(value=None, varname=None, is_none=True, unit=Unit(), token=func_obj.token)
-
-
-	def define_arguments(self, args):
-		"""関数の引数の変数たちを定義し，呼び出し時の値たちをそれぞれ代入する"""
-		for i in range(len(self.defined_args)):
-			variable, default_value = self.defined_args[i]
-			if i < len(args):
-				unitx_obj = args[i]
-			else:
-				if default_value:
-					unitx_obj = default_value
-				else:
-					unitx_obj = UnitXObject(value=None, varname=None, unit=Unit(), token=None, is_none=True)
-			variable.assign(unitx_obj, None) #スコープに代入される
-
-
-		"""Returns a current scope saving this class.
-	def get_current_scope(self):
-
-		Returns:
-			A instance of Scope saving an instance of this class.
-		return self._current_scope
-		"""
-	
 
 	def __unicode__(self):
 		"""Returns a string of attributes.
@@ -134,8 +104,48 @@ class DefinedFunction(Collegue):
 		"""
 		self.mediator = mediator
 
+
+
+class DefinedFunction(Function):
+	def __init__(self, name, defined_args, ctx, code):
+		super(DefinedFunction, self).__init__(name, defined_args, ctx=ctx, code=code)
+	
+	def call(self, args, func_obj, called_func):
+		super(DefinedFunction, self).call(args, func_obj, called_func)
+		self.define_arguments(args)
+		self.mediator.visitBlock(self.ctx.block())
+		return self.mediator.return_value
+
+	def define_arguments(self, args):
+		"""関数の引数の変数たちを定義し，呼び出し時の値たちをそれぞれ代入する"""
+		for i in range(len(self.defined_args)):
+			variable, default_value = self.defined_args[i]
+			if i < len(args):
+				unitx_obj = args[i]
+			else:
+				if default_value:
+					unitx_obj = default_value
+				else:
+					unitx_obj = UnitXObject(value=None, varname=None, unit=Unit(), token=None, is_none=True)
+			variable.assign(unitx_obj, None) #スコープに代入される
+
+
+
+class BuiltInFunction(Function):
+	def __init__(self, name, defined_args, func_p):
+		super(BuiltInFunction, self).__init__(name, defined_args, func_p=func_p)
+	
+	def call(self, args, func_obj, called_func):
+		super(BuiltInFunction, self).call(args, func_obj, called_func)
+		a_value = self.func_p(args, func_obj)
+		if a_value:
+			return UnitXObject(value=a_value, varname=None, is_none=False, unit=Unit(), token=func_obj.token)
+		else:
+			return UnitXObject(value=None, varname=None, is_none=True, unit=Unit(), token=func_obj.token)
+
+
 def main():
-	"""Run an example for a DefinedFunction class.
+	"""Run an example for a Function class.
 
 	Advice:
 		A value of 'ctx' should get from an argument of visitFunctionDeclaration(ctx).

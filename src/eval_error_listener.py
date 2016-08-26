@@ -5,6 +5,7 @@ import sys
 from antlr4.error.ErrorListener import ErrorListener
 from collegue import Collegue
 from util import Util
+import linecache
 
 class EvalErrorListener(ErrorListener, Collegue):
 	"""
@@ -22,12 +23,6 @@ class EvalErrorListener(ErrorListener, Collegue):
 		if self.mediator.is_intaractive_run: return self.codelines
 		else: return self.codepath
 
-	def set_codelines(self, lines):
-		self.codelines = lines
-
-	def set_codepath(self, a_path):
-		self.codepath = a_path
-	
 	def reset_exit(self):
 		self._is_exit = False
 
@@ -40,7 +35,6 @@ class EvalErrorListener(ErrorListener, Collegue):
 		"""
 		self.last_called_funcobj = unitx_obj
 
-
 	def trace_tokens(self, func, tracing_tokens):
 		"""
 		"""
@@ -52,12 +46,9 @@ class EvalErrorListener(ErrorListener, Collegue):
 		else:
 			return tracing_tokens
 
-
 	def syntaxError(self, recognizer, offendingSymbol, row, column, msg, e):
-		# TODO(Tasuku): 対話型のときのエラー描画のバグ
 		if self.is_exit(): return
 
-		import linecache
 		target_line = ''
 		filename = ''
 
@@ -91,4 +82,18 @@ class EvalErrorListener(ErrorListener, Collegue):
 
 		return
 
+
+
+class EvalErrorIOListener(EvalErrorListener):
+	"""
+	"""
+	def set_codepath(self, a_path):
+		self.codepath = a_path
+
+
+class EvalErrorIntaractiveListener(EvalErrorListener):
+	"""
+	"""
+	def set_codelines(self, lines):
+		self.codelines = lines
 

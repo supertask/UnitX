@@ -9,7 +9,9 @@ from UnitXLexer import UnitXLexer
 from UnitXParser import UnitXParser
 from eval_visitor import EvalVisitor
 from eval_error_strategy import EvalErrorStrategy
-from eval_error_listener import EvalErrorListener
+#from eval_error_listener import EvalErrorListener
+from eval_error_listener import EvalErrorIOListener
+from eval_error_listener import EvalErrorIntaractiveListener
 from util import Util
 
 from cmd import Cmd
@@ -33,7 +35,10 @@ class Example(Cmd):
 		self.parser._errHandler = self.errhandler
 		self.visitor.set_parser(self.parser)
 
-		a_listener = EvalErrorListener(self.visitor)
+		if is_intaractive_run:
+			a_listener = EvalErrorIntaractiveListener(self.visitor)
+		else:
+			a_listener = EvalErrorIOListener(self.visitor)
 		self.parser._listeners = [a_listener]
 		self.visitor.set_errlistener(a_listener)
 
@@ -68,16 +73,6 @@ class Example(Cmd):
 	def get_stream(self, a_line):
 		return a_stream
 
-	def parse(self, a_stream):
-		"""
-		"""
-		a_lexer = UnitXLexer(a_stream)
-		token_stream = CommonTokenStream(a_lexer)
-		self.parser.setTokenStream(token_stream)
-
-		a_tree = self.parser.program() #Bug
-		self.visitor.visit(a_tree)
-		return
 
 	def eat_code(self, a_path):
 		self.visitor.get_errlistener().set_codepath(a_path)
@@ -109,6 +104,17 @@ class Example(Cmd):
 			self.stock_line = ""
 		return
 
+
+	def parse(self, a_stream):
+		"""
+		"""
+		a_lexer = UnitXLexer(a_stream)
+		token_stream = CommonTokenStream(a_lexer)
+		self.parser.setTokenStream(token_stream)
+
+		a_tree = self.parser.program() #Bug
+		self.visitor.visit(a_tree)
+		return
 
 
 def main(argv):

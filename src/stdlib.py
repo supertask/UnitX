@@ -4,7 +4,7 @@
 import sys
 from constants import Constants
 from collegue import Collegue
-from defined_function import DefinedFunction
+from function import BuiltInFunction
 
 class Stdlib(Collegue):
 	"""A built-in(standard) library) in UnitX.
@@ -15,7 +15,7 @@ class Stdlib(Collegue):
 		"""Inits ."""
 		self.func_names = {'expect': [[],[]]}
 		self.funcs = [
-			DefinedFunction(name='expect', defined_args=[['l',None],['r',None]], func_p=self.expect)
+			BuiltInFunction('expect', [['l',None],['r',None]], self.expect)
 		]
 
 

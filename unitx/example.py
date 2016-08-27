@@ -12,6 +12,7 @@ from eval_error_strategy import EvalErrorStrategy
 from eval_error_listener import EvalErrorIOListener
 from eval_error_listener import EvalErrorIntaractiveListener
 from util import Util
+from constants import Constants
 
 from cmd import Cmd
 import readline
@@ -50,7 +51,7 @@ class Example(Cmd):
 		print "I don't help you."
 	
 	def do_quit(self, arg_line):
-		sys.exit(0)
+		sys.exit(Constants.EXIT_SUCCESS)
 
 	def do_EOF(self, arg_line):
 		print
@@ -128,7 +129,7 @@ def main(argv):
 		print intro_line.get_line()
 		cmd.talk_loop()
 
-	return 0
+	return Constants.EXIT_SUCCESS
 
 
 if __name__ == '__main__':

@@ -1,6 +1,0 @@
-<stdin>: line 1: SyntaxError: missing <INVALID> at '('
-def () {}
-    ^    
-<stdin>: line 1: NameError: name 'a' is not defined.
-a
-^

@@ -12,14 +12,14 @@ class Simulator(object):
 	def __init__(self):
 		this_dir, _ = os.path.split(__file__)
 		data_path = os.path.join(this_dir, Constants.SYSTEM_UNIT_DATA)
-		self.manager = UnitManager(data_path)
-		self.scopes = ScopeList()
-		self.scopes.new_scope()
+		self.__manager = UnitManager(data_path)
+		self.__scopes = ScopeList()
+		self.__scopes.new_scope()
 	
 	def get_scopes(self):
-		return self.scopes
+		return self.__scopes
 
 	def get_manager(self):
-		return self.manager
+		return self.__manager
 
 

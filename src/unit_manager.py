@@ -5,6 +5,7 @@ import sys
 import codecs
 from collegue import Collegue
 from util import Util
+from constants import Constants
 
 class UnitManager(Collegue):
 	""" 単位の情報を読み取り保存するクラス．
@@ -99,7 +100,7 @@ class UnitManager(Collegue):
 		if unit_str in self._unit_id_dict:
 			return self._unit_id_dict[unit_str]
 		else:
-			msg = "NameError: is not defined '%s' in this lang" % unit_str
+			msg = Constants.NAME_ERR % unit_str
 			self.mediator.get_parser().notifyErrorListeners(msg, unit.token, Exception(msg))
 
 	def set_mediator(self, mediator):
@@ -119,7 +120,7 @@ def main():
 	from unit import Unit
 	print manager._trans_original_value(u"10:00 - 17:00", Unit(u'US_Eastern', u'Asia_Tokyo'))
 
-	return 0
+	return Constants.EXIT_SUCCESS
 
 
 if __name__ == '__main__':

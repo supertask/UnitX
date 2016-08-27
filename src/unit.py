@@ -3,6 +3,7 @@
 
 import sys
 from collegue import Collegue
+from constants import Constants
 
 class Unit(Collegue):
 	"""単位の情報を持つクラス．
@@ -52,7 +53,7 @@ class Unit(Collegue):
 	def notifyEasily(self, unit, opp_token):
 		"""
 		"""
-		msg = "TypeError: unsupported operand for %s: unit '%s' and unit '%s'" % (opp_token.text, self.formal_str(), unit.formal_str())
+		msg = Constants.TYPE_ERR_UNSUPPORTED_UNIT % (opp_token.text, self.formal_str(), unit.formal_str())
 		self.mediator.get_parser().notifyErrorListeners(msg, opp_token, Exception(msg))
 
 
@@ -190,7 +191,7 @@ def main():
 	#left, right = Unit(None, u'km', None, u'時'), Unit(None, u'時', None, None)
 	#print "%s / %s\t-> %s" % (left.formal_str(), right.formal_str(), left.divide(right)) #error
 
-	return 0
+	return Constants.EXIT_SUCCESS
 
 if __name__ == '__main__':
 	sys.exit(main())

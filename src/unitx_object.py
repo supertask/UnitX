@@ -45,7 +45,7 @@ class UnitXObject(Collegue):
 					return self.__trans_all_unit(unitx_obj.get_value())
 			else:
 				if error:
-					msg = "NameError: name '%s' is not defined." % self.varname
+					msg = Constants.NAME_ERR % self.varname
 					self.mediator.get_parser().notifyErrorListeners(msg, self.token, Exception(msg))
 				else: return None
 		else:
@@ -114,12 +114,12 @@ class UnitXObject(Collegue):
 		"""
 		if self.unit.numer and self.unit.ex_numer:
 			if UnitXObject.manager.get_unit_id(self.unit.numer, self.unit) != UnitXObject.manager.get_unit_id(self.unit.ex_numer, self.unit):
-				msg = "TypeError: cannot translate from '%s' to '%s'" % (self.unit.ex_numer, self.unit.numer)
+				msg = Constants.TYPE_ERR % (self.unit.ex_numer, self.unit.numer)
 				self.mediator.get_parser().notifyErrorListeners(msg, self.unit.token, Exception(msg))
 
 		if self.unit.denom and self.unit.ex_denom:
 			if UnitXObject.manager.get_unit_id(self.unit.denom, self.unit) != UnitXObject.manager.get_unit_id(self.unit.ex_denom, self.unit):
-				msg = "TypeError: cannot translate from '%s' to '%s'" % (self.unit.ex_denom, self.unit.denom)
+				msg = Constants.TYPE_ERR % (self.unit.ex_denom, self.unit.denom)
 				self.mediator.get_parser().notifyErrorListeners(msg, self.unit.token, Exception(msg))
 
 
@@ -175,7 +175,7 @@ class UnitXObject(Collegue):
 					type_str = self.get_type_string(an_obj.get_value())
 					types += (type_str, )
 
-			msg = "TypeError: unsupported operand for %s: '%s' and '%s'" % ((opp_token.text,) + types)
+			msg = Constants.TYPE_ERR_UNSUPPORTED_VALUE % ((opp_token.text,) + types)
 			self.mediator.get_parser().notifyErrorListeners(msg, opp_token, Exception(msg))
 
 

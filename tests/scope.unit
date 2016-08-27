@@ -3,14 +3,13 @@
 def t1() {
 	a = 31
 	{ a = 64 }
-	print a #Bug
 	expect(31, a)
 
-	rep i,5 {
-		a = 64
-		except(64, a)
-	}
-	expect(64, a)
+	#rep i,5 {
+	#	a = 64
+	#	except(64, a)
+	#}
+	#expect(64, a)
 }
 
 def t2() {

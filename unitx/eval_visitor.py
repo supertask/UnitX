@@ -242,14 +242,14 @@ class EvalVisitor(UnitXVisitor, Mediator):
 				if ctx.expression():
 					self.return_value = self.visitExpression(ctx.expression())
 			else:
-				msg = "SyntaxError: 'return' outside function"
+				msg = Constants.SYNTAX_ERR_RETURN_OUTSIDE
 				self.get_parser().notifyErrorListeners(msg, ctx.start, Exception(msg))
 
 		elif ctx.start.type == UnitXLexer.BREAK:
 			if self.is_context_in_ancestor(ctx, UnitXParser.RepStatementContext):
 				self.is_break = True
 			else:
-				msg = "SyntaxError: 'break' outside loop"
+				msg = Constants.SYNTAX_ERR_BREAK_OUTSIDE
 				self.get_parser().notifyErrorListeners(msg, ctx.start, Exception(msg))
 
 		elif ctx.start.type == UnitXLexer.CONTINUE: pass #not yet
@@ -369,7 +369,7 @@ class EvalVisitor(UnitXVisitor, Mediator):
 		if not ctx.expression(): return
 		unitx_obj = self.visitExpression(ctx.expression())
 		if not unitx_obj.get_value():
-			msg = 'AssertionError'
+			msg = Constants.ASSERT_ERR
 			self.get_parser().notifyErrorListeners(msg, unitx_obj.token, Exception(msg))
 		return
 
@@ -449,7 +449,7 @@ class EvalVisitor(UnitXVisitor, Mediator):
 
 					self.get_scopes().del_scope()
 				else:
-					msg = "NameError: name '%s' is not defined." % called_func_name
+					msg = Constants.NAME_ERR % called_func_name
 					self.get_parser().notifyErrorListeners(msg, x.token, Exception(msg))
 					unitx_obj = UnitXObject(value=None, varname=None, unit=None, token=x, is_none=True)
 

@@ -56,8 +56,7 @@ class Function(Collegue):
 		# 引数が足りないエラー
 		#
 		if len(args) < len(args_without_default):
-			msg = "TypeError: %s() takes exactly %s arguments (%s given)" \
-				% (self.name, len(args_without_default), len(args))
+			msg = Constants.TYPE_ERR_ARGS % (self.name, len(args_without_default), len(args))
 			if args: 
 				last_unitx_obj = args[-1]
 				self.mediator.get_parser().notifyErrorListeners(msg, last_unitx_obj.token, Exception(msg))
@@ -68,8 +67,7 @@ class Function(Collegue):
 		# 引数が多すぎるときのエラー
 		#
 		if len(args) > len(self.defined_args):
-			msg = "TypeError: %s() takes exactly %s arguments (%s given)" \
-				% (self.name, len(self.defined_args), len(args))
+			msg = Constants.TYPE_ERR_ARGS % (self.name, len(self.defined_args), len(args))
 			last_unitx_obj = args[-1]
 			self.mediator.get_parser().notifyErrorListeners(msg, last_unitx_obj.token, Exception(msg))
 		return

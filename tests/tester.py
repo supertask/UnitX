@@ -6,45 +6,46 @@ import os
 import unittest
 import subprocess
 from unitx.example import Example
+from unitx.constants import Constants
 
 class Tester(unittest.TestCase):
-	"""
-	"""
+	""" """
 
-	"""
-	def __print(self, content):
-		pass
-	"""
+	def __check_a_bug(self, exit_status):
+		"""Tag a bug.
 
-	def __check_an_error(self, cmd, stdin, ans_code):
-		p = subprocess.Popen(cmd, stdin=stdin, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-		_, stderr_data = p.communicate()
-		with open(ans_code + '.tmp', 'w') as wf:
-			wf.write(stderr_data)
-		res = open(ans_code, 'r').read()
-		assert(stderr_data == res) #エラーコードが一致していないとき例外を吐く
-		p.wait()
+		If exit_status is Constants.SUCCESS_FAILURE or Constants.EXIT_FAILURE_IN_UNITX,
+		The UnitX system works normally. But if it's Constants.EXIT_FAILURE, it's going to be a bug.
+		"""
+		if exit_status == Constants.EXIT_FAILURE:
+			print '-' * 50
+			print 'A BUG IN UnitX(ERR_CODE=%s)' % Constants.EXIT_FAILURE
+			print '-' * 50
+			sys.exit(Constants.EXIT_FAILURE)
 
 
 	def test_errors_in_Intaractive(self):
-		pass
-		"""
-		for a_code, ans_code in zip(self.err_codes,self.err_ans_codes):
-			print 'Checking "%s" on intaractive mode' % a_code
-			self.__check_an_error(["python","unitx/example.py"], open(a_code, 'r'), ans_code)
-		"""
+		for a_code in self.err_codes:
+			print 'Checking "%s"(ERROR SOURCE) on intaractive mode' % a_code
+			p = subprocess.Popen(["python","unitx/example.py"], stdin=open(a_code, 'r'), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+			exit_status = p.wait()
+			self.__check_a_bug(exit_status)
+
+			print 'Checking "%s"(ERROR SOURCE) on IO mode' % a_code
+			p = subprocess.Popen(["python","unitx/example.py", a_code], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+			exit_status = p.wait()
+			self.__check_a_bug(exit_status)
 
 
 	def test_codes(self):
 		for a_code in self.test_codes:
-			print 'Checking "%s" on intaractive mode' % a_code
+			print 'Checking "%s"(CORRECT SOURCE) on intaractive mode' % a_code
 			self.cmd = Example(is_intaractive_run=True)
 			self.cmd.visitor.is_test = True
 			with open(a_code, 'r') as rf:
 				for line in rf:
 					self.cmd.talk(line)
-
-			print 'Checking "%s" on IO mode' % a_code
+			print 'Checking "%s"(CORRECT SOURCE) on IO mode' % a_code
 			self.cmd = Example(is_intaractive_run=False)
 			self.cmd.visitor.is_test = True
 			self.cmd.eat_code(a_code)
@@ -59,7 +60,6 @@ class Tester(unittest.TestCase):
 			if ext == '.unit':
 				if 'err' in name:
 					self.err_codes.append(os.path.join('tests', filename))
-					self.err_ans_codes.append(os.path.join('tests', name+'.ans'))
 				else:
 					self.test_codes.append(os.path.join('tests', filename))
 

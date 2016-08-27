@@ -1,8 +1,0 @@
-#!/usr/bin/env unitx
-# coding: utf-8
-
-a = """aa
-"""
-b = """bb"""
-print a
-print b

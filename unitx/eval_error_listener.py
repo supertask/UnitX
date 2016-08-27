@@ -5,6 +5,7 @@ import sys
 from antlr4.error.ErrorListener import ErrorListener
 from collegue import Collegue
 from util import Util
+from constants import Constants
 import linecache
 
 class EvalErrorListener(ErrorListener, Collegue):
@@ -57,8 +58,11 @@ class EvalErrorListener(ErrorListener, Collegue):
 		else:
 			filename = self.codepath
 
-		last_called_func = self.last_called_funcobj.get_value()
-		traced_tokens = self.trace_tokens(last_called_func, [])
+		if self.last_called_funcobj:
+			last_called_func = self.last_called_funcobj.get_value()
+			traced_tokens = self.trace_tokens(last_called_func, [])
+		else:
+			traced_tokens = []
 		traced_tokens.insert(0, {'name': '<unitx>', 'line': None, 'code': self.get_code()})
 		traced_tokens.append({'name': None, 'line': row, 'code': self.get_code()})
 		for i in range(len(traced_tokens)-1):
@@ -78,7 +82,7 @@ class EvalErrorListener(ErrorListener, Collegue):
 		linecache.clearcache() 
 		self._is_exit = True
 		if not self.mediator.is_intaractive_run:
-			sys.exit(1)
+			sys.exit(Constants.EXIT_FAILURE_IN_UNITX)
 
 		return
 

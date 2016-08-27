@@ -49,6 +49,7 @@ class ScopeList(list, Collegue):
 	def get_current_scope(self):
 		"""
 		"""
+		#TODO(Tasuku): Remove!!!
 		return self.peek()
 
 
@@ -59,9 +60,7 @@ class ScopeList(list, Collegue):
 			unitx_obj: An instance of UnitXObject registing in a scope
 		"""
 		current_scope = self.get_current_scope()
-		found_scope = current_scope.find_scope_of(varname)
-		if found_scope: found_scope[varname] = unitx_obj #Already created variable.
-		else: current_scope[varname] = unitx_obj #Create variable in the scope.
+		current_scope[varname] = unitx_obj
 		return
 
 

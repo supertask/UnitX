@@ -3,13 +3,13 @@
 def t1() {
 	a = 31
 	{ a = 64 }
-	expect(31, a)
+	expect(64, a)
 
-	#rep i,5 {
-	#	a = 64
-	#	except(64, a)
-	#}
-	#expect(64, a)
+	rep i,5 {
+		a = 52
+		expect(52, a)
+	}
+	expect(52, a)
 }
 
 def t2() {

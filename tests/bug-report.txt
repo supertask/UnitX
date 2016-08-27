@@ -1,0 +1,3 @@
+Intaractive mode
+>> a
+>> def () {}

@@ -443,9 +443,9 @@ class EvalVisitor(UnitXVisitor, Mediator):
 					self.get_scopes().new_scope()
 
 					called_func = self.__find_called_func(ctx)
-					self.get_errlistener().set_last_called_funcobj(x)
+					self.get_errlistener().set_last_called_func(x.get_value())
 					unitx_obj = def_func.call(called_args, x, called_func)
-					self.get_errlistener().set_last_called_funcobj(None)
+					self.get_errlistener().set_last_called_func(None)
 
 					self.get_scopes().del_scope()
 				else:
@@ -539,9 +539,20 @@ class EvalVisitor(UnitXVisitor, Mediator):
 		if ctx.unit(): unit = self.visitUnit(ctx.unit())
 
 		if ctx.Identifier():
-			# ここで変数がスコープにあるかを判定し，見つかったオブジェクトを格納する．
+			# Here
 			varname = ctx.Identifier().getText()
-			found_scope = self.scopes.peek().find_scope_of(varname)
+			unitx_obj = UnitXObject(value=None, varname=varname, unit=unit)
+			"""
+			current_scope = self.get_scopes().peek()
+			if varname in current_scope:
+				unitx_obj = current_scope[varname]
+				if not unit.is_empty():
+					unitx_obj.unit = unit
+			else:
+				unitx_obj = UnitXObject(value=None, varname=varname, unit=unit)
+			"""
+
+			found_scope = self.get_scopes().peek().find_scope_of(varname)
 			if found_scope:
 				unitx_obj = found_scope[varname]
 				if not unit.is_empty():

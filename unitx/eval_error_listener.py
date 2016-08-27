@@ -7,6 +7,7 @@ from collegue import Collegue
 from util import Util
 from constants import Constants
 import linecache
+from function import DefinedFunction
 
 class EvalErrorListener(ErrorListener, Collegue):
 	"""
@@ -14,7 +15,7 @@ class EvalErrorListener(ErrorListener, Collegue):
 	
 	def __init__(self, visitor):
 		self.set_mediator(visitor)
-		self.set_last_called_funcobj(None)
+		self.set_last_called_func(None)
 		self._is_exit = False
 	
 	def set_mediator(self, mediator):
@@ -30,11 +31,14 @@ class EvalErrorListener(ErrorListener, Collegue):
 	def is_exit(self):
 		return self._is_exit
 	
-	def set_last_called_funcobj(self, unitx_obj):
-		"""エラーを起こしたシンボルを別のシンボルへと強制的に変更する．
+	def set_last_called_func(self, last_called_func):
+		"""
 		
 		"""
-		self.last_called_funcobj = unitx_obj
+		if isinstance(last_called_func, DefinedFunction):
+			self.last_called_func = last_called_func
+		else:
+			self.last_called_func = None
 
 	def trace_tokens(self, func, tracing_tokens):
 		"""
@@ -42,6 +46,7 @@ class EvalErrorListener(ErrorListener, Collegue):
 		if func:
 			if func.ctx:
 				token_info = {'name': func.name, 'line': func.func_obj.token.line, 'code': func.code}
+				#print 'Here', token_info
 				tracing_tokens.insert(0,token_info) #token?
 			return self.trace_tokens(func.called_func, tracing_tokens)
 		else:
@@ -58,9 +63,8 @@ class EvalErrorListener(ErrorListener, Collegue):
 		else:
 			filename = self.codepath
 
-		if self.last_called_funcobj:
-			last_called_func = self.last_called_funcobj.get_value()
-			traced_tokens = self.trace_tokens(last_called_func, [])
+		if self.last_called_func:
+			traced_tokens = self.trace_tokens(self.last_called_func, [])
 		else:
 			traced_tokens = []
 		traced_tokens.insert(0, {'name': '<unitx>', 'line': None, 'code': self.get_code()})

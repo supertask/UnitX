@@ -24,7 +24,7 @@ class Tester(unittest.TestCase):
 			sys.exit(Constants.EXIT_FAILURE)
 
 
-	def test_errors_in_Intaractive(self):
+	def test_error_codes(self):
 		for a_code in self.err_codes:
 			print 'Checking "%s"(ERROR SOURCE) on intaractive mode' % a_code
 			p = subprocess.Popen(["python","unitx/example.py"], stdin=open(a_code, 'r'), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
@@ -37,7 +37,7 @@ class Tester(unittest.TestCase):
 			self.__check_a_bug(exit_status)
 
 
-	def test_codes(self):
+	def test_correct_codes(self):
 		for a_code in self.test_codes:
 			print 'Checking "%s"(CORRECT SOURCE) on intaractive mode' % a_code
 			self.cmd = Example(is_intaractive_run=True)

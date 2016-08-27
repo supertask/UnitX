@@ -91,4 +91,4 @@ zip: clean
 	@date
 
 wc:
-	wc -l UnitX.g4 src/*.py tests/*.py 
+	wc -l UnitX.g4 src/*.py tests/*.py tests/*.unit

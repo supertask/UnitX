@@ -165,8 +165,3 @@ class UnitXVisitor(ParseTreeVisitor):
         return self.visitChildren(ctx)
 
 
-    # Visit a parse tree produced by UnitXParser#comment.
-    def visitComment(self, ctx):
-        return self.visitChildren(ctx)
-
-

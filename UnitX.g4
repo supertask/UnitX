@@ -204,7 +204,6 @@ literal
     | string
     | boolean
     | none
-	| comment
     ;
 
 
@@ -532,11 +531,10 @@ NEWLINE
 WS  : [ \t\r\u000C]+ -> skip
     ;
 
-//COMMENT
-comment
+COMMENT
     :   '/*'
 		('\n'|.)*?
-		'*/'
+		'*/' -> skip
     ;
 
 LINE_COMMENT

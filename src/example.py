@@ -100,6 +100,7 @@ class Example(Cmd):
 			Cmd.prompt = '...... '
 			self.stock_line = self.stock_line + a_line
 		else:
+			#print self.stock_line
 			Cmd.prompt = 'unitx> '
 			self.stock_line = ""
 		return

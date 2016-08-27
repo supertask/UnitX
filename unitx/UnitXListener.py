@@ -292,12 +292,3 @@ class UnitXListener(ParseTreeListener):
         pass
 
 
-    # Enter a parse tree produced by UnitXParser#comment.
-    def enterComment(self, ctx):
-        pass
-
-    # Exit a parse tree produced by UnitXParser#comment.
-    def exitComment(self, ctx):
-        pass
-
-

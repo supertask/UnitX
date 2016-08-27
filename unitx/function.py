@@ -6,6 +6,7 @@ from constants import Constants
 from collegue import Collegue
 from unitx_object import UnitXObject
 from unit import Unit
+from util import Util
 
 class Function(Collegue):
 	"""A Class for saving a infomation of defined function.

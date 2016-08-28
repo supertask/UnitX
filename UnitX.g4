@@ -69,6 +69,7 @@ formalParameter
 
 block
     : '{' blockStatement*  '}'
+    | ':' blockStatement* 'end'
     ;
 
 blockStatement
@@ -283,6 +284,7 @@ BANG_X          : 'not';
 TILDE           : '~';
 QUESTION        : '?';
 COLON           : ':';
+END   	        : 'end';
 EQUAL           : '==';
 EQUAL_X         : 'is';
 LE              : '<=';

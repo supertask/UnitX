@@ -1,3 +1,4 @@
 Intaractive mode
 >> a
 >> def () {}
+There is no an error report at the time.

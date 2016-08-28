@@ -1,0 +1,26 @@
+#!/usr/bin/env unitx
+
+def t1() {
+	x = 0
+	rep i,5 {
+		rep j,5 {
+			rep k,5 {
+				x = x + 1
+			}
+		}
+	}
+	expect(x,125)
+}
+
+def t2() {
+	rep i,['年','年']:
+		expect(i, '年')
+	end
+}
+
+def main() {
+	t1()
+	t2()
+}
+
+main()

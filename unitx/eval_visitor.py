@@ -120,8 +120,8 @@ class EvalVisitor(UnitXVisitor, Mediator):
 		"""
 		"""
 		self.build_stdlib() # Sets a standard library
+		if self.is_intaractive_run: self.get_errlistener().reset_exit()
 		super(EvalVisitor, self).visit(tree)
-
 
 
 	#
@@ -132,7 +132,6 @@ class EvalVisitor(UnitXVisitor, Mediator):
 		""" Just visiting child nodes of UnitX syntax.
 			ALSO, THIS <program> RULE IS A STARTING POINT OF UNITX PARSER.
 		"""
-		self.get_errlistener().reset_exit()
 		return self.visitChildren(ctx)
 
 	def visitTypeDeclaration(self, ctx):

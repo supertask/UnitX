@@ -1,4 +1,21 @@
-Intaractive mode
+There is no an error report at the time.
+
+[Intaractive mode]
 >> a
 >> def () {}
-There is no an error report at the time.
+
+[Intaractive and IO mode]
+2 + 'a'
+
+[Intaractive]
+def t4(x,y) { return [x,y,z]{USD} }
+expect(t4(52, 62.0, 11.), [52, 62.0, 11.]{USD})
+
+[Intaractive]
+def t1():
+
+print x
+
+----
+
+[Intaractive]

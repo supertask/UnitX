@@ -25,6 +25,9 @@ class EvalErrorListener(ErrorListener, Collegue):
 		if self.mediator.is_intaractive_run: return self.codelines
 		else: return self.codepath
 
+	def set_exit(self):
+		self._is_exit = True
+
 	def reset_exit(self):
 		self._is_exit = False
 
@@ -40,51 +43,56 @@ class EvalErrorListener(ErrorListener, Collegue):
 		else:
 			self.last_called_func = None
 
-	def trace_tokens(self, func, tracing_tokens):
+	def trace_an_error(self, func, tracing_infos):
 		"""
 		"""
 		if func:
 			if func.ctx:
-				token_info = {'name': func.name, 'line': func.func_obj.token.line, 'code': func.code}
-				#print 'Here', token_info
-				tracing_tokens.insert(0,token_info) #token?
-			return self.trace_tokens(func.called_func, tracing_tokens)
+				tracing_info = {'name': func.name, 'line': func.func_obj.token.line, 'code': func.code}
+				tracing_infos.insert(0,tracing_info)
+			return self.trace_an_error(func.called_func, tracing_infos)
 		else:
-			return tracing_tokens
+			return tracing_infos
+	
+	def write_traced_infos(self, row):
+		filename = ''
+		if self.mediator.is_intaractive_run: filename = '<stdin>'
+		else: filename = self.codepath
+
+		if self.last_called_func:
+			traced_infos = self.trace_an_error(self.last_called_func, [])
+		else:
+			traced_infos = []
+		traced_infos.insert(0, {'name': '<unitx>', 'line': None, 'code': self.get_code()})
+		traced_infos.append({'name': None, 'line': row, 'code': self.get_code()})
+		for i in range(len(traced_infos)-1):
+			sys.stderr.write('%s: line %s in %s\n' % (filename, traced_infos[i+1]['line'], traced_infos[i]['name']))
+		traced_infos.pop()
+
+		return traced_infos
+
+	def write_error_message(self, error_line, column, msg):
+		error_line = error_line.rstrip()
+		whites = list(Util.filter_to_white(error_line))
+		whites[column] = '^'
+		mark_line = ''.join(whites)
+		sys.stderr.write(msg + '\n' + error_line + '\n' + mark_line + '\n')
+
 
 	def syntaxError(self, recognizer, offendingSymbol, row, column, msg, e):
 		if self.is_exit(): return
+		traced_infos = self.write_traced_infos(row)
 
-		target_line = ''
-		filename = ''
-
+		error_line = ''
 		if self.mediator.is_intaractive_run:
-			filename = '<stdin>'
+			error_line = traced_infos[-1]['code'][row-1]
 		else:
-			filename = self.codepath
+			error_line = linecache.getline(self.codepath, row)
+			linecache.clearcache() 
 
-		if self.last_called_func:
-			traced_tokens = self.trace_tokens(self.last_called_func, [])
-		else:
-			traced_tokens = []
-		traced_tokens.insert(0, {'name': '<unitx>', 'line': None, 'code': self.get_code()})
-		traced_tokens.append({'name': None, 'line': row, 'code': self.get_code()})
-		for i in range(len(traced_tokens)-1):
-			sys.stderr.write('%s: line %s in %s\n' % (filename, traced_tokens[i+1]['line'], traced_tokens[i]['name']))
-		traced_tokens.pop()
+		self.write_error_message(error_line, column, msg)
 
-		if self.mediator.is_intaractive_run:
-			target_line = traced_tokens[-1]['code'][row-1]
-		else:
-			target_line = linecache.getline(self.codepath, row)
-		target_line = target_line.rstrip()
-		whites = list(Util.filter_to_white(target_line))
-		whites[column] = '^'
-		mark_line = ''.join(whites)
-		sys.stderr.write(msg + '\n' + target_line + '\n' + mark_line + '\n')
-
-		linecache.clearcache() 
-		self._is_exit = True
+		self.set_exit()
 		if not self.mediator.is_intaractive_run:
 			sys.exit(Constants.EXIT_FAILURE_IN_UNITX)
 

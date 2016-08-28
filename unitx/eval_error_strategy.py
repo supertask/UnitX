@@ -128,6 +128,8 @@ class EvalErrorStrategy(DefaultErrorStrategy):
 		recognizer.notifyErrorListeners(msg, t, None)
 
 	def is_block(self, recognizer):
+		"""
+		"""
 		if isinstance(recognizer._ctx, UnitXParser.BlockContext) and self.is_intaractive_run: # ignore block
 
 			self.is_ignored_block = self.errorRecoveryMode = True

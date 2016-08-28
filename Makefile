@@ -75,6 +75,9 @@ tmp: all
 	$(TARGET) tests/tmp.unit
 	@date
 	
+errtmp: all
+	$(TARGET) tests/err_tmp.unit
+	@date
 
 inline: all
 	$(TARGET)

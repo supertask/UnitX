@@ -1,0 +1,16 @@
+#!/usr/bin/env unitx
+#print 'もらう額'
+>> ホテル代 = 300{USD}
+>> WiFi代 = 7.5 * 4{USD}
+>> RubberDucky代 = 40{USD}
+>> クラブ代 = 54{USD}
+---
+
+#print '払う額'
+人数 = 3.0
+>> UBER代 = -22.10{USD} / 人数
+>> 火鍋代 = (-88.05{USD}*1.15{@tip} * 2) / 人数{USD}
+---
+
+#>> 計 = ホテル代 + WiFi代 + RubberDucky代 + クラブ代 + UBER代 + 火鍋代
+#>> 計{USD->JPY}

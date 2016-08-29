@@ -6,13 +6,13 @@ import prettyprint
 from constants import Constants
 
 class Util(object):
-	"""A class compiled versatile utility functions."""
+	"""A class which is compiled versatile utility functions."""
 
 	@classmethod
 	def dump(self, an_obj):
 		"""Prints a debug value without misconversion.
 		
-		Prints a debug value without misconversion for UTF-8 strings 
+		Prints a debug value without a misconversion for UTF-8 strings 
 		in a list or a dict class, because it's not supported by Python.
 
 		Args:
@@ -20,12 +20,19 @@ class Util(object):
 		"""
 		sys.stderr.write(prettyprint.pp_str(an_obj) + '\n')
 
-
 	@classmethod
 	def printf(self, is_test, called_func, content):
+		"""Prints a variable with some filters.
+		
+		Args:
+			is_test: A bool whether this process is a test mode.
+			called_func: An instance of Function that calls this function.
+			content: A variable which is printed by this lang.
+		"""
 		is_DEBUG = False
 		if is_DEBUG: print "A method of UnitX:", type(called_func)
 		if not is_test: print content
+		return
 
 	@classmethod
 	def filter_to_white(self, string):
@@ -33,7 +40,6 @@ class Util(object):
 		
 		Args:
 			string: A string of a code line.
-
 		Returns:
 			spaces: A string of whitespaces.
 		"""
@@ -50,10 +56,12 @@ class Util(object):
 
 	@classmethod
 	def is_ascii(self, string):
-		"""Returns true if non ascii characters are detected in the given string.
+		"""Returns that whether a string of argument is ascii characters.
 		
 		Args:
 			string: A string of unicode.
+		Returns:
+			A bool whether a string of argument is ascii characters.
 		"""
 		if string:
 			return max([ord(char) for char in string]) < 128

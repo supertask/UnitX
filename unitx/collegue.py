@@ -4,7 +4,7 @@
 class Collegue(object):
 	"""A collegue interface for Mediator pattern.
 	
-	For Mediator pattern:
+	A reference of the mediator pattern:
 		Erich Gamma, John Vlissides, Ralph Johnson, and Richard Helm, "Design Patterns: Elements of Reusable Object-Oriented Software", Addison-Wesley, 1994
 		Online book, https://books.google.com/books/about/Design_Patterns.html?id=6oHuKQe3TjQC&printsec=frontcover&source=kp_read_button#v=onepage&q&f=false
 	"""

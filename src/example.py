@@ -19,13 +19,25 @@ import readline
 import rlcompleter
 
 class Example(Cmd):
-	"""A class running a parser on each some mode.
+	"""A class running a parser on each mode.
 
+	Attributes:
+		is_intaractive_run: A bool indicating whether an intaractive mode.
+		stock_line: A string stocking a code which is a block statement
+			on the intaractive mode.
+		errhandler: An instance of EvalErrorStrategy for reporting all errors.
+		visitor: An instance of EvalVisitor called by a parser.
+		parser: An instance of UnitXParser for parsing codes.
+		Cmd.prompt: A string displaying against every code line.
 	"""
 
+	#
+	# A string displaying against every code line.
+	#
 	Cmd.prompt = 'unitx> '
 
 	def __init__(self, is_intaractive_run):
+		"""Inits attributes of a Unit class."""
 		Cmd.__init__(self)
 		self.is_intaractive_run = is_intaractive_run
 		self.stock_line = ""
@@ -44,45 +56,93 @@ class Example(Cmd):
 
 
 	def do_demo(self, arg_line):
+		"""Executes demo programs. This is called, when 'demo' is typed by a user.
+
+		Args:
+			arg_line: A string which is given by a user.
+		"""
 		if arg_line.isdigit(): print "Xdemo", int(arg_line)
 		else: pass #error
 
+
 	def do_help(self, arg_line):
+		"""Prints a help. This is called, when 'help' is typed by a user.
+
+		Args:
+			arg_line: A string which is given by a user.
+		"""
 		print "I don't help you."
 	
+
 	def do_quit(self, arg_line):
+		"""Quits this program. This is called, when 'quit' is typed by a user.
+
+		Args:
+			arg_line: A string which is given by a user.
+		"""
 		sys.exit(Constants.EXIT_SUCCESS)
 
 	def do_EOF(self, arg_line):
+		"""Prints a new line for a new command line. This is called, when <ctrl+D> or <EOF> are called by a user.
+
+		Args:
+			arg_line: A string which is given by a user.
+		Returns:
+			A bool whether this function is called the 
+		"""
 		print
 		return True
 	
+
 	def emptyline(self):
+		"""Executes a code when '\n' is typed by a user."""
 		self.talk('' + '\n')
 
 	def default(self, a_line):
+		"""Executes a code when there is a string, except a command string
+			which is defined in this class.
+
+		Attributes:
+			a_line: a string which is typed by a user, except a command stirng
+				which is defined in this class.
+		"""
 		self.talk(a_line + '\n')
 
+
 	def talk_loop(self):
+		"""Repeatedly issue a prompt, accept input, parse an initial prefix off the received input, and dispatch to action methods, passing them the remainder of the line as argument."""
 		try: Cmd.cmdloop(self)
 		except KeyboardInterrupt as e:
 			print 'KeyboardInterrupt!'
 			self.talk_loop()
+		return
 		
 
-	def get_stream(self, a_line):
-		return a_stream
-
-
 	def eat_code(self, a_path):
+		"""Executes a code indicated as a_path on the IO mode.
+		
+		In this version, we just support UTF-8. As the next vision, we need to support UTF-8.
+
+		Attributes:
+			a_path: a string indicating a path of the source code.
+		"""
 		self.visitor.get_errlistener().set_codepath(a_path)
 		a_stream = FileStream(a_path, encoding='utf-8')
 		self.parse(a_stream)
+		return
 
 
 	def talk(self, a_line):
+		"""Executes a code indicated as a_path on the IO mode.
+		
+		In this version, we just support UTF-8. As the next vision, we need to support UTF-8.
+
+		Attributes:
+			a_line: a string which is typed by a user, except a command string
+				which is defined in this class.
+		"""
 		if self.errhandler.is_ignored_block:
-			# Errors of block statement never happen until coming empty char
+			# Errors of block statement never happen until coming empty char.
 			if not a_line.strip():
 				self.errhandler.is_ignored_block = False
 			codeline = self.stock_line + a_line
@@ -100,14 +160,16 @@ class Example(Cmd):
 			Cmd.prompt = '...... '
 			self.stock_line = self.stock_line + a_line
 		else:
-			#print self.stock_line
 			Cmd.prompt = 'unitx> '
 			self.stock_line = ""
 		return
 
 
 	def parse(self, a_stream):
-		"""
+		"""Parses a stream which is FileStream(the IO mode) or InputStream(the intaractive mode).
+
+		Attributes:
+			a_stream: an instance of FileStream(the IO mode) or InputStream(the intaractive mode).
 		"""
 		a_lexer = UnitXLexer(a_stream)
 		token_stream = CommonTokenStream(a_lexer)
@@ -119,8 +181,8 @@ class Example(Cmd):
 
 
 def main(argv):
-	""" 
-	"""
+	"""Run an example for a Unit class."""
+
 	if len(argv) > 1:
 		cmd = Example(is_intaractive_run=False)
 		cmd.eat_code(argv[1])
@@ -135,4 +197,3 @@ def main(argv):
 
 if __name__ == '__main__':
 	sys.exit(main(sys.argv))
-

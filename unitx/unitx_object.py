@@ -97,7 +97,7 @@ class UnitXObject(Collegue):
 		"""
 		unit = self.unit # For eval!
 		unit_id = UnitXObject.manager.get_unit_id(self.unit.numer, self.unit)
-		res = eval(UnitXObject.manager._unit_evals[unit_id])
+		res = eval(UnitXObject.manager.unit_evals[unit_id])
 		if not isinstance(res, dict):
 			return res
 		else:
@@ -130,15 +130,28 @@ class UnitXObject(Collegue):
 		return self.unit
 	
 	def __unicode__(self):
-		""" 値と変数を詳細に表示する．
+		"""Returns a string of attributes.
+
+		Returns:
+			A string of infomations of attributes.
 		"""
 		return u"<%s: value=%s, varname=%s, is_none=%s unit=%s>" \
 				% (self.__class__.__name__, self.get_value(), self.varname, self.is_none, self.unit)
 
 	def __str__(self):
+		"""Returns an encoded string of attributes.
+
+		Returns:
+			An encoded string of attributes.
+		"""
 		return unicode(self).encode('utf-8')
 
 	def __repr__(self):
+		"""Returns a string of attributes.
+
+		Returns:
+			A string of a result of a __str__() function.
+		"""
 		return self.__str__()
 
 	

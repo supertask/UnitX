@@ -9,13 +9,14 @@ from unit import Unit
 from util import Util
 
 class Function(Collegue):
-	"""A Class for saving a infomation of defined function.
+	"""A class saving an infomation of a function.
 	
 	Attributes:
 		name: A string indicating function name.
-		args: A list of string indicating function argument.
-		ctx: An instance of ParserRuleContext of functionDeclaration RULE.
-		_current_scope: A instance of Scope saving an instance of this class.
+		defined_args: A list of string indicating function argument.
+		ctx: An instance of ParserRuleContext indicating functionDeclaration RULE.
+		func_p: An instance indicating an address of a built-in function in python.
+		code: A string indicating a source code (an intaractive code or an IO path).
 	"""
 
 	def __init__(self, name, defined_args, ctx=None, func_p=None, code=None):
@@ -28,25 +29,38 @@ class Function(Collegue):
 		self.called_func = None
 		self.code = code
 
-
 	def call(self, args, func_obj, called_func):
 		"""Call a defined function with called arguments.
 
+		This function is actually an abstract function.
+		So, it needs to implement on the super class.
+
 		Args:
-			A list of a argument appointed/called by user.
+			args: A list of a argument appointed/called by user.
+			func_obj: An instance of UnitXObject including a function name.
+			called_func: An instantce of Function which called this function.
+				This a variable is used to trace an error on the EvalErrorListener.
 		Returns:
-			A instance of UnitXObject calculated by this function.
+			An instance of UnitXObject calculated by this function.
 		"""
+		self.func_obj = func_obj
+		self.called_func = called_func
 		self.check_arguments(args, func_obj, called_func)
 		return None
 
 
 	def check_arguments(self, args, func_obj, called_func):
+		"""Checks arguments of the Function.
+		
+		Checks that arguments of this function are not enougn or too much.
+		When it's found, it's raised an error againt an EvalErrorListener class.
+		
+		Args:
+			args: A list of a argument appointed/called by user.
+			func_obj: An instance of UnitXObject including a function name.
+			called_func: An instantce of Function which called this function.
+				This a variable is used to trace an error on the EvalErrorListener.
 		"""
-		"""
-		self.func_obj = func_obj
-		self.called_func = called_func
-
 		# variable, default_value: UnitXObject
 		args_without_default = []
 		for variable, default_value in self.defined_args:
@@ -54,7 +68,7 @@ class Function(Collegue):
 				args_without_default.append([variable, None])
 
 		#
-		# 引数が足りないエラー
+		# An error which arguments are not enougn.
 		#
 		if len(args) < len(args_without_default):
 			msg = Constants.TYPE_ERR_ARGS % (self.name, len(args_without_default), len(args))
@@ -65,12 +79,13 @@ class Function(Collegue):
 				self.mediator.get_parser().notifyErrorListeners(msg, self.ctx.start, Exception(msg))
 
 		#
-		# 引数が多すぎるときのエラー
+		# An error which arguments are too much.
 		#
 		if len(args) > len(self.defined_args):
 			msg = Constants.TYPE_ERR_ARGS % (self.name, len(self.defined_args), len(args))
 			last_unitx_obj = args[-1]
 			self.mediator.get_parser().notifyErrorListeners(msg, last_unitx_obj.token, Exception(msg))
+
 		return
 
 
@@ -83,16 +98,21 @@ class Function(Collegue):
 		res = "<%s: %s(%s) ctx=%s func_p=%s>" % (self.__class__.__name__, self.name, self.defined_args, self.ctx, self.func_p)
 		return res
 
-
 	def __str__(self):
-		"""Returns an encoded string of attributes."""
+		"""Returns an encoded string of attributes.
+
+		Returns:
+			An encoded string of attributes.
+		"""
 		return unicode(self).encode('utf-8')
 
-
 	def __repr__(self):
-		"""Returns a string of attributes."""
-		return self.__str__()
+		"""Returns a string of attributes.
 
+		Returns:
+			A string of a result of a __str__() function.
+		"""
+		return self.__str__()
 
 	@classmethod
 	def set_mediator(self, mediator):
@@ -106,17 +126,46 @@ class Function(Collegue):
 
 
 class DefinedFunction(Function):
+	"""A class saving an infomation of a defined function.
+	
+	Attributes:
+		name: A string indicating function name.
+		defined_args: A list of string indicating function arguments.
+		ctx: An instance of ParserRuleContext indicating functionDeclaration RULE.
+		code: A string indicating a source code (an intaractive code or an IO path).
+	"""
+
 	def __init__(self, name, defined_args, ctx, code):
+		"""Inits attributes of a Function class. """
 		super(DefinedFunction, self).__init__(name, defined_args, ctx=ctx, code=code)
 	
+
 	def call(self, args, func_obj, called_func):
+		"""Call a defined function with called arguments.
+
+		This function is actually an abstract function.
+		So, it needs to implement on the super class.
+
+		Args:
+			args: A list of a argument appointed/called by user.
+			func_obj: An instance of UnitXObject including a function name.
+			called_func: An instantce of Function which called this function.
+				This a variable is used to trace an error on the EvalErrorListener.
+		Returns:
+			An instance of UnitXObject calculated by this function.
+		"""
 		super(DefinedFunction, self).call(args, func_obj, called_func)
 		self.define_arguments(args)
 		self.mediator.visitBlock(self.ctx.block())
 		return self.mediator.return_value
 
 	def define_arguments(self, args):
-		"""関数の引数の変数たちを定義し，呼び出し時の値たちをそれぞれ代入する"""
+		"""Defines arguments of a Function class and assigns given values
+		by user program into the arguments.
+
+		Args:
+			args: A list of a argument appointed/called by user.
+		"""
 		for i in range(len(self.defined_args)):
 			variable, default_value = self.defined_args[i]
 			if i < len(args):
@@ -131,10 +180,33 @@ class DefinedFunction(Function):
 
 
 class BuiltInFunction(Function):
+	"""A class saving an infomation of a built-in function.
+	
+	Attributes:
+		name: A string indicating function name.
+		defined_args: A list of string indicating function arguments.
+		func_p: An instance indicating an address of a built-in function in python.
+	"""
+
 	def __init__(self, name, defined_args, func_p):
+		"""Inits attributes of a Function class. """
 		super(BuiltInFunction, self).__init__(name, defined_args, func_p=func_p)
 	
+
 	def call(self, args, func_obj, called_func):
+		"""Call a defined function with called arguments.
+
+		This function is actually an abstract function.
+		So, it needs to implement on the super class.
+
+		Args:
+			args: A list of a argument appointed/called by user.
+			func_obj: An instance of UnitXObject including a function name.
+			called_func: An instantce of Function which called this function.
+				This a variable is used to trace an error on the EvalErrorListener.
+		Returns:
+			An instance of UnitXObject calculated by this function.
+		"""
 		super(BuiltInFunction, self).call(args, func_obj, called_func)
 		a_value = self.func_p(args, func_obj)
 		if a_value:
@@ -144,11 +216,7 @@ class BuiltInFunction(Function):
 
 
 def main():
-	"""Run an example for a Function class.
-
-	Advice:
-		A value of 'ctx' should get from an argument of visitFunctionDeclaration(ctx).
-	"""
+	"""Run an example for a Function class."""
 	from simulator import Simulator
 	s = Simulator()
 
@@ -161,7 +229,7 @@ def main():
 
 	# Output
 	from util import Util
-	Util.dump(current_scope)
+	Util.dump(s.get_scopes())
 	s.get_scopes().del_scope()
 
 	return Constants.EXIT_SUCCESS

@@ -1,14 +1,33 @@
 TODO
 ・range関数を実装
+・NullUnitXObjectを実装
 
 ・英語でコメントをつける
-	eval_error.py
-	eval_visitor.py      scope_list.py
-	example.py           unit.py
-	unit_manager.py      unitlib.py
-	unitx_object.py
+	+++ = コメント済み, --- = コメントまだ
+	+++__init__.py
+	+++collegue.py
+	+++constants.py
+	---eval_error_strategy.py
+	---eval_error_listener.py
+	---eval_visitor.py
+	+++example.py
+	-++function.py - only main() function
+	+++intro_line.py
+	+++mediator.py
+	-++prettyprint.py
+	+++scope.py
+	+++scope_list.py
+	+++simulator.py
+	-++stdlib.py- main() and r() functions
+	+++unit.py
+	---unit_manager.py - In progress
+	--+unitlib.py - In progress
+	---unitx_object.py
+	+++util.py
 
-・コードを整理する（特にexample.py, unitx_object.py）
+・コードを整理する（特にunitx_object.py, example.py）
 
 ・拡張機能(branchを分ける)
 	・print関数のフォーマット(ex. print "{i}額")
+
+

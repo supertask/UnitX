@@ -2,35 +2,35 @@
 # -*- coding:utf-8 -*-
 
 def get_line():
-	"""Gets a string of logo for intaractive run.	
+    """Gets a string of logo for intaractive run.    
 
-	Returns:
-		A string of logo.
+    Returns:
+        A string of logo.
 
-	Advice:
-		Use a command for generating LOGO.
-		$ figlet -kw 120 -f slant UnitX
-		$ jp2a -i --width=30 --chars=" XY" --output=sample.txt unit_logo.jpg
-	"""
-	import time
-	now_time = time.ctime(time.time())
-	ascii_art = """\
+    Advice:
+        Use a command for generating LOGO.
+        $ figlet -kw 120 -f slant UnitX
+        $ jp2a -i --width=30 --chars=" XY" --output=sample.txt unit_logo.jpg
+    """
+    import time
+    now_time = time.ctime(time.time())
+    ascii_art = """\
    __  __        _  __  _  __
   / / / /____   (_)/ /_| |/ /
  / / / // __ \ / // __/|   / 
 / /_/ // / / // // /_ /   |  
 \____//_/ /_//_/ \__//_/|_|
 """
-	unitx_info = """\
+    unitx_info = """\
 UnitX 0.7.0 (%s)""" % (now_time)
 #Type "help" or "demo <number(0-2)>" for UnitX life.
-	console_info = ascii_art + unitx_info
+    console_info = ascii_art + unitx_info
 
-	return console_info
+    return console_info
 
 
 if __name__ == '__main__':
-	print get_line()
+    print get_line()
 
 
 

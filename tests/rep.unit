@@ -13,9 +13,9 @@ def t1() {
 }
 
 def t2() {
-	rep i,['年','年']:
+	rep i,['年','年'] {
 		expect(i, '年')
-	end
+	}
 }
 
 def main() {

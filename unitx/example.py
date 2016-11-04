@@ -11,6 +11,7 @@ from eval_visitor import EvalVisitor
 from eval_error_strategy import EvalErrorStrategy
 from eval_error_listener import EvalErrorIOListener
 from eval_error_listener import EvalErrorIntaractiveListener
+from eval_error_listener import EvalErrorStringCodeListener
 from util import Util
 from constants import Constants
 
@@ -19,181 +20,196 @@ import readline
 import rlcompleter
 
 class Example(Cmd):
-	"""A class running a parser on each mode.
+    """A class running a parser on each mode.
 
-	Attributes:
-		is_intaractive_run: A bool indicating whether an intaractive mode.
-		stock_line: A string stocking a code which is a block statement
-			on the intaractive mode.
-		errhandler: An instance of EvalErrorStrategy for reporting all errors.
-		visitor: An instance of EvalVisitor called by a parser.
-		parser: An instance of UnitXParser for parsing codes.
-		Cmd.prompt: A string displaying against every code line.
-	"""
+    Attributes:
+        is_intaractive_run: A bool indicating whether an intaractive mode.
+        stock_line: A string stocking a code which is a block statement
+            on the intaractive mode.
+        errhandler: An instance of EvalErrorStrategy for reporting all errors.
+        visitor: An instance of EvalVisitor called by a parser.
+        parser: An instance of UnitXParser for parsing codes.
+        Cmd.prompt: A string displaying against every code line.
+    """
 
-	#
-	# A string displaying against every code line.
-	#
-	Cmd.prompt = 'unitx> '
+    #
+    # A string displaying against every code line.
+    #
+    Cmd.prompt = 'unitx> '
 
-	def __init__(self, is_intaractive_run):
-		"""Inits attributes of a Unit class."""
-		Cmd.__init__(self)
-		self.is_intaractive_run = is_intaractive_run
-		self.stock_line = ""
-		self.errhandler = EvalErrorStrategy(self.is_intaractive_run)
-		self.visitor = EvalVisitor(self.is_intaractive_run, self.errhandler)
-		self.parser = UnitXParser(None)
-		self.parser._errHandler = self.errhandler
-		self.visitor.set_parser(self.parser)
+    def __init__(self, is_intaractive_run):
+        """Inits attributes of a Unit class."""
+        Cmd.__init__(self)
+        self.is_intaractive_run = is_intaractive_run
+        self.stock_line = ""
+        self.errhandler = EvalErrorStrategy(self.is_intaractive_run)
+        self.visitor = EvalVisitor(self.is_intaractive_run, self.errhandler)
+        self.parser = UnitXParser(None)
+        self.parser._errHandler = self.errhandler
+        self.visitor.set_parser(self.parser)
 
-		if is_intaractive_run:
-			a_listener = EvalErrorIntaractiveListener(self.visitor)
-		else:
-			a_listener = EvalErrorIOListener(self.visitor)
-		self.parser._listeners = [a_listener]
-		self.visitor.set_errlistener(a_listener)
-
-
-	def do_demo(self, arg_line):
-		"""Executes demo programs. This is called, when 'demo' is typed by a user.
-
-		Args:
-			arg_line: A string which is given by a user.
-		"""
-		if arg_line.isdigit(): print "Xdemo", int(arg_line)
-		else: pass #error
+        if is_intaractive_run:
+            a_listener = EvalErrorIntaractiveListener(self.visitor)
+        else:
+            a_listener = EvalErrorIOListener(self.visitor)
+        self.parser._listeners = [a_listener]
+        self.visitor.set_errlistener(a_listener)
 
 
-	def do_help(self, arg_line):
-		"""Prints a help. This is called, when 'help' is typed by a user.
+    def do_demo(self, arg_line):
+        """Executes demo programs. This is called, when 'demo' is typed by a user.
 
-		Args:
-			arg_line: A string which is given by a user.
-		"""
-		print "I don't help you."
-	
-
-	def do_quit(self, arg_line):
-		"""Quits this program. This is called, when 'quit' is typed by a user.
-
-		Args:
-			arg_line: A string which is given by a user.
-		"""
-		sys.exit(Constants.EXIT_SUCCESS)
-
-	def do_EOF(self, arg_line):
-		"""Prints a new line for a new command line. This is called, when <ctrl+D> or <EOF> are called by a user.
-
-		Args:
-			arg_line: A string which is given by a user.
-		Returns:
-			A bool whether this function is called the 
-		"""
-		print
-		return True
-	
-
-	def emptyline(self):
-		"""Executes a code when '\n' is typed by a user."""
-		self.talk('' + '\n')
-
-	def default(self, a_line):
-		"""Executes a code when there is a string, except a command string
-			which is defined in this class.
-
-		Attributes:
-			a_line: a string which is typed by a user, except a command stirng
-				which is defined in this class.
-		"""
-		self.talk(a_line + '\n')
+        Args:
+            arg_line: A string which is given by a user.
+        """
+        if arg_line.isdigit(): print "Xdemo", int(arg_line)
+        else: pass #error
 
 
-	def talk_loop(self):
-		"""Repeatedly issue a prompt, accept input, parse an initial prefix off the received input, and dispatch to action methods, passing them the remainder of the line as argument."""
-		try: Cmd.cmdloop(self)
-		except KeyboardInterrupt as e:
-			print 'KeyboardInterrupt!'
-			self.talk_loop()
-		return
-		
+    def do_help(self, arg_line):
+        """Prints a help. This is called, when 'help' is typed by a user.
 
-	def eat_code(self, a_path):
-		"""Executes a code indicated as a_path on the IO mode.
-		
-		In this version, we just support UTF-8. As the next vision, we need to support UTF-8.
+        Args:
+            arg_line: A string which is given by a user.
+        """
+        print "I don't want to help you."
+    
 
-		Attributes:
-			a_path: a string indicating a path of the source code.
-		"""
-		self.visitor.get_errlistener().set_codepath(a_path)
-		a_stream = FileStream(a_path, encoding='utf-8')
-		self.parse(a_stream)
-		return
+    def do_quit(self, arg_line):
+        """Quits this program. This is called, when 'quit' is typed by a user.
 
+        Args:
+            arg_line: A string which is given by a user.
+        """
+        sys.exit(Constants.EXIT_SUCCESS)
 
-	def talk(self, a_line):
-		"""Executes a code indicated as a_path on the IO mode.
-		
-		In this version, we just support UTF-8. As the next vision, we need to support UTF-8.
+    def do_EOF(self, arg_line):
+        """Prints a new line for a new command line. This is called, when <ctrl+D> or <EOF> are called by a user.
 
-		Attributes:
-			a_line: a string which is typed by a user, except a command string
-				which is defined in this class.
-		"""
-		if self.errhandler.is_ignored_block:
-			# Errors of block statement never happen until coming empty char.
-			if not a_line.strip():
-				self.errhandler.is_ignored_block = False
-			codeline = self.stock_line + a_line
-		else:
-			codeline = a_line
+        Args:
+            arg_line: A string which is given by a user.
+        Returns:
+            A bool whether this function is called the 
+        """
+        print
+        return True
+    
 
-		codeline = codeline.decode('utf-8')
-		lines = codeline.split('\n')
-		self.visitor.get_errlistener().set_codelines(lines)
+    def emptyline(self):
+        """Executes a code when '\n' is typed by a user."""
+        self.talk('' + '\n')
 
-		a_stream = InputStream(codeline)
-		self.parse(a_stream)
+    def default(self, a_line):
+        """Executes a code when there is a string, except a command string
+            which is defined in this class.
 
-		if self.errhandler.is_ignored_block:
-			Cmd.prompt = '...... '
-			self.stock_line = self.stock_line + a_line
-		else:
-			Cmd.prompt = 'unitx> '
-			self.stock_line = ""
-		return
+        Attributes:
+            a_line: a string which is typed by a user, except a command stirng
+                which is defined in this class.
+        """
+        self.talk(a_line + '\n')
 
 
-	def parse(self, a_stream):
-		"""Parses a stream which is FileStream(the IO mode) or InputStream(the intaractive mode).
+    def talk_loop(self):
+        """Repeatedly issue a prompt, accept input, parse an initial prefix off the received input, and dispatch to action methods, passing them the remainder of the line as argument."""
+        try: Cmd.cmdloop(self)
+        except KeyboardInterrupt as e:
+            print 'KeyboardInterrupt!'
+            self.talk_loop()
+        return
+        
+    def eat_string(self, code_str):
+        """
+        """
+        #TODO(Tasuku): Changed a_lisener "FORCELY" because it's difficult to fix now
+        a_listener = EvalErrorStringCodeListener(self.visitor)
+        self.parser._listeners = [a_listener]
+        self.visitor.set_errlistener(a_listener)
 
-		Attributes:
-			a_stream: an instance of FileStream(the IO mode) or InputStream(the intaractive mode).
-		"""
-		a_lexer = UnitXLexer(a_stream)
-		token_stream = CommonTokenStream(a_lexer)
-		self.parser.setTokenStream(token_stream)
+        code_str = code_str.decode('utf-8')
+        lines = code_str.split('\n')
+        self.visitor.get_errlistener().set_codelines(lines)
 
-		a_tree = self.parser.program() #Bug
-		self.visitor.visit(a_tree)
-		return
+        a_stream = InputStream(code_str)
+        self.parse(a_stream)
+        return
+
+    def eat_code(self, a_path):
+        """Executes a code indicated as a_path on the IO mode.
+        
+        In this version, we just support UTF-8. As the next vision, we need to support UTF-8.
+
+        Attributes:
+            a_path: a string indicating a path of the source code.
+        """
+        self.visitor.get_errlistener().set_codepath(a_path)
+        a_stream = FileStream(a_path, encoding='utf-8')
+        self.parse(a_stream)
+        return
+
+
+    def talk(self, a_line):
+        """Executes a code indicated as a_path on the IO mode.
+        
+        In this version, we just support UTF-8. As the next vision, we need to support UTF-8.
+
+        Attributes:
+            a_line: a string which is typed by a user, except a command string
+                which is defined in this class.
+        """
+        if self.errhandler.is_ignored_block:
+            # Errors of block statement never happen until coming empty char.
+            if not a_line.strip():
+                self.errhandler.is_ignored_block = False
+            codeline = self.stock_line + a_line
+        else:
+            codeline = a_line
+
+        codeline = codeline.decode('utf-8')
+        lines = codeline.split('\n')
+        self.visitor.get_errlistener().set_codelines(lines)
+
+        a_stream = InputStream(codeline)
+        self.parse(a_stream)
+
+        if self.errhandler.is_ignored_block:
+            Cmd.prompt = '...... '
+            self.stock_line = self.stock_line + a_line
+        else:
+            Cmd.prompt = 'unitx> '
+            self.stock_line = ""
+        return
+
+
+    def parse(self, a_stream):
+        """Parses a stream which is FileStream(the IO mode) or InputStream(the intaractive mode).
+
+        Attributes:
+            a_stream: an instance of FileStream(the IO mode) or InputStream(the intaractive mode).
+        """
+        a_lexer = UnitXLexer(a_stream)
+        token_stream = CommonTokenStream(a_lexer)
+        self.parser.setTokenStream(token_stream)
+
+        a_tree = self.parser.program() #Bug
+        self.visitor.visit(a_tree)
+        return
 
 
 def main(argv):
-	"""Run an example for a Unit class."""
+    """Run an example for a Unit class."""
 
-	if len(argv) > 1:
-		cmd = Example(is_intaractive_run=False)
-		cmd.eat_code(argv[1])
-	else:
-		cmd = Example(is_intaractive_run=True)
-		import intro_line
-		print intro_line.get_line()
-		cmd.talk_loop()
+    if len(argv) > 1:
+        cmd = Example(is_intaractive_run=False)
+        cmd.eat_code(argv[1])
+    else:
+        cmd = Example(is_intaractive_run=True)
+        import intro_line
+        print intro_line.get_line()
+        cmd.talk_loop()
 
-	return Constants.EXIT_SUCCESS
+    return Constants.EXIT_SUCCESS
 
 
 if __name__ == '__main__':
-	sys.exit(main(sys.argv))
+    sys.exit(main(sys.argv))

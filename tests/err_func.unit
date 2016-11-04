@@ -1,6 +1,6 @@
 #!/usr/bin/env unitx
 
-def t1(): end
+def t1() {}
 def t2() { return }
 def t3(x) { return x }
 def t4(x,y) { return [x,y,z]{USD} }
